@@ -1,0 +1,61 @@
+{
+    "name": "DHCP Server",
+    "description": "Define configuration parameters for the DHCP server on the LAN interface.",
+    "tr098PathPrefix": "InternetGatewayDevice.LANDevice.1.LANHostConfigManagement.",
+    "parameters": [
+        {
+            "name": "DHCPServerEnable",
+            "displayName": "DHCP Server",
+            "description": "Enables or disables the DHCP server on the LAN interface.",
+            "type": "boolean"
+        },{
+            "name": "DeviceIpAddress",
+            "displayName": "Device IP Address",
+            "description": "Specifies the IP address of the Device itself.",
+            "type": "IPAddress",
+            "tr098PathOverride": ["InternetGatewayDevice.LANDevice.1.LANHostConfigManagement.IPInterface.1.IPInterfaceIPAddress"]
+        },{
+            "name": "MinAddress",
+            "displayName": "Beginning IP Address",
+            "description": "Specifies first address in the pool to be assigned by the DHCP server on the LAN interface.\nThis parameter MUST have a valid value before the DHCP server can be enabled.",
+            "type": "IPAddress"
+        },{
+            "name": "MaxAddress",
+            "displayName": "Ending IP Address",
+            "description": "Specifies last address in the pool to be assigned by the DHCP server on the LAN interface.\nThis parameter MUST have a valid value before the DHCP server can be enabled.",
+           "type": "IPAddress"
+        },{
+            "name": "SubnetMask",
+            "displayName": "Subnet Mask",
+            "description": "Specifies the client's network subnet mask.\nThis parameter MUST have a valid value before the DHCP server can be enabled.",
+            "type": "IPAddress"
+        },{
+            "name": "DNSServers",
+            "displayName": "DNS Servers",
+            "description": "Comma-separated list (maximum list length 64) of IPAddresses. DNS servers offered to DHCP clients. Support for more than three DNS Servers is OPTIONAL.",
+            "type": "string",
+            "maxStringLength": 64
+        },{
+            "name": "X_000631_HostName",
+            "displayName": "Host Name",
+            "description": "Sets the Device's Hostname",
+            "type": "string",
+            "maxStringLength": 64
+        },{
+            "name": "DomainName",
+            "displayName": "Domain Name",
+            "description": "Sets the domain name to provide to clients on the LAN interface.",
+            "type": "string",
+            "maxStringLength": 64
+        },{
+            "name": "DHCPLeaseTime",
+            "displayName": "DHCP Server Lease Time (in seconds)",
+            "description": "Specifies the lease time in seconds of client assigned addresses. A value of -1 indicates an infinite lease.",
+            "type": "int",
+            "minValue": -1,
+            "defaultValue": 86400,
+            "excludedValueEnums": [0],
+            "validationErrorMessage": "Please enter a positive number, or -1 for infinite lease"
+        }
+    ]
+}

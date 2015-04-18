@@ -1,0 +1,4 @@
+-X GET
+--header "Content-Type: application/json"
+--url http://localhost:8081/cc/workflow/829d2860-a99b-4fc2-bdcd-e305db6646ff
+-v

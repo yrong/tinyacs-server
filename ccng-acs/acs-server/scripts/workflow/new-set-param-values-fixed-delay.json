@@ -1,0 +1,24 @@
+    {
+	"name": "Disable_Periodic_Inform",
+    "groups": ["be55fcba-dbf4-4f2a-93a3-1ddb5cda534f"],
+    "actions": [{
+        "actionType":"Set Parameter Values",
+        "parameterValues": {
+            "InternetGatewayDevice": {
+                "ManagementServer": {
+                    "PeriodicInformEnable": false,
+                    "PeriodicInformInterval": 500
+                }
+            }
+        }
+    }],
+    "execPolicy": {
+        "initialTrigger": {
+            "type": "Fixed Delay"
+        },
+        "initialDelay": 3,
+        "maxConcurrentDevices": 100
+    },
+    "description": "Test Set Param Values with maintenance window, targeting all SIM RGs.",
+    "orgId": "51"
+}

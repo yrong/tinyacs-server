@@ -1,0 +1,36 @@
+{
+    "data": {"Enable": true},
+    "video": {"Enable": true},
+    "voice": {
+        "FaxT38": {"Enable": true},
+        "DialPlan": "system-default",
+        "Line": {
+            "1": {
+                "Enable": "Disabled",
+                "SIP": {
+                    "AuthUserName": "sip-user",
+                    "AuthPassword": "sip-password",
+                    "URI": "4001"
+                },
+                "CallingFeatures": {
+                    "CallerIDEnable": true,
+                     "CallWaitingEnable": true,
+                     "X_000631_ThreewayCallingEnable": true,
+                     "MWIEnable": true,
+                     "X_000631_DirectConnectEnable": true,
+                     "X_000631_DirectConnectNumber": "7077663113",
+                     "X_000631_DirectConnectTimer": 0
+                },
+                "VoiceProcessing": {
+                    "ReceiveGain": -4,
+                    "TransmitGain": -2
+                }
+            },
+            "2": {
+                "Enable": "Disabled"
+            }
+        }
+    },
+    "subscriberId": "ad86ae70-6289-4074-aee6-1b7e9aa89d04",
+    "deviceId": "CXNK001D8E93"
+}

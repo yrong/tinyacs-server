@@ -1,0 +1,6 @@
+-X GET
+--header "Content-Type: application/json"
+-d @all-workflows.json
+--url http://localhost:8081/cc/maintenance-schedule?orgId=2550
+-v
+

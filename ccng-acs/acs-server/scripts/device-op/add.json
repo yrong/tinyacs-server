@@ -1,0 +1,7 @@
+{
+    "operation":"AddObject",
+    "cpeIdentifier": {
+        "serialNumber" : "CXNK001D8E93"
+    },
+    "objectName": "InternetGatewayDevice.WANDevice.3.WANConnectionDevice.1.WANIPConnection."
+}

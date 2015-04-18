@@ -1,0 +1,9 @@
+{
+    "$set": {
+        "paramValues.InternetGatewayDevice.LANDevice.1.Hosts.HostNumberOfEntries": 0
+    },
+    "$unset": {
+        "paramValues.InternetGatewayDevice.LANDevice.1.Hosts.1": "",
+        "paramValues.InternetGatewayDevice.LANDevice.1.Hosts.2": ""
+    }
+}

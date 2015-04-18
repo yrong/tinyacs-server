@@ -1,0 +1,7 @@
+-X PUT
+--header "Content-Type: application/json"
+-u "admin@calix.com:asdf"
+-d @edit-subscriber-2.json
+--url http://vmlnx-ccenter:8080/sxa-stager-0.0.24-SNAPSHOT/rest/sxa-subscriber/b3b03ec0-e811-42ce-ab5c-3f9163885832
+-v
+

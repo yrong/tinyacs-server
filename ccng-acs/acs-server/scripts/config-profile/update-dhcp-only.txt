@@ -1,0 +1,6 @@
+-X PUT
+--header "Content-Type: application/json"
+-d @dhcp-only.json
+--url http://localhost:8081/cc/configuration-profile/33556c32-6eb4-4742-884c-2fb77b62c19b?orgId=2027564
+-v
+

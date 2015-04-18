@@ -1,0 +1,2 @@
+-X DELETE
+--url http://vmlnx-jqin:8090?queue=cc_tasks_acs_demo

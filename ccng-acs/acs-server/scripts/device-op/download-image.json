@@ -1,0 +1,11 @@
+{
+    "operation":"Download",
+    "cpeIdentifier": {
+        "serialNumber" : "CXNK001D8E93"
+    },
+    "fileType": "1 Firmware Upgrade Image",
+    "internalFileId": "550b0dd5e4b06f6fbd98a500",
+    "execPolicy": {
+        "timeout": 400
+     }
+}

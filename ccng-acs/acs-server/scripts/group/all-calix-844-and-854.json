@@ -1,0 +1,12 @@
+{
+	"name": "Calix-844-and-854",
+    "cpeFilter": {
+        "manufacturer": "Calix",
+        "modelName": {
+            "$in": ["844RG", "854RG"]
+        }
+    },
+    "description": "All Calix 844RGs",
+    "type": "dynamic",
+    "orgId": "2550"
+}

@@ -1,0 +1,17 @@
+{
+    "operation":"Diagnostics",
+    "cpeIdentifier": {
+        "serialNumber" : "CXNK00186F49"
+    },
+    "execPolicy": {
+        "timeout": 20
+    },
+    "diagType": "InternetGatewayDevice.IPPingDiagnostics",
+    "diagParameters": {
+        "Interface": "X_CALIX_SXACC_DefaultWanConnectionPath",
+        "Host": "172.23.34.82",
+        "NumberOfRepetitions": 2,
+        "DataBlockSize": 1000,
+        "Timeout": 3000
+    }
+}

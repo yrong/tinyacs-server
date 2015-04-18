@@ -1,0 +1,11 @@
+{
+    "$set": {
+        "paramValues.InternetGatewayDevice.LANDevice.1.Hosts.HostNumberOfEntries": 2,
+        "paramValues.InternetGatewayDevice.LANDevice.1.Hosts.1.MACAddress": "001122334455",
+        "paramValues.InternetGatewayDevice.LANDevice.1.Hosts.1.IPAddress": "192.168.1.2",
+        "paramValues.InternetGatewayDevice.LANDevice.1.Hosts.1.HostName": "Jack's Laptop",
+        "paramValues.InternetGatewayDevice.LANDevice.1.Hosts.2.MACAddress": "112233445566",
+        "paramValues.InternetGatewayDevice.LANDevice.1.Hosts.2.IPAddress": "192.168.1.3",
+        "paramValues.InternetGatewayDevice.LANDevice.1.Hosts.2.HostName": "Jack's Phone"
+    }
+}

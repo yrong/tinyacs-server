@@ -1,0 +1,55 @@
+{
+    "name": "5GHz WIFI Radio",
+    "description": "Define 5GHz WIFI Radio Configurations parameters.",
+    "tr098PathPrefix": "InternetGatewayDevice.LANDevice.1.WLANConfiguration.9.",
+    "parameters": [
+        {
+            "name": "RadioEnabled",
+            "displayName": "WIFI Radio",
+            "description": "Enables or disables the Radio.",
+            "type": "boolean"
+        }, {
+            "name": "Standard",
+            "displayName": "Mode",
+            "description": "Indicates which IEEE 802.11 standard this Radio is configured for.",
+            "type": "string",
+            "valueEnums": [
+                {"value":"n", "displayName": "802.11n"},
+                {"value":"ac", "displayName": "802.11ac"}
+            ]
+        }, {
+            "name": "X_000631_OperatingChannelBandwidth",
+            "displayName": "Bandwidth",
+            "description": "Indicates the operating channel bandwidth.",
+            "type": "string",
+            "valueEnums": [
+                {"value":"20MHz", "displayName": "20MHz"},
+                {"value":"40MHz", "displayName": "40MHz"},
+                {"value":"80MHz", "displayName": "80MHz"}
+            ]
+        }, {
+            "name": "TransmitPower",
+            "displayName": "Power Level",
+            "description": "Indicates the current transmit power level as a percentage of full power. The value MUST be one of the values reported by the TransmitPowerSupported parameter.",
+            "type": "unsignedInt",
+            "valueEnums": [
+                {"value": 100, "displayName": "100%"},
+                {"value": 90, "displayName": "90%"},
+                {"value": 80, "displayName": "80%"},
+                {"value": 70, "displayName": "70%"},
+                {"value": 60, "displayName": "60%"},
+                {"value": 50, "displayName": "50%"},
+                {"value": 40, "displayName": "40%"},
+                {"value": 30, "displayName": "30%"},
+                {"value": 20, "displayName": "20%"},
+                {"value": 10, "displayName": "10%"}
+            ]
+        }, {
+            "name": "X_000631_EnableDfsChannels",
+            "displayName": "DFS",
+            "description": "Enables or disables DFS Channels.",
+            "type": "boolean"
+        }
+	]
+}
+

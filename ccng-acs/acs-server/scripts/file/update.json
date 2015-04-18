@@ -1,0 +1,11 @@
+{
+    "name": "image1.bin",
+    "description": "A dummy image",
+    "type": "SW/FW Image",
+    "manufacturer": "Comtrend",
+    "version": "1.3",
+    "models": [
+        "CT-5374",
+        "CT-5377"
+    ]
+}

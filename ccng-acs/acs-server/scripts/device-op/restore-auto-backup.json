@@ -1,0 +1,23 @@
+{
+    "operation": "Download",
+    "cpeIdentifier": {
+        "serialNumber" : "CXNK001D8E93"
+    },
+    "execPolicy": {
+        "timeout": 300
+    },
+    "fileType": "3 Vendor Configuration File",
+    "fileStruct": {
+        "_id" : "auto-backup-2550-000631-CXNK001D8E93",
+        "orgId" : "2550",
+        "type" : "Configuration File",
+        "csrUsername" : "(System Performed Auto Backup)",
+        "username" : "2550-000631-CXNK001D8E93",
+        "password" : "auto-backup",
+        "name" : "Auto Backup",
+        "cpeIdentifier" : {
+            "manufacturerOUI" : "000631",
+            "serialNumber" : "CXNK001D8E93"
+        }
+    }
+}

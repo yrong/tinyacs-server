@@ -1,0 +1,6 @@
+cd /home/sxacc-dev/vertx-artifacts
+lcd /home/jqin/SXA/codebase/ccng-acs/acs-server/target
+mput *.zip
+lcd /home/jqin/SXA/codebase/ccng-acs/cpe-server/target
+mput *.zip
+exit

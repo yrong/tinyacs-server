@@ -1,0 +1,10 @@
+{
+    "operation":"Reboot",
+    "correlationId":"reboot1234",
+    "cpeIdentifier": {
+        "serialNumber" : "CXNK00186F49"
+    },
+    "execPolicy": {
+            "timeout": 300
+     }
+}

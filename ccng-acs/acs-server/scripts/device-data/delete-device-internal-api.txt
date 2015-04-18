@@ -1,0 +1,4 @@
+-X DELETE
+--header "Content-Type: application/json"
+--url http://localhost:8081/cc/device?serialNumber=CXNK001D8E93&orgId=2550
+-v

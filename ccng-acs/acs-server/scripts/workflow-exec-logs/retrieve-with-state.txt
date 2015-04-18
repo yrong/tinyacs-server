@@ -1,0 +1,6 @@
+-X GET
+--header "Content-Type: application/json"
+-d @workflow-id-and-state.json
+--url http://localhost:8081/cc/workflow-exec-logs?skip=130&limit=100
+-v
+

@@ -1,0 +1,87 @@
+{
+    "name" : "Video Service",
+    "description" : "Define parameters for Video Service.",
+    "serviceType" : "Service WAN VLAN",
+    "parameters" : [
+        {
+            "name": "VlanTagAction",
+            "displayName": "VLAN Tag Action",
+            "description": "Enable VLAN.",
+            "type": "boolean",
+            "mandatory": true,
+            "defaultValue": true,
+            "displayOnly": true,
+            "implies": {
+                "false": {
+                    "X_000631_VlanMuxID": -1,
+                    "X_000631_VlanMux8021p": -1
+                }
+            }
+        },{
+            "name": "X_000631_VlanMuxID",
+            "displayName": "VLAN ID",
+            "description": "The VLAN ID.",
+            "type": "int",
+            "mandatory": true,
+            "minValue": 1,
+            "maxValue": 4093,
+            "defaultValue": 7,
+            "requires": {
+                "VlanTagAction": true
+            }
+        },{
+            "name": "X_000631_VlanMux8021p",
+            "displayName": "Priority (P-Bit)",
+            "description": "The priority of the VLAN.",
+            "type": "int",
+            "mandatory": true,
+            "valueEnums": [
+                { "value": 0, "displayName": "0" },
+                { "value": 1, "displayName": "1" },
+                { "value": 2, "displayName": "2" },
+                { "value": 3, "displayName": "3" },
+                { "value": 4, "displayName": "4" },
+                { "value": 5, "displayName": "5" },
+                { "value": 6, "displayName": "6" },
+                { "value": 7, "displayName": "7" }
+            ],
+            "defaultValue": 7,
+            "requires": {
+                "VlanTagAction": true
+            }
+        },{
+            "name": "ServiceConnectionType",
+            "displayName": "Transport",
+            "description": "Specifies the transport type, Routed / Bridged.",
+            "type": "string",
+            "mandatory": true,
+            "valueEnums": [
+                { "value": "DHCP", "displayName": "Routed" },
+                { "value": "Bridged", "displayName": "Bridged" }
+            ],
+            "defaultValue": "DHCP"
+        },{
+            "name": "BridgedInterface",
+            "displayName": "Bridge LAN Interface",
+            "description": "The LAN Interface to be bridged to WAN",
+            "type": "stringArray",
+            "mandatory": true,
+            "valueEnums": [
+                {"value": "InternetGatewayDevice.Layer2Bridging.AvailableInterface.15", "displayName": "5.0GHz IPTV SSID"},
+                {"value": "InternetGatewayDevice.Layer2Bridging.AvailableInterface.1", "displayName": "LAN Port 1"},
+                {"value": "InternetGatewayDevice.Layer2Bridging.AvailableInterface.2", "displayName": "LAN Port 2"},
+                {"value": "InternetGatewayDevice.Layer2Bridging.AvailableInterface.3", "displayName": "LAN Port 3"},
+                {"value": "InternetGatewayDevice.Layer2Bridging.AvailableInterface.4", "displayName": "LAN Port 4"}
+            ],
+            "defaultValue" : [ "InternetGatewayDevice.Layer2Bridging.AvailableInterface.15" ],
+            "requires" : {
+                "ServiceConnectionType": "Bridged"
+            }
+        }
+    ],
+    "serviceValues" : {
+        "Name": "Video Service",
+        "X_000631_IGMPProxy": true,
+        "NATEnabled": true
+    }
+}

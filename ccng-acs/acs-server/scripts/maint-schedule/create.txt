@@ -1,0 +1,6 @@
+-X POST
+--header "Content-Type: application/json"
+-d @new-maintenance-schedule.json
+--url http://localhost:8081/cc/maintenance-schedule?orgId=2550
+-v
+

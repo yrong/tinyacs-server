@@ -1,0 +1,7 @@
+-X PUT
+--header "Content-Type: application/json"
+-u "apiclient@venturelabs.com:apiclient"
+-d @edit-subscriber.json
+--url http://localhost:8082/api/subscriber/ad86ae70-6289-4074-aee6-1b7e9aa89d04
+-v
+

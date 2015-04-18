@@ -1,0 +1,12 @@
+{
+    "name" : "Disable Periodic Inform",
+    "description": "Management server - Disable Periodic Inform",
+    "configurations": [
+        {
+            "category": "Management Server",
+            "parameterValues": {
+                "PeriodicInformEnable": false
+            }
+        }
+    ]
+}

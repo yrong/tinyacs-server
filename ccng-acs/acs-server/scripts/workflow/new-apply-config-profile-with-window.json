@@ -1,0 +1,23 @@
+{
+	"name": "Apply a config profile",
+    "groups": ["2745417b-3ec6-4fae-a44b-2cee08e42f8a"],
+    "actions": [
+        {
+            "actionType":"Apply Configuration Profile",
+            "profileId" : "cfb9c76f-3eb7-45db-8707-3df1bfd71fdb"
+        }
+    ],
+    "execPolicy": {
+        "initialTrigger": {
+            "type": "Maintenance Window"
+        },
+        "window": {
+            "startDateTime": "2015-3-24T1:19:10.000Z",
+            "windowLength": 1000,
+            "recurringInterval": 1010,
+            "maxRecurrence": 2000000
+        },
+        "maxConcurrentDevices": 100
+    },
+    "description": "Test Apply Configuration Profile with maintenance window, targeting all Calix RGs."
+}

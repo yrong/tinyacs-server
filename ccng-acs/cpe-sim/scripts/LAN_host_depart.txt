@@ -1,0 +1,4 @@
+-X POST
+--header "Content-Type: application/json"
+--url http://localhost:30005/value-change/hvtel/001122/08A027C00000
+-d @lan_host_depart.json

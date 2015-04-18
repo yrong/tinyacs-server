@@ -1,0 +1,8 @@
+{
+  "_id" : "ab0f573e-4753-4d18-86d0-ca4c1b24f6a",
+  "operation" : "GetParameterValues",
+  "correlationId" : "get1234",
+  "cpeIdentifier" : {
+    "serialNumber" : "08A027C00000"
+  }
+} 

@@ -1,0 +1,6 @@
+-X POST
+--header "Content-Type: application/json"
+-d @mgmt-server+dhc+wifi.json
+--url http://localhost:8081/cc/configuration-profile?orgId=2027564
+-v
+

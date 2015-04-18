@@ -1,0 +1,918 @@
+{
+  "name": "Timezone",
+  "description": "Configure Timezone for CPE device.",
+  "parameters": [
+    {
+      "name": "Tz",
+      "displayName": "Timezone",
+      "description": "The timezone to be selected",
+      "displayOnly": true,
+      "mandatory": true,
+      "type": "string",
+      "valueEnums": [
+        {
+          "value": "Timezone_000",
+          "displayName": "(UTC-12:00) International Date Line West"
+        },
+        {
+          "value": "Timezone_001",
+          "displayName": "(UTC-11:00) Coordinated Universal Time-11"
+        },
+        {
+          "value": "Timezone_002",
+          "displayName": "(UTC-10:00) Hawaii"
+        },
+        {
+          "value": "Timezone_003",
+          "displayName": "(UTC-09:00) Alaska"
+        },
+        {
+          "value": "Timezone_004",
+          "displayName": "(UTC-08:00) Baja California"
+        },
+        {
+          "value": "Timezone_005",
+          "displayName": "(UTC-08:00) Pacific Time (US and Canada)"
+        },
+        {
+          "value": "Timezone_006",
+          "displayName": "(UTC-07:00) Arizona"
+        },
+        {
+          "value": "Timezone_007",
+          "displayName": "(UTC-07:00) Chihuahua, La Paz, Mazatlan"
+        },
+        {
+          "value": "Timezone_008",
+          "displayName": "(UTC-07:00) Mountain Time (US and Canada)"
+        },
+        {
+          "value": "Timezone_009",
+          "displayName": "(UTC-06:00) Central America"
+        },
+        {
+          "value": "Timezone_010",
+          "displayName": "(UTC-06:00) Central Time (US and Canada)"
+        },
+        {
+          "value": "Timezone_011",
+          "displayName": "(UTC-06:00) Guadalajara, Mexico City, Monterrey"
+        },
+        {
+          "value": "Timezone_012",
+          "displayName": "(UTC-06:00) Saskatchewan"
+        },
+        {
+          "value": "Timezone_013",
+          "displayName": "(UTC-05:00) Bogota, Lima, Quito"
+        },
+        {
+          "value": "Timezone_014",
+          "displayName": "(UTC-05:00) Eastern Time (US and Canada)"
+        },
+        {
+          "value": "Timezone_015",
+          "displayName": "(UTC-05:00) Indiana (East)"
+        },
+        {
+          "value": "Timezone_016",
+          "displayName": "(UTC-04:30) Caracas"
+        },
+        {
+          "value": "Timezone_017",
+          "displayName": "(UTC-04:00) Asuncion"
+        },
+        {
+          "value": "Timezone_018",
+          "displayName": "(UTC-04:00) Atlantic Time (Canada)"
+        },
+        {
+          "value": "Timezone_019",
+          "displayName": "(UTC-04:00) Cuiaba"
+        },
+        {
+          "value": "Timezone_020",
+          "displayName": "(UTC-04:00) Georgetown, La Paz, Manaus, San Juan"
+        },
+        {
+          "value": "Timezone_021",
+          "displayName": "(UTC-04:00) Santiago"
+        },
+        {
+          "value": "Timezone_022",
+          "displayName": "(UTC-03:30) Newfoundland"
+        },
+        {
+          "value": "Timezone_023",
+          "displayName": "(UTC-03:00) Brasilia"
+        },
+        {
+          "value": "Timezone_024",
+          "displayName": "(UTC-03:00) Buenos Aires"
+        },
+        {
+          "value": "Timezone_025",
+          "displayName": "(UTC-03:00) Cayenne, Fortaleza"
+        },
+        {
+          "value": "Timezone_026",
+          "displayName": "(UTC-03:00) Greenland"
+        },
+        {
+          "value": "Timezone_027",
+          "displayName": "(UTC-03:00) Montevideo"
+        },
+        {
+          "value": "Timezone_028",
+          "displayName": "(UTC-03:00) Salvador"
+        },
+        {
+          "value": "Timezone_029",
+          "displayName": "(UTC-02:00) Coordinated Universal Time-02"
+        },
+        {
+          "value": "Timezone_030",
+          "displayName": "(UTC-02:00) Mid-Atlantic"
+        },
+        {
+          "value": "Timezone_031",
+          "displayName": "(UTC-01:00) Azores"
+        },
+        {
+          "value": "Timezone_032",
+          "displayName": "(UTC-01:00) Cape Verde Is."
+        },
+        {
+          "value": "Timezone_033",
+          "displayName": "(UTC) Casablanca"
+        },
+        {
+          "value": "Timezone_034",
+          "displayName": "(UTC) Coordinated Universal Time"
+        },
+        {
+          "value": "Timezone_035",
+          "displayName": "(UTC) Dublin, Edinburgh, Lisbon, London"
+        },
+        {
+          "value": "Timezone_036",
+          "displayName": "(UTC) Monrovia, Reykjavik"
+        },
+        {
+          "value": "Timezone_037",
+          "displayName": "(UTC+01:00) Amsterdam, Berlin, Bern, Rome, Stockholm, Vienna"
+        },
+        {
+          "value": "Timezone_038",
+          "displayName": "(UTC+01:00) Belgrade, Bratislava, Budapest, Ljubljana, Prague"
+        },
+        {
+          "value": "Timezone_039",
+          "displayName": "(UTC+01:00) Brussels, Copenhagen, Madrid, Paris"
+        },
+        {
+          "value": "Timezone_040",
+          "displayName": "(UTC+01:00) Sarajevo, Skopje, Warsaw, Zagreb"
+        },
+        {
+          "value": "Timezone_041",
+          "displayName": "(UTC+01:00) West Central Africa"
+        },
+        {
+          "value": "Timezone_042",
+          "displayName": "(UTC+01:00) Windhoek"
+        },
+        {
+          "value": "Timezone_043",
+          "displayName": "(UTC+02:00) Amman"
+        },
+        {
+          "value": "Timezone_044",
+          "displayName": "(UTC+02:00) Athens, Bucharest"
+        },
+        {
+          "value": "Timezone_045",
+          "displayName": "(UTC+02:00) Beirut"
+        },
+        {
+          "value": "Timezone_046",
+          "displayName": "(UTC+02:00) Cairo"
+        },
+        {
+          "value": "Timezone_047",
+          "displayName": "(UTC+02:00) Damascus"
+        },
+        {
+          "value": "Timezone_048",
+          "displayName": "(UTC+02:00) Harare, Pretoria"
+        },
+        {
+          "value": "Timezone_049",
+          "displayName": "(UTC+02:00) Helsinki, Kyiv, Riga, Sofia, Tallinn, Vilnius"
+        },
+        {
+          "value": "Timezone_050",
+          "displayName": "(UTC+02:00) Istanbul"
+        },
+        {
+          "value": "Timezone_051",
+          "displayName": "(UTC+02:00) Jerusalem"
+        },
+        {
+          "value": "Timezone_052",
+          "displayName": "(UTC+02:00) Nicosia"
+        },
+        {
+          "value": "Timezone_053",
+          "displayName": "(UTC+03:00) Baghdad"
+        },
+        {
+          "value": "Timezone_054",
+          "displayName": "(UTC+03:00) Kaliningrad, Minsk"
+        },
+        {
+          "value": "Timezone_055",
+          "displayName": "(UTC+03:00) Kuwait, Riyadh"
+        },
+        {
+          "value": "Timezone_056",
+          "displayName": "(UTC+03:00) Nairobi"
+        },
+        {
+          "value": "Timezone_057",
+          "displayName": "(UTC+03:30) Tehran"
+        },
+        {
+          "value": "Timezone_058",
+          "displayName": "(UTC+04:00) Abu Dhabi, Muscat"
+        },
+        {
+          "value": "Timezone_059",
+          "displayName": "(UTC+04:00) Baku"
+        },
+        {
+          "value": "Timezone_060",
+          "displayName": "(UTC+04:00) Moscow, St. Petersburg, Volgograd"
+        },
+        {
+          "value": "Timezone_061",
+          "displayName": "(UTC+04:00) Port Louis"
+        },
+        {
+          "value": "Timezone_062",
+          "displayName": "(UTC+04:00) Tbilisi"
+        },
+        {
+          "value": "Timezone_063",
+          "displayName": "(UTC+04:00) Yerevan"
+        },
+        {
+          "value": "Timezone_064",
+          "displayName": "(UTC+04:30) Kabul"
+        },
+        {
+          "value": "Timezone_065",
+          "displayName": "(UTC+05:00) Islamabad, Karachi"
+        },
+        {
+          "value": "Timezone_066",
+          "displayName": "(UTC+05:00) Tashkent"
+        },
+        {
+          "value": "Timezone_067",
+          "displayName": "(UTC+05:30) Chennai, Kolkata, Mumbai, New Delhi"
+        },
+        {
+          "value": "Timezone_068",
+          "displayName": "(UTC+05:30) Sri Jayawardenepura"
+        },
+        {
+          "value": "Timezone_069",
+          "displayName": "(UTC+05:45) Kathmandu"
+        },
+        {
+          "value": "Timezone_070",
+          "displayName": "(UTC+06:00) Astana"
+        },
+        {
+          "value": "Timezone_071",
+          "displayName": "(UTC+06:00) Dhaka"
+        },
+        {
+          "value": "Timezone_072",
+          "displayName": "(UTC+06:00) Ekaterinburg"
+        },
+        {
+          "value": "Timezone_073",
+          "displayName": "(UTC+06:30) Yangon (Rangoon)"
+        },
+        {
+          "value": "Timezone_074",
+          "displayName": "(UTC+07:00) Bangkok, Hanoi, Jakarta"
+        },
+        {
+          "value": "Timezone_075",
+          "displayName": "(UTC+07:00) Novosibirsk"
+        },
+        {
+          "value": "Timezone_076",
+          "displayName": "(UTC+08:00) Beijing, Chongqing, Hong Kong, Urumqi"
+        },
+        {
+          "value": "Timezone_077",
+          "displayName": "(UTC+08:00) Krasnoyarsk"
+        },
+        {
+          "value": "Timezone_078",
+          "displayName": "(UTC+08:00) Kuala Lumpur, Singapore"
+        },
+        {
+          "value": "Timezone_079",
+          "displayName": "(UTC+08:00) Perth"
+        },
+        {
+          "value": "Timezone_080",
+          "displayName": "(UTC+08:00) Taipei"
+        },
+        {
+          "value": "Timezone_081",
+          "displayName": "(UTC+08:00) Ulaanbaatar"
+        },
+        {
+          "value": "Timezone_082",
+          "displayName": "(UTC+09:00) Irkutsk"
+        },
+        {
+          "value": "Timezone_083",
+          "displayName": "(UTC+09:00) Osaka, Sapporo, Tokyo"
+        },
+        {
+          "value": "Timezone_084",
+          "displayName": "(UTC+09:00) Seoul"
+        },
+        {
+          "value": "Timezone_085",
+          "displayName": "(UTC+09:30) Adelaide"
+        },
+        {
+          "value": "Timezone_086",
+          "displayName": "(UTC+09:30) Darwin"
+        },
+        {
+          "value": "Timezone_087",
+          "displayName": "(UTC+10:00) Brisbane"
+        },
+        {
+          "value": "Timezone_088",
+          "displayName": "(UTC+10:00) Canberra, Melbourne, Sydney"
+        },
+        {
+          "value": "Timezone_089",
+          "displayName": "(UTC+10:00) Guam, Port Moresby"
+        },
+        {
+          "value": "Timezone_090",
+          "displayName": "(UTC+10:00) Hobart"
+        },
+        {
+          "value": "Timezone_091",
+          "displayName": "(UTC+10:00) Yakutsk"
+        },
+        {
+          "value": "Timezone_092",
+          "displayName": "(UTC+11:00) Solomon Is., New Caledonia"
+        },
+        {
+          "value": "Timezone_093",
+          "displayName": "(UTC+11:00) Vladivostok"
+        },
+        {
+          "value": "Timezone_094",
+          "displayName": "(UTC+12:00) Auckland, Wellington"
+        },
+        {
+          "value": "Timezone_095",
+          "displayName": "(UTC+12:00) Coordinated Universal Time+12"
+        },
+        {
+          "value": "Timezone_096",
+          "displayName": "(UTC+12:00) Fiji"
+        },
+        {
+          "value": "Timezone_097",
+          "displayName": "(UTC+12:00) Magadan"
+        },
+        {
+          "value": "Timezone_098",
+          "displayName": "(UTC+13:00) Nuku'alofa"
+        },
+        {
+          "value": "Timezone_099",
+          "displayName": "(UTC+13:00) Samoa"
+        }
+      ],
+      "implies": {
+        "Timezone_000": {
+          "TzOffset": "-12:00",
+          "TzName": "International Date Line West"
+        },
+        "Timezone_001": {
+          "TzOffset": "-11:20",
+          "TzName": "Coordinated Universal Time-11"
+        },
+        "Timezone_002": {
+          "TzOffset": "-10:00",
+          "TzName": "Hawaii"
+        },
+        "Timezone_003": {
+          "TzOffset": "-09:00",
+          "TzName": "Alaska"
+        },
+        "Timezone_004": {
+          "TzOffset": "-08:00",
+          "TzName": "Baja California"
+        },
+        "Timezone_005": {
+          "TzOffset": "-08:00",
+          "TzName": "Pacific Time (US, Canada)"
+        },
+        "Timezone_006": {
+          "TzOffset": "-07:00",
+          "TzName": "Arizona"
+        },
+        "Timezone_007": {
+          "TzOffset": "-07:00",
+          "TzName": "Chihuahua, La Paz, Mazatlan"
+        },
+        "Timezone_008": {
+          "TzOffset": "-07:00",
+          "TzName": "Mountain Time (US, Canada)"
+        },
+        "Timezone_009": {
+          "TzOffset": "-06:00",
+          "TzName": "Central America"
+        },
+        "Timezone_010": {
+          "TzOffset": "-06:00",
+          "TzName": "Central Time (US, Canada)"
+        },
+        "Timezone_011": {
+          "TzOffset": "-06:00",
+          "TzName": "Guadalajara, Mexico City, Monterrey"
+        },
+        "Timezone_012": {
+          "TzOffset": "-06:00",
+          "TzName": "Saskatchewan"
+        },
+        "Timezone_013": {
+          "TzOffset": "-05:00",
+          "TzName": "Bogota, Lima, Quito"
+        },
+        "Timezone_014": {
+          "TzOffset": "-05:00",
+          "TzName": "Eastern Time (US, Canada)"
+        },
+        "Timezone_015": {
+          "TzOffset": "-05:00",
+          "TzName": "Indiana (East)"
+        },
+        "Timezone_016": {
+          "TzOffset": "-04:30",
+          "TzName": "Caracas"
+        },
+        "Timezone_017": {
+          "TzOffset": "-04:00",
+          "TzName": "Asuncion"
+        },
+        "Timezone_018": {
+          "TzOffset": "-04:00",
+          "TzName": "Atlantic Time (Canada)"
+        },
+        "Timezone_019": {
+          "TzOffset": "-04:00",
+          "TzName": "Cuiaba"
+        },
+        "Timezone_020": {
+          "TzOffset": "-04:00",
+          "TzName": "Georgetown, La Paz, Manaus, San Juan"
+        },
+        "Timezone_021": {
+          "TzOffset": "-04:00",
+          "TzName": "Santiago"
+        },
+        "Timezone_022": {
+          "TzOffset": "-03:30",
+          "TzName": "Newfoundland"
+        },
+        "Timezone_023": {
+          "TzOffset": "-03:00",
+          "TzName": "Brasilia"
+        },
+        "Timezone_024": {
+          "TzOffset": "-03:00",
+          "TzName": "Buenos Aires"
+        },
+        "Timezone_025": {
+          "TzOffset": "-03:00",
+          "TzName": "Cayenne, Fortaleza"
+        },
+        "Timezone_026": {
+          "TzOffset": "-03:00",
+          "TzName": "Greenland"
+        },
+        "Timezone_027": {
+          "TzOffset": "-03:00",
+          "TzName": "Montevideo"
+        },
+        "Timezone_028": {
+          "TzOffset": "-03:00",
+          "TzName": "Salvador"
+        },
+        "Timezone_029": {
+          "TzOffset": "-02:00",
+          "TzName": "Coordinated Universal Time-02"
+        },
+        "Timezone_030": {
+          "TzOffset": "-02:00",
+          "TzName": "Mid-Atlantic"
+        },
+        "Timezone_031": {
+          "TzOffset": "-01:00",
+          "TzName": "Azores"
+        },
+        "Timezone_032": {
+          "TzOffset": "-01:00",
+          "TzName": "Cape Verde Is."
+        },
+        "Timezone_033": {
+          "TzOffset": "+00:00",
+          "TzName": "Casablanca"
+        },
+        "Timezone_034": {
+          "TzOffset": "+00:00",
+          "TzName": "Coordinated Universal Time"
+        },
+        "Timezone_035": {
+          "TzOffset": "+00:00",
+          "TzName": "Dublin, Edinburgh, Lisbon, London"
+        },
+        "Timezone_036": {
+          "TzOffset": "+00:00",
+          "TzName": "Monrovia, Reykjavik"
+        },
+        "Timezone_037": {
+          "TzOffset": "+01:00",
+          "TzName": "Amsterdam, Berlin, Bern, Rome, Stockholm, Vienna"
+        },
+        "Timezone_038": {
+          "TzOffset": "+01:00",
+          "TzName": "Belgrade, Bratislava, Budapest, Ljubljana, Prague"
+        },
+        "Timezone_039": {
+          "TzOffset": "+01:00",
+          "TzName": "Brussels, Copenhagen, Madrid, Paris"
+        },
+        "Timezone_040": {
+          "TzOffset": "+01:00",
+          "TzName": "Sarajevo, Skopje, Warsaw, Zagreb"
+        },
+        "Timezone_041": {
+          "TzOffset": "+01:00",
+          "TzName": "West Central Africa"
+        },
+        "Timezone_042": {
+          "TzOffset": "+01:00",
+          "TzName": "Windhoek"
+        },
+        "Timezone_043": {
+          "TzOffset": "+02:00",
+          "TzName": "Amman"
+        },
+        "Timezone_044": {
+          "TzOffset": "+02:00",
+          "TzName": "Athens, Bucharest"
+        },
+        "Timezone_045": {
+          "TzOffset": "+02:00",
+          "TzName": "Beirut"
+        },
+        "Timezone_046": {
+          "TzOffset": "+02:00",
+          "TzName": "Cairo"
+        },
+        "Timezone_047": {
+          "TzOffset": "+02:00",
+          "TzName": "Damascus"
+        },
+        "Timezone_048": {
+          "TzOffset": "+02:00",
+          "TzName": "Harare, Pretoria"
+        },
+        "Timezone_049": {
+          "TzOffset": "+02:00",
+          "TzName": "Helsinki, Kyiv, Riga, Sofia, Tallinn, Vilnius"
+        },
+        "Timezone_050": {
+          "TzOffset": "+02:00",
+          "TzName": "Istanbul"
+        },
+        "Timezone_051": {
+          "TzOffset": "+02:00",
+          "TzName": "Jerusalem"
+        },
+        "Timezone_052": {
+          "TzOffset": "+02:00",
+          "TzName": "Nicosia"
+        },
+        "Timezone_053": {
+          "TzOffset": "+03:00",
+          "TzName": "Baghdad"
+        },
+        "Timezone_054": {
+          "TzOffset": "+03:00",
+          "TzName": "Kaliningrad, Minsk"
+        },
+        "Timezone_055": {
+          "TzOffset": "+03:00",
+          "TzName": "Kuwait, Riyadh"
+        },
+        "Timezone_056": {
+          "TzOffset": "+03:00",
+          "TzName": "Nairobi"
+        },
+        "Timezone_057": {
+          "TzOffset": "+03:30",
+          "TzName": "Tehran"
+        },
+        "Timezone_058": {
+          "TzOffset": "+04:00",
+          "TzName": "Abu Dhabi, Muscat"
+        },
+        "Timezone_059": {
+          "TzOffset": "+04:00",
+          "TzName": "Baku"
+        },
+        "Timezone_060": {
+          "TzOffset": "+04:00",
+          "TzName": "Moscow, St. Petersburg, Volgograd"
+        },
+        "Timezone_061": {
+          "TzOffset": "+04:00",
+          "TzName": "Port Louis"
+        },
+        "Timezone_062": {
+          "TzOffset": "+04:00",
+          "TzName": "Tbilisi"
+        },
+        "Timezone_063": {
+          "TzOffset": "+04:00",
+          "TzName": "Yerevan"
+        },
+        "Timezone_064": {
+          "TzOffset": "+04:30",
+          "TzName": "Kabul"
+        },
+        "Timezone_065": {
+          "TzOffset": "+05:00",
+          "TzName": "Islamabad, Karachi"
+        },
+        "Timezone_066": {
+          "TzOffset": "+05:00",
+          "TzName": "Tashkent"
+        },
+        "Timezone_067": {
+          "TzOffset": "+05:30",
+          "TzName": "Chennai, Kolkata, Mumbai, New Delhi"
+        },
+        "Timezone_068": {
+          "TzOffset": "+05:30",
+          "TzName": "Sri Jayawardenepura"
+        },
+        "Timezone_069": {
+          "TzOffset": "+05:45",
+          "TzName": "Kathmandu"
+        },
+        "Timezone_070": {
+          "TzOffset": "+06:00",
+          "TzName": "Astana"
+        },
+        "Timezone_071": {
+          "TzOffset": "+06:00",
+          "TzName": "Dhaka"
+        },
+        "Timezone_072": {
+          "TzOffset": "+06:00",
+          "TzName": "Ekaterinburg"
+        },
+        "Timezone_073": {
+          "TzOffset": "+06:30",
+          "TzName": "Yangon (Rangoon)"
+        },
+        "Timezone_074": {
+          "TzOffset": "+07:00",
+          "TzName": "Bangkok, Hanoi, Jakarta"
+        },
+        "Timezone_075": {
+          "TzOffset": "+07:00",
+          "TzName": "Novosibirsk"
+        },
+        "Timezone_076": {
+          "TzOffset": "+08:00",
+          "TzName": "Beijing, Chongqing, Hong Kong, Urumqi"
+        },
+        "Timezone_077": {
+          "TzOffset": "+08:00",
+          "TzName": "Krasnoyarsk"
+        },
+        "Timezone_078": {
+          "TzOffset": "+08:00",
+          "TzName": "Kuala Lumpur, Singapore"
+        },
+        "Timezone_079": {
+          "TzOffset": "+08:00",
+          "TzName": "Perth"
+        },
+        "Timezone_080": {
+          "TzOffset": "+08:00",
+          "TzName": "Taipei"
+        },
+        "Timezone_081": {
+          "TzOffset": "+08:00",
+          "TzName": "Ulaanbaatar"
+        },
+        "Timezone_082": {
+          "TzOffset": "+09:00",
+          "TzName": "Irkutsk"
+        },
+        "Timezone_083": {
+          "TzOffset": "+09:00",
+          "TzName": "Osaka, Sapporo, Tokyo"
+        },
+        "Timezone_084": {
+          "TzOffset": "+09:00",
+          "TzName": "Seoul"
+        },
+        "Timezone_085": {
+          "TzOffset": "+09:30",
+          "TzName": "Adelaide"
+        },
+        "Timezone_086": {
+          "TzOffset": "+09:30",
+          "TzName": "Darwin"
+        },
+        "Timezone_087": {
+          "TzOffset": "+10:00",
+          "TzName": "Brisbane"
+        },
+        "Timezone_088": {
+          "TzOffset": "+10:00",
+          "TzName": "Canberra, Melbourne, Sydney"
+        },
+        "Timezone_089": {
+          "TzOffset": "+10:00",
+          "TzName": "Guam, Port Moresby"
+        },
+        "Timezone_090": {
+          "TzOffset": "+10:00",
+          "TzName": "Hobart"
+        },
+        "Timezone_091": {
+          "TzOffset": "+10:00",
+          "TzName": "Yakutsk"
+        },
+        "Timezone_092": {
+          "TzOffset": "+11:00",
+          "TzName": "Solomon Is., New Caledonia"
+        },
+        "Timezone_093": {
+          "TzOffset": "+11:00",
+          "TzName": "Vladivostok"
+        },
+        "Timezone_094": {
+          "TzOffset": "+12:00",
+          "TzName": "Auckland, Wellington"
+        },
+        "Timezone_095": {
+          "TzOffset": "+12:00",
+          "TzName": "Coordinated Universal Time+12"
+        },
+        "Timezone_096": {
+          "TzOffset": "+12:00",
+          "TzName": "Fiji"
+        },
+        "Timezone_097": {
+          "TzOffset": "+12:00",
+          "TzName": "Magadan"
+        },
+        "Timezone_098": {
+          "TzOffset": "+13:00",
+          "TzName": "Nuku'alofa"
+        },
+        "Timezone_099": {
+          "TzOffset": "+13:00",
+          "TzName": "Samoa"
+        }
+      }
+    },
+    {
+      "name": "TzOffset",
+      "description": "The Timezone Offset to be set in Tr098",
+      "type": "string",
+      "hidden": true,
+      "tr098PathOverride": [
+        "InternetGatewayDevice.Time.LocalTimeZone"
+      ]
+    },
+    {
+      "name": "TzName",
+      "description": "The Timezone Name to be set in Tr098",
+      "type": "string",
+      "hidden": true,
+      "tr098PathOverride": [
+        "InternetGatewayDevice.Time.LocalTimeZoneName"
+      ]
+    },
+    {
+      "name": "DaylightSaving",
+      "displayName": "Daylight Saving",
+      "description": "Enable the daylight saving time",
+      "type": "boolean",
+      "defaultValue": true,
+      "tr098PathOverride": [
+        "InternetGatewayDevice.Time.DaylightSavingsUsed"
+      ]
+    },
+    {
+      "name": "NTPEnable",
+      "displayName": "Network Time",
+      "description": "Enable to use use network time",
+      "mandatory": true,
+      "type": "boolean",
+      "defaultValue": false,
+      "tr098PathOverride": [
+        "InternetGatewayDevice.Time.Enable"
+      ]
+    },
+    {
+      "name": "NTPServer1",
+      "displayName": "1st NTP Server",
+      "description": "First NTP timeserver",
+      "mandatory": true,
+      "type": "string",
+      "requires": {
+        "NTPEnable": true
+      },
+      "tr098PathOverride": [
+        "InternetGatewayDevice.Time.NTPServer1"
+      ]
+    },
+    {
+      "name": "NTPServer2",
+      "displayName": "2nd NTP Server",
+      "description": "Second NTP timeserver",
+      "type": "string",
+      "requires": {
+        "NTPEnable": true
+      },
+      "tr098PathOverride": [
+        "InternetGatewayDevice.Time.NTPServer2"
+      ]
+    },
+    {
+      "name": "NTPServer3",
+      "displayName": "3rd NTP Server",
+      "description": "Third NTP timeserver",
+      "type": "string",
+      "requires": {
+        "NTPEnable": true
+      },
+      "tr098PathOverride": [
+        "InternetGatewayDevice.Time.NTPServer3"
+      ]
+    },
+    {
+      "name": "NTPServer4",
+      "displayName": "4th NTP Server",
+      "description": "Fourth NTP timeserver",
+      "type": "string",
+      "requires": {
+        "NTPEnable": true
+      },
+      "tr098PathOverride": [
+        "InternetGatewayDevice.Time.NTPServer4"
+      ]
+    },
+    {
+      "name": "NTPServer5",
+      "displayName": "5th NTP Server",
+      "description": "Fifth NTP timeserver",
+      "type": "string",
+      "requires": {
+        "NTPEnable": true
+      },
+      "tr098PathOverride": [
+        "InternetGatewayDevice.Time.NTPServer5"
+      ]
+    }
+  ]
+}

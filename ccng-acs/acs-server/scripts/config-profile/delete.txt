@@ -1,0 +1,5 @@
+-X DELETE
+--header "Content-Type: application/json"
+--url http://localhost:8081/cc/configuration-profile/33556c32-6eb4-4742-884c-2fb77b62c19b
+-v
+

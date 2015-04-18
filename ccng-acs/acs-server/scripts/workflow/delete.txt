@@ -1,0 +1,4 @@
+-X DELETE
+--url http://localhost:8081/cc/workflow/ed6a9f91-e73f-4a35-a6a5-9a90e6a4c097
+-v
+

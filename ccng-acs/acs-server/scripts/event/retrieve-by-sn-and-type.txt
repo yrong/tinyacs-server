@@ -1,0 +1,5 @@
+-X GET
+--header "Content-Type: application/json"
+--url http://localhost:8081/cc/event?orgId=2550&deviceSn=CXNK001D8E93&type=Apply%20Configuration%20Profile
+-v
+

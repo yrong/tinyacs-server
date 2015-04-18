@@ -1,0 +1,13 @@
+{
+	"name": "844-SW-Ver-10.6.10.7-Or-Older",
+    "cpeFilter": {
+        "manufacturer": "Calix",
+        "modelName": "844RG",
+        "softwareVersion": {
+            "$lte": "10.6.10.7"
+        }
+    },
+    "description": "Calix 844RGs whose SW version is 10.6.10.7 or older",
+    "type": "dynamic",
+    "orgId": "2550"
+}

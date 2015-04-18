@@ -1,0 +1,25 @@
+{
+    "name": "Jack Qin",
+    "type": "Residential",
+    "customId": "111-2223334",
+    "locations": [
+        {
+            "devices": ["CXNK001D8E93"],
+            "address": {
+                "streetLine1": "123 Main St.",
+                "city": "Vancouver",
+                "state": "WA",
+                "zip": "98682"
+            },
+            "contacts": [
+                {
+                    "firstName": "John",
+                    "lastName": "Doe",
+                    "email": "john.doe@example.com",
+                    "phone": "111-222-3333",
+                    "type": "Home"
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,5 @@
+-X GET
+--header "Content-Type: application/json"
+--url http://localhost:8081/cc/file/75ee7007-011b-418a-a5cb-88fa37fb7a0d?withContent=true
+-v
+

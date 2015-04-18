@@ -1,0 +1,21 @@
+{
+  "_id" : "58f0f85c-b7f3-4ae3-aabf-8497cc7b4edc",
+  "orgId" : "10097",
+  "customId" : "098769868",
+  "name" : "Jack Qin",
+  "locations" : [{
+      "address" : {
+        "streetLine1" : "",
+        "city" : "",
+        "state" : "",
+        "zip" : "",
+        "country" : ""
+      },
+      "contacts" : [{
+          "phone" : "",
+          "email" : ""
+        }],
+      "devices" : ["CXNK00186F49"]
+    }],
+  "type" : "Residential"
+}

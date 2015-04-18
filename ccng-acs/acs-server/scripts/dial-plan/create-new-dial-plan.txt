@@ -1,0 +1,6 @@
+-X POST
+--header "Content-Type: application/json"
+-d @new-dial-plan.json
+--url http://localhost:8081/cc/dial-plan?orgId=2550
+-v
+

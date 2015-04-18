@@ -1,0 +1,6 @@
+-X PUT
+--header "Content-Type: application/json"
+-d @edit-service-plan.json
+--url http://localhost:8081/cc/service-plan/98643007-e6cd-42cd-9d3c-975b72dce990?orgId=2550
+-v
+

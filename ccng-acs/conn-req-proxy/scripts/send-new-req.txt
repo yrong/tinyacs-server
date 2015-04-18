@@ -1,0 +1,7 @@
+-X POST
+--header "Content-Type: application/json"
+-d @new-conn-req.json
+-v
+--url http://localhost:8181
+
+

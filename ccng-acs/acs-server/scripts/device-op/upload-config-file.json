@@ -1,0 +1,9 @@
+{
+    "operation": "Upload",
+    "cpeIdentifier": {
+        "serialNumber" : "CXNK001D8E93"
+    },
+    "fileType": "1 Vendor Configuration File",
+    "csrUsername": "Dummy CSR User",
+    "description": "Unit Test"
+}

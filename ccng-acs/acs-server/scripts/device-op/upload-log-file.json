@@ -1,0 +1,10 @@
+{
+    "operation": "Upload",
+    "cpeIdentifier": {
+        "serialNumber" : "CXNK001D8E93"
+    },
+    "fileType": "2 Vendor Log File",
+    "execPolicy": {
+        "timeout": 120
+    }
+}

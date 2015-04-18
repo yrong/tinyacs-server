@@ -1,0 +1,5 @@
+-X GET
+--header "Content-Type: application/json"
+--url http://localhost:8081/cc/service-plan?orgId=2550&subscriberId=8da15b29-33b8-4375-b9bb-6ad7e10d596e
+-v
+

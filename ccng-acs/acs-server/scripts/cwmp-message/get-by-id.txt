@@ -1,0 +1,5 @@
+-X GET
+--header "Content-Type: application/json"
+--url http://localhost:8081/cc/device-cwmp-logs/44179b9d-9cf8-4610-853e-e20049e4c232
+-v
+

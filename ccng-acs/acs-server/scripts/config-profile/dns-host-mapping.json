@@ -1,0 +1,13 @@
+{
+    "name" : "DNS Host Mapping",
+    "description": "DNS Host Mapping",
+    "configurations": [
+        {
+            "category": "DNS Host Mapping",
+            "parameterValues": {
+                "HostName": "gcs.calix.local",
+                "IPAddress": "1.2.3.4"
+            }
+        }
+    ]
+}

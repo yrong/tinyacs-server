@@ -1,0 +1,5 @@
+-X DELETE
+-u "admin@calix.com:asdf"
+--url http://vmlnx-ccenter:8080/sxa-stager-0.0.24-SNAPSHOT/rest/sxa-subscriber/4b5a02f1-8c91-434e-9634-e8507199d7ee
+-v
+

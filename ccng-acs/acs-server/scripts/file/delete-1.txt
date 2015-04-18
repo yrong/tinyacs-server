@@ -1,0 +1,4 @@
+-X DELETE
+--url http://localhost:8081/cc/file/54d293f9e4b0d89455566988
+-v
+

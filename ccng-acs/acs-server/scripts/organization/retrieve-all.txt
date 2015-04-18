@@ -1,0 +1,4 @@
+-X GET
+--url http://localhost:8081/cc/organization
+-v
+

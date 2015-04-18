@@ -1,0 +1,7 @@
+-X POST
+--header "Content-Type: application/json"
+-u "apiclient@venturecomm.net:apiclient"
+-d @new-subscriber.json
+--url http://venture-cc.calix.com:8082/api/subscriber
+-v
+

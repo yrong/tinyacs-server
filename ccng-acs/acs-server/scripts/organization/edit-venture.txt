@@ -1,0 +1,6 @@
+-X PUT
+--header "Content-Type: application/json"
+-d @edit-org-venture.json
+--url http://localhost:8081/cc/organization
+-v
+

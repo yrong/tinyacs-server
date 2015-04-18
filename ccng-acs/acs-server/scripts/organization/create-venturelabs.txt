@@ -1,0 +1,6 @@
+-X POST
+--header "Content-Type: application/json"
+-d @new-org-venturelabs.json
+--url http://localhost:8081/cc/organization
+-v
+

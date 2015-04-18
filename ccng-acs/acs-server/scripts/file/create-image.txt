@@ -1,0 +1,6 @@
+-X POST
+--header "Content-Type: application/json"
+-d @new-fw-image.json
+--url http://localhost:8081/cc/file?orgId=2550
+-v
+

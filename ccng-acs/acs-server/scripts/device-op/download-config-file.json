@@ -1,0 +1,11 @@
+{
+    "operation": "Download",
+    "cpeIdentifier": {
+        "serialNumber" : "CXNK001D8F65"
+    },
+    "execPolicy": {
+        "timeout": 300
+    },
+    "fileType": "3 Vendor Configuration File",
+    "internalFileId" : "auto-backup-2550-000631-CXNK001D8E93"
+}

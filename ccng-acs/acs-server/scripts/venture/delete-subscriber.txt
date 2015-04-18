@@ -1,0 +1,6 @@
+-X DELETE
+--header "Content-Type: application/json"
+-u "apiclient@venturecomm.net:apiclient"
+--url http://venture-cc.calix.com:8082/api/subscriber/66f12a59-9378-4ecf-b9e2-a880d27c4066
+-v
+

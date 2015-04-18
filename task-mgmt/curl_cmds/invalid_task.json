@@ -1,0 +1,14 @@
+{
+    "queue": "tasks_acs_demo",
+    "type": "unknown",
+    "args": {
+            "producerHost": "demo-client",
+            "producerApp": "demo",
+            "orgId": 10,
+            "sn": 10,
+            "collectionName": "devices",
+            "destination": "/home/jqin/tmp",
+            "delay": 10
+    }
+}
+

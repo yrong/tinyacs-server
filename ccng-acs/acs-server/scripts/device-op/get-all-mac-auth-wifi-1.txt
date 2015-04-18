@@ -1,0 +1,6 @@
+-X POST
+--header "Content-Type: application/json"
+-d @get-all-mac-auth-wifi-1.json
+--url http://localhost:8081/cc/device-op?orgId=50
+-v
+

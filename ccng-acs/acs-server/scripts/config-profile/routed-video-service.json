@@ -1,0 +1,24 @@
+{
+    "name": "Basic Routed Video Service Profile",
+    "description": "A Basic Routed Video Service Profile",
+    "configurations": [
+        {
+            "category": "Video Service",
+            "parameterValues": {
+                "X_000631_VlanMuxID": 26,
+                "X_000631_VlanMux8021p": 5,
+                "ServiceConnectionType": "DHCP"
+            }
+        },
+        {
+            "category": "DHCP Server",
+            "parameterValues": {
+                "DHCPServerEnable": true,
+                "DeviceIpAddress": "192.168.2.1",
+                "MinAddress": "192.168.2.2",
+                "MaxAddress": "192.168.2.100",
+                "DHCPLeaseTime": 86400
+            }
+        }
+    ]
+}

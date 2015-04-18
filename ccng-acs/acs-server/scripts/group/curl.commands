@@ -1,0 +1,29 @@
+# Create:
+curl -X POST --header "Content-Type: application/json" --url "http://localhost:8081/cc/group?orgId=2550" -d @all-calix-RGs.json
+curl -X POST --header "Content-Type: application/json" --url "http://localhost:8081/cc/group?orgId=2550" -d @all-calix-844Es.json
+curl -X POST --header "Content-Type: application/json" --url "http://localhost:8081/cc/group?orgId=2550" -d @all-calix-SIM-RGs.json
+curl -X POST --header "Content-Type: application/json" --url "http://localhost:8081/cc/group?orgId=2550" -d @all-calix-844RGs.json
+curl -X POST --header "Content-Type: application/json" --url "http://localhost:8081/cc/group?orgId=2550" -d @all-calix-854RGs.json
+curl -X POST --header "Content-Type: application/json" --url "http://localhost:8081/cc/group?orgId=2550" -d @all-calix-844-and-854.json
+curl -X POST --header "Content-Type: application/json" --url "http://localhost:8081/cc/group?orgId=2550" -d @844RG-SW-Ver-10.6.10.7-or-Older.json
+curl -X POST --header "Content-Type: application/json" --url "http://localhost:8081/cc/group?orgId=2550" -d @844RG-SW-Ver-10.6.10.8-or-Newer.json
+
+# Modify:
+curl -X PUT --header "Content-Type: application/json" --url "http://localhost:8081/cc/group?orgId=2550" -d @all-calix-RGs.json
+curl -X PUT --header "Content-Type: application/json" --url "http://localhost:8081/cc/group/7edfa28e-141c-4db6-b9db-f61ac8701bc3?orgId=2550" -d @all-calix-844Es.json
+curl -X PUT --header "Content-Type: application/json" --url "http://localhost:8081/cc/group?orgId=2550" -d @844RG-SW-Ver-10.6.10.7-or-Older.json
+curl -X PUT --header "Content-Type: application/json" --url "http://localhost:8081/cc/group?orgId=2550" -d @844RG-SW-Ver-10.6.10.8-or-Newer.json
+
+# Delete:
+curl -X DELETE --header "Content-Type: application/json" --url "http://localhost:8081/cc/group?name=all-calix-RGs&orgId=2550"
+curl -X DELETE --header "Content-Type: application/json" --url "http://localhost:8081/cc/group?name=Calix-844RGs&orgId=2550"
+curl -X DELETE --header "Content-Type: application/json" --url "http://localhost:8081/cc/group?name=Calix-854RGs&orgId=2550"
+curl -X DELETE --header "Content-Type: application/json" --url "http://localhost:8081/cc/group?name=844-SW-Ver-10.6.10.7-Or-Older&orgId=2550"
+
+# Find all:
+curl -X GET --header "Content-Type: application/json" --url "http://localhost:8081/cc/group?orgId=2550"
+
+# Find one:
+curl -X GET --header "Content-Type: application/json" --url "http://localhost:8081/cc/group?name=all-calix-RGs&orgId=2550"
+
+curl -X POST --header "Content-Type: application/json" --url "http://localhost:8081/cc/group?orgId=51" -d @all-calix-SIM-RGs.json

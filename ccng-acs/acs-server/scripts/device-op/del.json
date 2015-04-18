@@ -1,0 +1,7 @@
+{
+    "operation":"DeleteObject",
+    "cpeIdentifier": {
+        "serialNumber" : "CXNK001D8E93"
+    },
+    "objectName": "InternetGatewayDevice.Layer2Bridging.Bridge.6."
+}

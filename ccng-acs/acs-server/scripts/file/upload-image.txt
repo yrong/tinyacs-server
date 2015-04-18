@@ -1,0 +1,7 @@
+-X POST
+--header "Content-Type:application/octet-stream"
+--header "Transfer-Encoding: chunked"
+--data-binary @/home/jqin/ccng/rg_images/CALIX_800G_11.1.254.427.bin
+--URL http://vmlnx-jqin.calix.local:8080/files/550b0dd5e4b06f6fbd98a500
+-u "233176d:a4f234c"
+-v

@@ -1,0 +1,13 @@
+{
+    "operation":"GetParameterValues",
+    "cpeIdentifier": {
+        "serialNumber" : "CXNK00186F49"
+    },
+    "getOptions": {
+        "cachedData": false,
+        "liveData": true
+    },
+    "parameterNames": [
+        "InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.X_CALIX_WlanMacAuthCfg."
+    ]
+}

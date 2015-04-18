@@ -1,0 +1,7 @@
+-X POST
+--header "Content-Type:application/octet-stream"
+--header "Transfer-Encoding: chunked"
+--data auto-backup
+--URL http://vmlnx-jqin.calix.local:8080/files/auto-backup-2550-000631-CXNK27C08000
+-u "233176d:a4f234c"
+-v

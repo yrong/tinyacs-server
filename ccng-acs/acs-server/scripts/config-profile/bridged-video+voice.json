@@ -1,0 +1,41 @@
+{
+    "name": "Bridged Video + Voice Service Profile for Unit Test",
+    "configurations": [
+        {
+            "category": "Video Service",
+            "parameterValues": {
+                "X_000631_VlanMuxID": 26,
+                "X_000631_VlanMux8021p": 3,
+                "ServiceConnectionType": "Bridged",
+                "BridgedInterface": [
+                    "InternetGatewayDevice.Layer2Bridging.AvailableInterface.1",
+                    "InternetGatewayDevice.Layer2Bridging.AvailableInterface.4",
+                    "InternetGatewayDevice.Layer2Bridging.AvailableInterface.15"
+                ]
+            }
+        },
+        {
+            "category": "Voice Service",
+            "parameterValues": {
+                "X_000631_VlanMuxID": 5,
+                "X_000631_VlanMux8021p": 5,
+                "ServiceConnectionType": "DHCP",
+                "ProxyServer": "0.0.0.0",
+                "ProxyServerPort": 10000,
+                "DNSPrimary":  "0.0.0.0",
+                "RTPCodec1st": "G.711MuLaw",
+                "PacketRate1st": 20,
+                "SilenceSuppression1st": true,
+                "RTPCodec2nd": "none",
+                "RTPCodec3rd": "none",
+                "RegistrationPeriod": 36000,
+                "DistinctiveRingPrefix": "CalixCcfgRingPrefix",
+                "CallWaitingTonePrefix": "CallingWaitingToneCCFG",
+                "DTMFMethod": "RFC2833",
+                "LocalHookFlash": true,
+                "HookFlashMethod": "SIPInfo",
+                "ReleaseTimer": 15
+            }
+        }
+    ]
+}

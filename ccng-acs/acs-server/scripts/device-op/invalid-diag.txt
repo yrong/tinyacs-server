@@ -1,0 +1,7 @@
+-X POST
+--header "Content-Type: application/json"
+-d @invalid-diag.json
+--url http://localhost:8081/cc/device-op?orgId=50
+--trace-ascii  /dev/stdout
+
+

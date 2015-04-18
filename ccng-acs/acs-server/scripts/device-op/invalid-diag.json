@@ -1,0 +1,14 @@
+{
+    "operation":"Diagnostics",
+    "correlationId":"diag1234",
+    "cpeIdentifier": {
+        "serialNumber" : "08A027C00000"
+    },
+    "execPolicy": {
+        "timeout": 30000
+    },
+    "diagType": "Device.InvalidDiagnostics",
+    "diagParameters": {
+        "Timeout": 3000
+    }
+}

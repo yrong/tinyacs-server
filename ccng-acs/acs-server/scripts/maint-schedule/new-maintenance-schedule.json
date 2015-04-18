@@ -1,0 +1,8 @@
+{
+    "description": "A very short window that opens very frequently (for testing)",
+	"name": "5-sec Window",
+    "startDateTime": "2014-9-29T1:19:10Z",
+    "windowLength": 5,
+    "recurringInterval": 10,
+    "maxRecurrence": 2000000
+}

@@ -1,0 +1,5 @@
+-X POST
+--header "Content-Type: application/json"
+-d @voice-service.json
+--url http://localhost:8081/cc/configuration-category
+-v

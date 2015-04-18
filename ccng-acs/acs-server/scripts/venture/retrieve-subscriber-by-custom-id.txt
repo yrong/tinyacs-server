@@ -1,0 +1,6 @@
+-X GET
+--header "Content-Type: application/json"
+-u "apiclient@venturecomm.net:apiclient"
+--url http://venture-cc.calix.com:8082/api/subscriber?customId=111-222-3333
+-v
+

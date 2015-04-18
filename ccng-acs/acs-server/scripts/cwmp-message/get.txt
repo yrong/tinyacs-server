@@ -1,0 +1,6 @@
+-X GET
+--header "Content-Type: application/json"
+-d @get.json
+--url http://localhost:8081/cc/device-cwmp-logs?limit=40
+-v
+

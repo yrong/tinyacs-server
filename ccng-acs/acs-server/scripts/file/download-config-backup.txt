@@ -1,0 +1,2 @@
+rm tmp-backup.bin
+curl -v -u ""2550-000631-CXNK001D8E93:auto-backup"" "http://vmlnx-jqin.calix.local:8080/files/auto-backup-2550-000631-CXNK001D8E93" > tmp-backup.bin

@@ -1,0 +1,6 @@
+-X PUT
+--header "Content-Type: application/json"
+-d @update-config-file.json
+--url http://localhost:8081/cc/file?orgId=2550
+-v
+

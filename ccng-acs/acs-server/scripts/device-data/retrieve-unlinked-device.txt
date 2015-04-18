@@ -1,0 +1,5 @@
+-X GET
+--header "Content-Type: application/json"
+--url http://localhost:8081/cc/device?orgId=2550&unlinked=true&limit=20
+-v
+

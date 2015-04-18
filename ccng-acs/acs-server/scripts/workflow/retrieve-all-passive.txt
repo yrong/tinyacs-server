@@ -1,0 +1,6 @@
+-X GET
+--header "Content-Type: application/json"
+--url http://localhost:8081/cc/workflow?orgId=2550&execPolicy.initialTrigger.type=CPE%20Event&execPolicy.initialTrigger.cpeEvent=CC%20EVENT%20-%20New%20CPE%20Discovered
+
+-v
+

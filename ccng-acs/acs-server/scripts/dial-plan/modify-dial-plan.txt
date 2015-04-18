@@ -1,0 +1,6 @@
+-X PUT
+--header "Content-Type: application/json"
+-d @edit-dial-plan.json
+--url http://localhost:8081/cc/dial-plan/120fc3ff-0634-4f7f-a467-0d3d0bc426ff?orgId=2550
+-v
+

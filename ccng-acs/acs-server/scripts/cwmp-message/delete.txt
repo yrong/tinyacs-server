@@ -1,0 +1,6 @@
+-X DELETE
+--header "Content-Type: application/json"
+-d @delete.json
+--url http://localhost:8081/cc/device-cwmp-logs
+-v
+

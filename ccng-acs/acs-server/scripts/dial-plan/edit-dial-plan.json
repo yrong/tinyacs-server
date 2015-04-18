@@ -1,0 +1,7 @@
+{
+  "name": "A dummy dial plan",
+  "description" : "Dummy Test Dial Plan",
+  "shortTimer" : 6,
+  "longTimer" : 15,
+  "rules" : [ "^911n", "^411"]
+}

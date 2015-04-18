@@ -1,0 +1,8 @@
+curl -K set.txt
+curl -K get.txt
+curl -K add.txt
+curl -K del.txt
+
+curl -X POST --header "Content-Type: application/json" --url http://localhost:8081/cc/device-op?orgId=50 -d @reboot.json
+
+curl -X POST --header "Content-Type: application/json" --url http://localhost:8081/cc/device-op?orgId=50 -d @factoryreset.json

@@ -1,0 +1,48 @@
+{
+    "name": "2.4GHz WIFI Radio",
+    "description": "Define 2.4GHz WIFI Radio Configurations parameters.",
+    "tr098PathPrefix": "InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.",
+    "parameters": [
+        {
+            "name": "RadioEnabled",
+            "displayName": "WIFI Radio",
+            "description": "Enables or disables the Radio.",
+            "type": "boolean"
+        }, {
+            "name": "Standard",
+            "displayName": "Mode",
+            "description": "Indicates which IEEE 802.11 standard this Radio is configured for.",
+            "type": "string",
+            "valueEnums": [
+                {"value":"bgn", "displayName": "802.11b, 802.11g and 802.11n"},
+                {"value":"gn", "displayName": "802.11g and 802.11n"},
+                {"value":"n", "displayName": "802.11n"},
+                {"value":"bg", "displayName": "802.11b and 802.11g"},
+                {"value":"b", "displayName": "802.11b"}
+            ]
+        }, {
+            "name": "TransmitPower",
+            "displayName": "Power Level",
+            "description": "Indicates the current transmit power level as a percentage of full power. The value MUST be one of the values reported by the TransmitPowerSupported parameter.",
+            "type": "unsignedInt",
+            "valueEnums": [
+                {"value": 100, "displayName": "100%"},
+                {"value": 90, "displayName": "90%"},
+                {"value": 80, "displayName": "80%"},
+                {"value": 70, "displayName": "70%"},
+                {"value": 60, "displayName": "60%"},
+                {"value": 50, "displayName": "50%"},
+                {"value": 40, "displayName": "40%"},
+                {"value": 30, "displayName": "30%"},
+                {"value": 20, "displayName": "20%"},
+                {"value": 10, "displayName": "10%"}
+            ]
+        }, {
+            "name": "X_CALIX_MulticastForwardEnable",
+            "displayName": "Multicast Forwarding",
+            "description": "Enables or disables Multicast Forwarding.",
+            "type": "boolean"
+        }
+	]
+}
+

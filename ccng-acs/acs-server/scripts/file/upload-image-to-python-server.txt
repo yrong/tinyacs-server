@@ -1,0 +1,7 @@
+-X PUT
+--header "Content-Type:application/octet-stream"
+--header "Transfer-Encoding: chunked"
+--data-binary @/home/jqin/python_httpd/images/CALIX_800G.bin
+--URL http://vmlnx-jqin.calix.local:8000/54dbd298e4b08ec4c76bc1de
+-u "233176d:a4f234c"
+-v

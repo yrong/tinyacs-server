@@ -1,0 +1,41 @@
+{
+    "name": "Management Server",
+    "description": "Define parameters relating to the CPE's association with an ACS.",
+    "tr098PathPrefix": "InternetGatewayDevice.ManagementServer.",
+    "parameters": [
+        {
+            "name": "URL",
+            "displayName": "ACS URL",
+            "description": "URL, as defined in [RFC3986], for the CPE to connect to the ACS using the CPE WAN Management Protocol.",
+            "type": "string",
+            "minStringLength": 1,
+            "maxStringLength": 256
+        },{
+            "name": "Username",
+            "displayName": "ACS Username",
+            "description": "Username used to authenticate the CPE when making a connection to the ACS using the CPE WAN Management Protocol.",
+            "type": "string",
+            "minStringLength": 1,
+            "maxStringLength": 256
+        },{
+            "name": "Password",
+            "displayName": "ACS Password",
+            "description": "Password used to authenticate the CPE when making a connection to the ACS using the CPE WAN Management Protocol.",
+            "type": "string",
+            "minStringLength": 1,
+            "maxStringLength": 256
+        },{
+            "name": "PeriodicInformEnable",
+            "displayName": "Periodic Inform",
+            "description": "Whether or not the CPE MUST periodically send CPE information to the ACS using the Inform method call.",
+            "type": "boolean"
+        },{
+            "name": "PeriodicInformInterval",
+            "displayName": "Periodic Inform Interval (in seconds)",
+            "description": "The duration in seconds of the interval for which the CPE MUST attempt to connect with the ACS and call the Inform method if PeriodicInformEnable is true.",
+            "type": "unsignedInt",
+            "minValue": 60,
+            "maxValue": 86400
+        }
+    ]
+}

@@ -1,0 +1,6 @@
+-X GET
+--header "Content-Type: application/json"
+--data @cpe-identifier.json
+--url http://vmlnx-snukala-sxa:8081/cc/file?orgId=2595060
+-v
+

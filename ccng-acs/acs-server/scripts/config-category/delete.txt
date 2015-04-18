@@ -1,0 +1,5 @@
+-X DELETE
+--header "Content-Type: application/json"
+--url http://localhost:8081/cc/configuration-category/feda1ddc-6578-47ac-b7ea-bf89e5433d69
+-v
+

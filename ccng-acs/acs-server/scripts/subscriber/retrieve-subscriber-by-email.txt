@@ -1,0 +1,6 @@
+-X GET
+--header "Content-Type: application/json"
+-u "apiclient@venturelabs.com:apiclient"
+--url http://localhost:8082/api/subscriber?email=john.doe@example.com
+-v
+

@@ -1,0 +1,18 @@
+{
+  "operation" : "SetParameterValues",
+  "cpeIdentifier" : {
+    "serialNumber" : "CXNK001D8E93"
+  },
+  "parameterValues" : {
+    "InternetGatewayDevice": {
+      "Layer2Bridging": {
+        "Filter": {
+          "32": {
+            "FilterEnable" : false,
+            "FilterBridgeReference" : "0"
+          }
+        }
+      }
+    }
+  }
+}

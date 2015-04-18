@@ -1,0 +1,10 @@
+{
+    "_id": "2095070",
+    "name": "007 SXA CC",
+    "description": "007",
+    "url": "http://cmssim05.calix.local:8080/007",
+    "username": "tr069",
+    "password": "tr069",
+    "apiClientUsername": "apiclient@007.com",
+    "apiClientPassword": "apiclient"
+}

@@ -1,0 +1,12 @@
+{
+	"name": "Calix-844Es",
+    "cpeFilter": {
+        "manufacturer": "Calix",
+        "modelName": {
+            "$in": ["844E-1", "844E-2"]
+        }
+    },
+    "description": "All Calix 844Es",
+    "type": "dynamic",
+    "orgId": "2550"
+}

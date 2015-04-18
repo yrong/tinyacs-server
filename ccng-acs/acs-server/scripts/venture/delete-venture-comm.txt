@@ -1,0 +1,7 @@
+-X DELETE
+--header "Content-Type: application/json"
+-u "apiclient@venturecomm.net:apiclient"
+-d @delete-venture-comm.json
+--url http://venture-cc.calix.com:8082/api/organization
+-v
+

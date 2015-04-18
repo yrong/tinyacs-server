@@ -1,0 +1,6 @@
+-X POST
+--header "Content-Type: application/json"
+-d @traceroute.json
+--url http://localhost:8081/cc/device-op?orgId=2550
+-v
+

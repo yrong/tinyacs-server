@@ -1,0 +1,19 @@
+{
+    "name": "Basic Bridged Video Service Profile",
+    "description": "A Basic Routed Video Service Profile",
+    "configurations": [
+        {
+            "category": "Video Service",
+            "parameterValues": {
+                "X_000631_VlanMuxID": 260,
+                "X_000631_VlanMux8021p": 3,
+                "ServiceConnectionType": "Bridged",
+                "BridgedInterface": [
+                    "2",
+                    "3",
+                    "15"
+                ]
+            }
+        }
+    ]
+}

@@ -1,0 +1,6 @@
+-X DELETE
+--header "Content-Type: application/json"
+-d @workflow-name.json
+--url http://localhost:8081/cc/workflow?orgId=2550
+-v
+

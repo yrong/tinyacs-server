@@ -1,0 +1,16 @@
+{
+    "name" : "DHCP only",
+    "description": "DHCP server",
+    "configurations": [
+        {
+            "category": "DHCP Server",
+            "parameterValues": {
+                "DHCPServerEnable": true,
+                "DeviceIpAddress": "192.168.2.1",
+                "MinAddress": "192.168.2.2",
+                "MaxAddress": "192.168.2.100",
+                "DHCPLeaseTime": 86400
+            }
+        }
+    ]
+}

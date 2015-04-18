@@ -1,0 +1,10 @@
+{
+    "_id": "2027564",
+    "name": "Mega Software",
+    "description": "Mega Software",
+    "url": "http://10.28.0.2:8080",
+    "username": "tr069",
+    "password": "tr069",
+    "apiClientUsername": "apiclient@megasoft.com",
+    "apiClientPassword": "apiclient"
+}

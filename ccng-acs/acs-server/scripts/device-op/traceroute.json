@@ -1,0 +1,17 @@
+{
+    "operation":"Diagnostics",
+    "cpeIdentifier": {
+        "serialNumber" : "CXNK00186F49"
+    },
+    "execPolicy": {
+        "timeout": 10
+    },
+    "diagType": "InternetGatewayDevice.TraceRouteDiagnostics",
+    "diagParameters": {
+        "Interface": "X_CALIX_SXACC_DefaultWanConnectionPath",
+        "Host": "google.com",
+        "NumberOfTries" : 1,
+        "MaxHopCount":20,
+        "Timeout": 2000
+    }
+}

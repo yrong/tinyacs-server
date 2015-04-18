@@ -1,0 +1,27 @@
+{
+    "name": "John Doe",
+    "type": "Residential",
+    "customId": "111-222-3333",
+    "devices": [
+        "2550-000631-CXNK00186F49"
+    ],
+    "locations": [
+        {
+            "address": {
+                "streetLine1": "123 Main St.",
+                "city": "Vancouver",
+                "state": "WA",
+                "zip": "98682"
+            },
+            "contacts": [
+                {
+                    "firstName": "John",
+                    "lastName": "Doe",
+                    "email": "john.doe@example.com",
+                    "phone": "111-222-3333",
+                    "type": "Home"
+                }
+            ]
+        }
+    ]
+}

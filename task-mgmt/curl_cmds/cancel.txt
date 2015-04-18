@@ -1,0 +1,2 @@
+-X PUT
+--url http://vmlnx-jqin:8090?queue=cc_tasks_acs_demo&id=10-cc_tasks_acs_demo-demo-client-demo-Mon-Jun-16-09:47:01-PDT-201410

@@ -1,0 +1,31 @@
+{
+    "name": "SXA-CC Integration User",
+    "type": "Business",
+    "customId": "sxacc-hvtel",
+    "servicePrefix": "123489071",
+    "locations": [
+        {
+            "devices": [
+                "7564-000631-CXNK00186F17",
+                "7564-000631-CXNK00186F25",
+                "7564-000631-CXNK00186F09",
+                "7564-000631-CXNK00186F04",
+                "7564-000631-CXNK00186EFF"
+            ],
+            "address": {
+                "streetLine1": "123 Main St.",
+                "city": "Petaluma",
+                "state": "CA",
+                "zip": "94954"
+            },
+            "contacts": [
+                {
+                    "firstName": "Jack",
+                    "lastName": "Qin",
+                    "email": "jack.qin@calix.com",
+                    "phone": "707-766-3113"
+                }
+            ]
+        }
+    ]
+}

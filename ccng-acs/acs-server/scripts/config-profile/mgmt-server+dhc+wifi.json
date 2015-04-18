@@ -1,0 +1,71 @@
+{
+    "orgId": "51",
+    "name" : "Management Server + DHCP + WIFI",
+    "description": "Management Server + DHCP + WIFI",
+    "configurations": [
+        {
+            "category": "Management Server",
+            "parameterValues": {
+                "PeriodicInformEnable": true,
+                "PeriodicInformInterval": 1200
+            }
+        },
+        {
+            "category": "DHCP Server",
+            "parameterValues": {
+                "DHCPServerEnable": true,
+                "DeviceIpAddress": "192.168.2.1",
+                "MinAddress": "192.168.2.2",
+                "MaxAddress": "192.168.2.100",
+                "DHCPLeaseTime": 86400
+            }
+        },
+        {
+            "category": "WIFI Radio",
+            "_instance": 1,
+            "parameterValues": {
+                "X_CALIX_MulticastForwardEnable": "true",
+                "RadioEnabled": true,
+                "Standard": "bgn",
+                "TransmitPower": 100,
+                "X_CALIX_MulticastForwardEnable": "true"
+            }
+        },
+        {
+            "category": "WIFI Radio",
+            "_instance": 9,
+            "parameterValues": {
+                "X_CALIX_MulticastForwardEnable": "true",
+                "RadioEnabled": true,
+                "Standard": "ac",
+                "TransmitPower": 100,
+                "X_CALIX_MulticastForwardEnable": "true",
+                "X_000631_EnableDfsChannels": true
+            }
+        },
+        {
+            "category": "SSID",
+            "_instance": 1,
+            "parameterValues": {
+                "Enable": true,
+                "SSID": "2.4GHz Internet",
+                "SSIDAdvertisementEnabled": true,
+                "BeaconType": "WPAand11i",
+                "IEEE11iEncryptionModes": "TKIPandAESEncryptionb",
+                "WPAEncryptionModes": "TKIPandAESEncryption"
+            }
+        },
+        {
+            "category": "SSID",
+            "_instance": 9,
+            "parameterValues": {
+                "Enable": true,
+                "SSID": "5GHz IPTV",
+                "SSIDAdvertisementEnabled": true,
+                "BeaconType": "WPAand11i",
+                "IEEE11iEncryptionModes": "TKIPandAESEncryptionb",
+                "WPAEncryptionModes": "TKIPandAESEncryption"
+            }
+        }
+    ]
+}

@@ -1,0 +1,7 @@
+-X PUT
+--header "Content-Type: application/json"
+-u "apiclient@hvtel.com:apiclient"
+-d @edit-device.json
+--url http://localhost:8082/api/device
+-v
+

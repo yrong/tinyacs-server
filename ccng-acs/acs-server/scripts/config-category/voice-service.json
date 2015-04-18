@@ -1,0 +1,357 @@
+{
+    "name": "Voice Service",
+    "description": "Define parameters for Voice Service.",
+    "serviceType": "Service Voice",
+    "parameters": [
+        {
+            "name": "X_000631_VlanMuxID",
+            "displayName": "VLAN ID",
+            "description": "The VLAN ID.",
+            "type": "int",
+            "mandatory": true,
+            "minValue": 1,
+            "maxValue": 4093,
+            "defaultValue": 2
+        },{
+            "name": "X_000631_VlanMux8021p",
+            "displayName": "Priority (P-Bit)",
+            "description": "The priority of the VLAN.",
+            "type": "int",
+            "mandatory": true,
+            "valueEnums": [
+              { "value": 0, "displayName": "0" },
+              { "value": 1, "displayName": "1" },
+              { "value": 2, "displayName": "2" },
+              { "value": 3, "displayName": "3" },
+              { "value": 4, "displayName": "4" },
+              { "value": 5, "displayName": "5" },
+              { "value": 6, "displayName": "6" },
+              { "value": 7, "displayName": "7" }
+            ],
+            "defaultValue": 7
+        },{
+            "name": "ProxyServer",
+            "displayName": "Proxy Server",
+            "description": "Host name or IP address of the SIP proxy server.",
+            "type": "string",
+            "tr098PathOverride": [ "InternetGatewayDevice.Services.VoiceService.1.VoiceProfile.1.SIP.ProxyServer" ]
+        },{
+            "name": "ProxyServerPort",
+            "displayName": "Proxy Server Port",
+            "description": "Destination port to be used in connecting to the SIP server.",
+            "type": "unsignedInt",
+            "minValue": 0,
+            "maxValue": 65535,
+            "defaultValue": 5060,
+            "tr098PathOverride": [ "InternetGatewayDevice.Services.VoiceService.1.VoiceProfile.1.SIP.ProxyServerPort" ]
+        },{
+            "name": "ProxyServerSecondary",
+            "displayName": "Secondary Proxy Server",
+            "description": "Host name or IP address of the SIP secondary proxy server.",
+            "type": "string",
+            "tr098PathOverride": [ "InternetGatewayDevice.Services.VoiceService.1.VoiceProfile.1.SIP.X_000631_ProxyServerSecondary" ]
+        },{
+            "name": "ProxyServerPortSecondary",
+            "displayName": "Secondary Proxy Server Port",
+            "description": "Secondary proxy destination port to be used in connecting to the SIP server.",
+            "type": "unsignedInt",
+            "minValue": 0,
+            "maxValue": 65535,
+            "defaultValue": 5060,
+            "tr098PathOverride": [ "InternetGatewayDevice.Services.VoiceService.1.VoiceProfile.1.SIP.X_000631_ProxyServerPortSecondary" ]
+        },{
+            "name": "DNSPrimary",
+            "displayName": "Primary DNS Server",
+            "description": "Primary DNS Server for proxy server.",
+            "type": "IPAddress",
+            "tr098PathOverride": [ "InternetGatewayDevice.Services.VoiceService.1.VoiceProfile.1.SIP.X_000631_DnsPrimary" ]
+        },{
+            "name": "DNSSecondary",
+            "displayName": "Secondary DNS Server",
+            "description": "Secondary DNS Server for proxy server.",
+            "type": "IPAddress",
+            "tr098PathOverride": [ "InternetGatewayDevice.Services.VoiceService.1.VoiceProfile.1.SIP.X_000631_DnsSecondary" ]
+        },{
+            "name": "RTPCodec1st",
+            "displayName": "RTP Codec First Order",
+            "description": "The first order RTP Codec.",
+            "type": "string",
+            "mandatory": true,
+            "valueEnums": [
+                {"value": "G.711MuLaw", "displayName": "G.711MuLaw"},
+                {"value": "G.711ALaw", "displayName": "G.711ALaw"},
+                {"value": "G.729a", "displayName": "G.729a"}
+            ],
+            "defaultValue": "G.711MuLaw",
+            "tr098PathOverride": ["X_CALIX_SXACC_RTP_CODEC_1ST_ORDER.Codec"]
+        },{
+            "name": "PacketRate1st",
+            "displayName": "Packet Rate First Order (ms)",
+            "description": "The first order packet rate (period) in milliseconds.",
+            "type": "string",
+            "valueEnums": [
+                {"value": "10", "displayName": "10"},
+                {"value": "20", "displayName": "20"},
+                {"value": "30", "displayName": "30"}
+            ],
+            "defaultValue": "10",
+            "tr098PathOverride": ["X_CALIX_SXACC_RTP_CODEC_1ST_ORDER.PacketizationPeriod"]
+        },{
+            "name": "SilenceSuppression1st",
+            "displayName": "Silence Suppression First Order",
+            "description": "The first order boolean value indicates whether to support silence suppression for the codec.",
+            "type": "boolean",
+            "defaultValue": false,
+            "tr098PathOverride": ["X_CALIX_SXACC_RTP_CODEC_1ST_ORDER.SilenceSuppression"]
+        },{
+            "name": "RTPCodec2nd",
+            "displayName": "RTP Codec Second Order",
+            "description": "The second order RTP Codec.",
+            "type": "string",
+            "valueEnums": [
+                {"value": "G.711MuLaw", "displayName": "G.711MuLaw"},
+                {"value": "G.711ALaw", "displayName": "G.711ALaw"},
+                {"value": "G.729a", "displayName": "G.729a"},
+                {"value": "", "displayName": "None"}
+            ],
+            "defaultValue": "",
+            "tr098PathOverride": ["X_CALIX_SXACC_RTP_CODEC_2ND_ORDER.Codec"]
+        },{
+            "name": "PacketRate2nd",
+            "displayName": "Packet Rate Second Order (ms)",
+            "description": "The second order packet rate (period) in milliseconds.",
+            "type": "string",
+            "valueEnums": [
+                {"value": "10", "displayName": "10"},
+                {"value": "20", "displayName": "20"},
+                {"value": "30", "displayName": "30"}
+            ],
+            "defaultValue": "10",
+            "tr098PathOverride": [
+                "X_CALIX_SXACC_RTP_CODEC_2ND_ORDER.PacketizationPeriod"
+            ]
+        },{
+            "name": "SilenceSuppression2nd",
+            "displayName": "Silence Suppression Second Order",
+            "description": "The second order boolean value indicates whether to support silence suppression for the codec.",
+            "type": "boolean",
+            "defaultValue": false,
+            "tr098PathOverride": [
+                "X_CALIX_SXACC_RTP_CODEC_2ND_ORDER.SilenceSuppression"
+            ]
+        },{
+            "name": "RTPCodec3rd",
+            "displayName": "RTP Codec Third Order",
+            "description": "The third order RTP Codec.",
+            "type": "string",
+            "valueEnums": [
+                {"value": "G.711MuLaw", "displayName": "G.711MuLaw"},
+                {"value": "G.711ALaw", "displayName": "G.711ALaw"},
+                {"value": "G.729a", "displayName": "G.729a"},
+                {"value": "", "displayName": "None"}
+            ],
+            "defaultValue": "",
+            "tr098PathOverride": ["X_CALIX_SXACC_RTP_CODEC_3RD_ORDER.Codec"]
+        },{
+            "name": "PacketRate3rd",
+            "displayName": "Packet Rate Third Order (ms)",
+            "description": "The third order packet rate (period) in milliseconds.",
+            "type": "string",
+            "valueEnums": [
+                {"value": "10", "displayName": "10"},
+                {"value": "20", "displayName": "20"},
+                {"value": "30", "displayName": "30"}
+            ],
+            "defaultValue": "10",
+            "tr098PathOverride": [
+                "X_CALIX_SXACC_RTP_CODEC_3RD_ORDER.PacketizationPeriod"
+            ]
+        },{
+            "name": "SilenceSuppression3rd",
+            "displayName": "Silence Suppression Third Order",
+            "description": "The third order boolean value indicates whether to support silence suppression for the codec.",
+            "type": "boolean",
+            "defaultValue": false,
+            "tr098PathOverride": [
+                "X_CALIX_SXACC_RTP_CODEC_3RD_ORDER.SilenceSuppression"
+            ]
+        },{
+            "name": "TimerT1",
+            "displayName": "T1 Timer (ms)",
+            "description": "SIP timer T1, in milliseconds",
+            "type": "int",
+            "minValue": 100,
+            "maxValue": 1500,
+            "defaultValue": 500,
+            "tr098PathOverride": [ "InternetGatewayDevice.Services.VoiceService.1.VoiceProfile.1.SIP.TimerT1" ]
+        },{
+            "name": "TimerT2",
+            "displayName": "T2 Timer (ms)",
+            "description": "SIP timer T2, in milliseconds",
+            "type": "int",
+            "minValue": 1000,
+            "maxValue": 5000,
+            "defaultValue": 4000,
+            "tr098PathOverride": [ "InternetGatewayDevice.Services.VoiceService.1.VoiceProfile.1.SIP.TimerT2" ]
+        },{
+            "name": "RegistrationPeriod",
+            "displayName": "Registration Period (s)",
+            "description": "Period over which the user agent must periodically register, in seconds.",
+            "type": "int",
+            "minValue": 60,
+            "maxValue": 86400,
+            "defaultValue": 3600,
+            "tr098PathOverride": [ "InternetGatewayDevice.Services.VoiceService.1.VoiceProfile.1.SIP.RegistrationPeriod" ]
+        },{
+            "name": "DistinctiveRingPrefix",
+            "displayName": "Distinctive Ring Prefix",
+            "description": "Prefix to use predefined distinctive ringing tone",
+            "type": "string",
+            "defaultValue": "Bellcore-dr",
+            "tr098PathOverride": [
+                "InternetGatewayDevice.Services.VoiceService.1.VoiceProfile.1.Line.1.CallingFeatures.X_000631_DistinctiveRingPrefix",
+                "InternetGatewayDevice.Services.VoiceService.1.VoiceProfile.1.Line.2.CallingFeatures.X_000631_DistinctiveRingPrefix"
+            ]
+        },{
+            "name": "CallWaitingTonePrefix",
+            "displayName": "Call Waiting Prefix",
+            "description": "Prefix to use predefined Call waiting tone",
+            "type": "string",
+            "defaultValue": "CallWaitingTone",
+            "tr098PathOverride": [
+                "InternetGatewayDevice.Services.VoiceService.1.VoiceProfile.1.Line.1.CallingFeatures.X_000631_CallWaitingTonePrefix",
+                "InternetGatewayDevice.Services.VoiceService.1.VoiceProfile.1.Line.2.CallingFeatures.X_000631_CallWaitingTonePrefix"
+            ]
+        },{
+            "name": "DTMFMethod",
+            "displayName": "Out-Of-Band DTMF",
+            "description": "Method by which DTMF digits MUST be passed.",
+            "type": "string",
+            "defaultValue": "InBand",
+            "valueEnums":  [
+                {"value": "InBand", "displayName": "In Band"},
+                {"value": "RFC2833", "displayName": "RFC2833"},
+                {"value": "SIPInfo", "displayName": "SIP Info"}
+            ],
+            "tr098PathOverride": [ "InternetGatewayDevice.Services.VoiceService.1.VoiceProfile.1.DTMFMethod" ]
+        },{
+            "name": "LocalHookFlash",
+            "displayName": "Local Hook Flash",
+            "description": "Specifies hookflash relay method to use.",
+            "type": "boolean",
+            "defaultValue": true,
+            "displayOnly": true,
+            "implies": {
+                "true": {
+                    "HookFlashMethod": "None"
+                },
+                "false": {
+                    "HookFlashMethod": "SIPInfo"
+                }
+            }
+        },{
+            "name": "HookFlashMethod",
+            "type": "string",
+            "hidden": true,
+            "tr098PathOverride": [ "InternetGatewayDevice.Services.VoiceService.1.VoiceProfile.1.X_000631_HookFlashMethod" ]
+        },{
+            "name": "RTPDscp",
+            "displayName": "RTP DSCP",
+            "description": "Diffserv code point to be used for outgoing RTP packets for this profile.",
+            "type": "int",
+            "minValue": 0,
+            "maxValue": 63,
+            "tr098PathOverride": [ "InternetGatewayDevice.Services.VoiceService.1.VoiceProfile.1.RTP.DSCPMark" ]
+        },{
+            "name": "RTPEthernetQos",
+            "displayName": "RTP Ethernet QoS",
+            "description": "Ethernet priority code (as defined in 802.1D) to be used for outgoing RTP packets for this profile.",
+            "type": "int",
+            "defaultValue": 6,
+            "minValue": 0,
+            "maxValue": 7,
+            "tr098PathOverride": [ "InternetGatewayDevice.Services.VoiceService.1.VoiceProfile.1.RTP.EthernetPriorityMark" ]
+        },{
+            "name": "ControlDscp",
+            "displayName": "Control DSCP",
+            "description": "Diffserv code point to be used for outgoing SIP signaling packets.",
+            "type": "int",
+            "defaultValue": 0,
+            "minValue": 0,
+            "maxValue": 63,
+            "tr098PathOverride": [ "InternetGatewayDevice.Services.VoiceService.1.VoiceProfile.1.SIP.DSCPMark" ]
+        },{
+            "name": "ControlEthernetQos",
+            "displayName": "Control Ethernet QoS",
+            "description": "Ethernet priority code (as defined in 802.1D) to be used for outgoing SIP signaling packets for this profile.",
+            "type": "int",
+            "defaultValue": 6,
+            "minValue": 0,
+            "maxValue": 7,
+            "tr098PathOverride": [ "InternetGatewayDevice.Services.VoiceService.1.VoiceProfile.1.SIP.EthernetPriorityMark" ]
+        },{
+            "name": "UserAgentDomain",
+            "displayName": "Domain",
+            "description": "CPE domain string.",
+            "type": "string",
+            "maxStringLength": 256,
+            "tr098PathOverride": [ "InternetGatewayDevice.Services.VoiceService.1.VoiceProfile.1.SIP.UserAgentDomain" ]
+        },{
+            "name": "CountryCode",
+            "displayName": "Country Code",
+            "description": "The geographic region associated with this profile.",
+            "type": "string",
+            "valueEnums": [
+                {"value": "US", "displayName": "United States"},
+                {"value": "IT", "displayName": "Italy"},
+                {"value": "GB", "displayName": "United Kingdom"},
+                {"value": "SE", "displayName": "Sweden"},
+                {"value": "PL", "displayName": "Poland"},
+                {"value": "BR", "displayName": "Brazil"},
+                {"value": "AU", "displayName": "Australia"}
+            ],
+            "defaultValue": "US",
+            "tr098PathOverride": [ "InternetGatewayDevice.Services.VoiceService.1.VoiceProfile.1.Region" ]
+        },{
+            "name": "ReleaseTimer",
+            "displayName": "Release Timer (s)",
+            "description": "Delay before applying permanent signal treatment.",
+            "type": "int",
+            "minValue": 1,
+            "maxValue": 20,
+            "defaultValue": 10,
+            "tr098PathOverride": [ "InternetGatewayDevice.Services.VoiceService.1.VoiceProfile.1.SIP.X_000631_ReleaseTimer" ]
+        },{
+            "name": "RTPPort",
+            "displayName": "RTP Port",
+            "description": "Base of port range to be used for incoming RTP streams for this profile.",
+            "type": "int",
+            "minValue": 49152,
+            "maxValue": 65535,
+            "defaultValue": 49152,
+            "tr098PathOverride": [ "InternetGatewayDevice.Services.VoiceService.1.VoiceProfile.1.RTP.LocalPortMin" ]
+        },{
+            "name": "SwitchType",
+            "displayName": "Switch Type",
+            "description": "Softswitch vendor name.",
+            "type": "string",
+            "valueEnums": [
+                {"value": "None", "displayName": "None"},
+                {"value": "ZTE", "displayName": "ZTE"},
+                {"value": "HUAW", "displayName": "HUAW"},
+                {"value": "SYLA", "displayName": "SYLA"},
+                {"value": "ERIC", "displayName": "ERIC"},
+                {"value": "CS2K", "displayName": "CS2K"},
+                {"value": "BELL", "displayName": "BELL"}
+            ],
+            "defaultValue": "None",
+            "tr098PathOverride": [ "InternetGatewayDevice.Services.VoiceService.1.VoiceProfile.1.SIP.X_000631_SoftSwitch" ]
+        }
+    ],
+    "serviceValues": {
+        "Name": "Voice Service",
+        "X_000631_IGMPProxy": false,
+        "NATEnabled": false,
+        "ServiceConnectionType": "DHCP"
+    }
+}

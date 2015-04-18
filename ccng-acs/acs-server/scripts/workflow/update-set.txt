@@ -1,0 +1,6 @@
+-X PUT
+--header "Content-Type: application/json"
+-d @edit-set-param-values-window.json
+--url http://localhost:8081/cc/workflow
+-v
+

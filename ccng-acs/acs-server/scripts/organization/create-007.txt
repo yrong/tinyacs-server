@@ -1,0 +1,6 @@
+-X POST
+--header "Content-Type: application/json"
+-d @new-org-007.json
+--url http://cmssim05:8081/cc/organization
+-v
+

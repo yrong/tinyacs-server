@@ -1,0 +1,25 @@
+{
+    "name": "DNS Host Mapping",
+    "description": "Configure host mapping for CPE device.",
+    "tr098PathPrefix": "InternetGatewayDevice.X_000631_DNSHostMapping.{i}.",
+    "multiInstance": true,
+    "keyParameter": {
+        "name": "HostName",
+        "allowOverwrite": false
+    },
+    "parameters": [{
+        "name": "HostName",
+        "displayName": "Host Name",
+        "description": "The host name that to be mapped to a certain IP Address",
+        "type": "string",
+        "mandatory": true,
+        "minStringLength": 1,
+        "maxStringLength": 64
+    }, {
+        "name": "IPAddress",
+        "displayName": "IP Address",
+        "description": "The IP Address that a host name maps to",
+        "type": "IPAddress",
+        "mandatory": true
+    }]
+}

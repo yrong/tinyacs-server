@@ -1,0 +1,22 @@
+{
+    "operation":"SetParameterValues",
+    "correlationId":"enable-remote-ewi",
+    "cpeIdentifier": {
+        "serialNumber" : "CXNK001D8E93"
+    },
+    "parameterValues": {
+        "InternetGatewayDevice": {
+            "UserInterface" : {
+	            "RemoteAccess" : {
+	                "Enable" : "true"
+                }
+            },
+            "User" : {
+	            "2" : {
+	                "Enable" : "true",
+	                "RemoteAccessCapable" : "true"
+	            }
+            }
+        }
+    }
+}

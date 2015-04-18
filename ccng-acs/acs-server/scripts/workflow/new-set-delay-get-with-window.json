@@ -1,0 +1,48 @@
+{
+	"name": "Enable_Periodic_Inform",
+    "groups": ["08d7dd0e-37cb-4cd8-8a19-2dca055394b8"],
+    "actions": [
+        {
+            "actionType":"Set Parameter Values",
+            "parameterValues": {
+                "InternetGatewayDevice": {
+                    "ManagementServer": {
+                        "PeriodicInformEnable": true,
+                        "PeriodicInformInterval": 500
+                    }
+                }
+            }
+        }, {
+            "actionType":"Delay",
+            "delay": 5
+        }, {
+            "actionType":"Get Parameter Values",
+            "parameterNames": [
+                "InternetGatewayDevice.ManagementServer.PeriodicInformEnable",
+                "InternetGatewayDevice.ManagementServer.PeriodicInformInterval"
+            ],
+            "expectedParameterValues": {
+                "InternetGatewayDevice": {
+                   "ManagementServer": {
+                       "PeriodicInformEnable": true,
+                       "PeriodicInformInterval": 500
+                   }
+                }
+           }
+        }
+    ],
+    "execPolicy": {
+        "initialTrigger": {
+            "type": "Maintenance Window"
+        },
+        "window": {
+            "startDateTime": "2014-9-29T1:19:10Z",
+            "windowLength": 5,
+            "recurringInterval": 10,
+            "maxRecurrence": 2000000
+        },
+        "maxConcurrentDevices": 1
+    },
+    "description": "Test Set Param Values with maintenance window, targeting all SIM RGs.",
+    "orgId": "50"
+}

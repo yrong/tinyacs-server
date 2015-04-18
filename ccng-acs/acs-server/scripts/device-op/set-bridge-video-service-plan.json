@@ -1,0 +1,15 @@
+{
+  "operation" : "SetParameterValues",
+  "cpeIdentifier" : {
+    "serialNumber" : "CXNK001D8E93"
+  },
+  "services" : [ {
+      "X_000631_VlanMuxID" : 26,
+      "X_000631_VlanMux8021p" : 5,
+      "ServiceConnectionType" : "Bridged",
+      "BridgedInterface" : [ "InternetGatewayDevice.LANDevice.1.LANEthernetInterfaceConfig.2" ],
+      "Name" : "Video Service",
+      "X_000631_IGMPProxy" : true,
+      "NATEnabled" : true
+    } ]
+}

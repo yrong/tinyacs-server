@@ -1,0 +1,85 @@
+{
+    "name": "Timezone",
+    "description": "Configure Timezone for CPE device.",
+    "parameters": [{
+        "name": "Tz",
+        "displayName": "Timezone",
+        "description": "The timezone to be selected",
+        "displayOnly": true,
+        "mandatory": true,
+        "type": "string"
+    }, {
+        "name": "TzOffset",
+        "description": "The Timezone Offset to be set in Tr098",
+        "type": "string",
+        "hidden": true,
+        "tr098PathOverride": ["InternetGatewayDevice.Time.LocalTimeZone"]
+    }, {
+        "name": "TzName",
+        "description": "The Timezone Name to be set in Tr098",
+        "type": "string",
+        "hidden": true,
+        "tr098PathOverride": ["InternetGatewayDevice.Time.LocalTimeZoneName"]
+    }, {
+        "name": "DaylightSaving",
+        "displayName": "Daylight Saving",
+        "description": "Enable the daylight saving time",
+        "type": "boolean",
+        "defaultValue": true,
+        "tr098PathOverride": ["InternetGatewayDevice.Time.DaylightSavingsUsed"]
+    }, {
+        "name": "NTPEnable",
+        "displayName": "Network Time",
+        "description": "Enable to use use network time",
+        "mandatory": true,
+        "type": "boolean",
+        "defaultValue": false,
+        "tr098PathOverride": ["InternetGatewayDevice.Time.Enable"]
+    }, {
+        "name": "NTPServer1",
+        "displayName": "1st NTP Server",
+        "description": "First NTP timeserver",
+        "mandatory": true,
+        "type": "string",
+        "requires": {
+            "NTPEnable": true
+        },
+        "tr098PathOverride": ["InternetGatewayDevice.Time.NTPServer1"]
+    }, {
+        "name": "NTPServer2",
+        "displayName": "2nd NTP Server",
+        "description": "Second NTP timeserver",
+        "type": "string",
+        "requires": {
+            "NTPEnable": true
+        },
+        "tr098PathOverride": ["InternetGatewayDevice.Time.NTPServer2"]
+    }, {
+        "name": "NTPServer3",
+        "displayName": "3rd NTP Server",
+        "description": "Third NTP timeserver",
+        "type": "string",
+        "requires": {
+            "NTPEnable": true
+        },
+        "tr098PathOverride": ["InternetGatewayDevice.Time.NTPServer3"]
+    }, {
+        "name": "NTPServer4",
+        "displayName": "4th NTP Server",
+        "description": "Fourth NTP timeserver",
+        "type": "string",
+        "requires": {
+            "NTPEnable": true
+        },
+        "tr098PathOverride": ["InternetGatewayDevice.Time.NTPServer4"]
+    }, {
+        "name": "NTPServer5",
+        "displayName": "5th NTP Server",
+        "description": "Fifth NTP timeserver",
+        "type": "string",
+        "requires": {
+            "NTPEnable": true
+        },
+        "tr098PathOverride": ["InternetGatewayDevice.Time.NTPServer5"]
+    }]
+}

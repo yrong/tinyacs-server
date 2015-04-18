@@ -1,0 +1,6 @@
+-X POST
+--header "Content-Type: application/json"
+-d @routed-video-service.json
+--url http://localhost:8081/cc/configuration-profile?orgId=2550
+-v
+

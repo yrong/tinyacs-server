@@ -1,0 +1,4 @@
+ --digest
+ -v
+ -u "admin:admin"
+ --url "http://10.201.8.10:30005/"

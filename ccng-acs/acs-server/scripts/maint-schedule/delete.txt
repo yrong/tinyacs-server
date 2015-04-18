@@ -1,0 +1,6 @@
+-X DELETE
+--header "Content-Type: application/json"
+-d @id.json
+--url http://localhost:8081/cc/maintenance-schedule?orgId=2550
+-v
+

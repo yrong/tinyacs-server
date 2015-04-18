@@ -1,0 +1,17 @@
+{
+    "operation":"SetParameterAttributes",
+    "cpeIdentifier": {
+        "serialNumber" : "CXNK001D8E93"
+    },
+    "parameterAttributes": {
+        "InternetGatewayDevice": {
+            "DeviceInfo": {
+                "X_000631_IGDChangeCounter": 0
+            },
+            "ManagementServer": {
+                "PeriodicInformEnable": 0,
+                "PeriodicInformInterval": 0
+            }
+        }
+    }
+}

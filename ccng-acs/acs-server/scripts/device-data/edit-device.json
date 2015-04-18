@@ -1,0 +1,15 @@
+{
+    "serialNumber" : "CXNK00186F49",
+    "manufacturerOUI": "000631",
+    "initialProvisioning":{
+        "WLANConfiguration": {
+            "1": {
+                "BeaconAdvertisementEnabled": true,
+                "BeaconType": "WPA2",
+                "Enable": true,
+                ""
+                "SSID": "Petaluma"
+            }
+        }
+    }
+}

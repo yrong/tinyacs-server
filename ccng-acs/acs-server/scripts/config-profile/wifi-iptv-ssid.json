@@ -1,0 +1,17 @@
+{
+    "name" : "WIFI IPTV SSID",
+    "description": "WIFI IPTV SSID",
+    "configurations": [
+        {
+            "category": "Wifi SSID",
+            "parameterValues": {
+                "WlanIndex": 11,
+                "Enable": true,
+                "SSID": "IPTV 5GHz",
+                "SSIDAdvertisementEnabled": true,
+                "BeaconType": "WPAand11i",
+                "PreSharedKey.1.KeyPassphrase": "iptv"
+            }
+        }
+    ]
+}

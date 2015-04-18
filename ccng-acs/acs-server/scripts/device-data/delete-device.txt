@@ -1,0 +1,5 @@
+-X DELETE
+--header "Content-Type: application/json"
+-u "apiclient@hvtel.com:apiclient"
+--url http://localhost:8082/api/device/10097-000631-CXNK001D8E93
+-v

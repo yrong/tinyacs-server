@@ -1,0 +1,17 @@
+{
+	"name": "Apply Untagged Video + Voice on Discovery",
+    "groups": ["2745417b-3ec6-4fae-a44b-2cee08e42f8a"],
+    "actions": [
+        {
+            "actionType":"Apply Configuration Profile",
+            "profileId": "cfb9c76f-3eb7-45db-8707-3df1bfd71fdb"
+        }
+    ],
+    "execPolicy": {
+        "initialTrigger": {
+            "type": "CPE Event",
+            "cpeEvent": "CC EVENT - New CPE Discovered"
+        }
+    },
+    "orgId": "2550"
+}

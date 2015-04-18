@@ -1,0 +1,8 @@
+-X POST
+--header "Content-Type: application/json"
+-u "apiclient@venturelabs.com:apiclient"
+-d @new-device.json
+-v
+--url http://localhost:8082/api/device
+
+

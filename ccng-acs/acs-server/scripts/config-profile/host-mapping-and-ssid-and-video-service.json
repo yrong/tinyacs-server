@@ -1,0 +1,39 @@
+{
+    "name" : "DNS Host Mapping + SSID + Video Service",
+    "description": "DNS Host Mapping + SSID + Video Service",
+    "configurations": [
+        {
+            "category": "DNS Host Mapping",
+            "parameterValues": {
+                "HostName": "gcs.calix.local",
+                "IPAddress": "1.2.3.4"
+            }
+        },
+        {
+            "category": "DNS Host Mapping",
+            "parameterValues": {
+                "HostName": "acs.calix.local",
+                "IPAddress": "1.2.3.5"
+            }
+        },
+        {
+            "category": "Video Service",
+            "parameterValues": {
+                "X_000631_VlanMuxID" : -1,
+                "X_000631_VlanMux8021p" : 3,
+                "ServiceConnectionType" : "DHCP"
+            }
+        },
+        {
+            "category": "Wifi SSID",
+            "parameterValues": {
+                "WlanIndex": 11,
+                "Enable": true,
+                "SSID": "IPTV 5GHz",
+                "SSIDAdvertisementEnabled": true,
+                "BeaconType": "WPAand11i",
+                "PreSharedKey.1.KeyPassphrase": "iptv"
+            }
+        }
+    ]
+}

@@ -1,0 +1,6 @@
+-X GET
+--header "Content-Type: application/json"
+-u "apiclient@hvtel.com:apiclient"
+--url http://localhost:8082/api/device/51-000631-CXNK00186F49
+-v
+

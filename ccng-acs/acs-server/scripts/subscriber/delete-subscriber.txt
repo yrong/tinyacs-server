@@ -1,0 +1,4 @@
+-X DELETE
+--header "Content-Type: application/json"
+--url http://localhost:8081/cc/subscriber/4b5a02f1-8c91-434e-9634-e8507199d7ee
+

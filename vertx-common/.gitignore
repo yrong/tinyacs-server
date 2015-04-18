@@ -1,0 +1,30 @@
+# Maven
+target/
+
+# Eclipse
+.settings/
+.classpath
+.project
+
+# IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# JRebel
+rebel.xml
+
+# Auto-generated Code
+cwmp-schemas/src/main/java/broadband*
+cwmp-schemas/src/main/java/dsl*
+cwmp-schemas/src/main/java/org*
+
+# NBI Temp Test Data
+nbi/scripts
+
+# JBoss
+# jboss-web.xml
+
+# Verx
+mods

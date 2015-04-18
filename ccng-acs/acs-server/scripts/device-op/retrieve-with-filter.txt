@@ -1,0 +1,6 @@
+-X GET
+--header "Content-Type: application/json"
+-d @retrieve-filter.json
+--url http://localhost:8081/cc/device-op?orgId=50
+-v
+

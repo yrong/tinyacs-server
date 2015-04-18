@@ -1,0 +1,35 @@
+{
+    "operation":"SetParameterValues",
+    "cpeIdentifier": {
+        "serialNumber" : "CXNK00186F49"
+    },
+    "parameterValues": {
+        "InternetGatewayDevice": {
+          "WANDevice" : {
+            "5" : {
+              "WANConnectionDevice" : {
+                "1" : {
+                  "WANIPConnection" : {
+                    "13" : {
+                      "PortMapping" : {
+                        "6" : {
+                          "PortMappingEnabled" : "true",
+                          "PortMappingLeaseDuration" : "0",
+                          "RemoteHost" : "0.0.0.0",
+                          "ExternalPort" : "9001",
+                          "InternalPort" : "9001",
+                          "PortMappingProtocol" : "TCP",
+                          "InternalClient" : "192.168.1.1",
+                          "PortMappingDescription" : "API Test @ Port 9001",
+                          "X_BROADCOM_COM_AppName" : "API Test 9001"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+    }
+}

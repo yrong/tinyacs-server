@@ -1,0 +1,9 @@
+{
+    "operation":"FactoryReset",
+    "cpeIdentifier": {
+        "serialNumber" : "CXNK001D8E93"
+    },
+    "execPolicy": {
+        "timeout": 360
+    }
+}

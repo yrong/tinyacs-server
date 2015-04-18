@@ -1,0 +1,25 @@
+{
+    "operation":"SetParameterValues",
+    "cpeIdentifier": {
+        "serialNumber" : "CXNK00186F49"
+    },
+    "parameterValues": {
+        "InternetGatewayDevice": {
+          "LANDevice" : {
+            "1" : {
+              "WLANConfiguration" : {
+                "1" : {
+                  "X_CALIX_WlanMacAuthCfg" : {
+                    "4" : {
+                      "MACAddress" : "66:77:88:99:AA:BB",
+                      "Deny" : "true",
+                      "Allow" : "false"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+    }
+}

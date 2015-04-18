@@ -1,0 +1,6 @@
+-X POST
+--header "Content-Type: application/json"
+-d @new-set-delay-get-with-window.json
+--url http://localhost:8081/cc/workflow
+-v
+

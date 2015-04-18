@@ -1,0 +1,11 @@
+{
+    "operation": "Download",
+    "cpeIdentifier": {
+        "serialNumber" : "CXNK001D8E93"
+    },
+    "execPolicy": {
+        "timeout": 300
+    },
+    "fileType": "X 000631 SIP Configuration File",
+    "internalFileId" : "552453e4e4b06d136422ccfd"
+}

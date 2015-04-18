@@ -1,0 +1,5 @@
+-X PUT
+--header "Content-Type: application/json"
+--url http://localhost:8081/cc/maintenance-schedule?orgId=2550
+-v
+

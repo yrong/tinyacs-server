@@ -1,0 +1,9 @@
+{
+	"name": "Calix-SIM-844RGs",
+    "cpeFilter": {
+        "manufacturer": "Calix",
+        "modelName": "844G-SIM"
+    },
+    "type": "dynamic",
+    "description": "All Calix SIM 844RGs"
+}

@@ -1,0 +1,5 @@
+groupId= "${pom.groupId}"
+artifactId= "${pom.artifactId}"
+version= "${pom.version}"
+buildDate="${timestamp}"
+buildUser="${user.name}"

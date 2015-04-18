@@ -1,0 +1,6 @@
+-X POST
+--header "Content-Type: application/json"
+-d @timezone.json
+--url http://localhost:8081/cc/configuration-category
+-v
+

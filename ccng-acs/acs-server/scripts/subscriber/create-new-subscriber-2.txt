@@ -1,0 +1,6 @@
+-X POST
+--header "Content-Type: application/json"
+-d @new-subscriber-2.json
+--url http://localhost:8081/cc/subscriber?orgId=10097
+-v
+

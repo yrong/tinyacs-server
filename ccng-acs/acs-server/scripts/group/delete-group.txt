@@ -1,0 +1,4 @@
+-X DELETE
+--url http://localhost:8081/cc/group/78546eb2-12f0-4306-ab8e-22ef3d463da7
+-v
+

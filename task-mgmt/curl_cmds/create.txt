@@ -1,0 +1,3 @@
+-X POST
+--url http://vmlnx-jqin:8090
+-d @DbBackup.json

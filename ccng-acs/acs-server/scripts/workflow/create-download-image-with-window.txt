@@ -1,0 +1,6 @@
+-X POST
+--header "Content-Type: application/json"
+-d @new-dnld-image-with-window.json
+--url http://localhost:8081/cc/workflow?orgId=2550
+-v
+

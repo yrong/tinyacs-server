@@ -1,0 +1,14 @@
+{
+    "queue": "cc_tasks_acs_demo",
+    "type": "DbBackup",
+    "args": {
+            "producerHost": "demo-client",
+            "producerApp": "demo",
+            "orgId": 10,
+            "sn": 10,
+            "collectionNames": ["devices", "tasks"],
+            "destination": "/home/jqin/tmp",
+            "delay": 5
+    }
+}
+

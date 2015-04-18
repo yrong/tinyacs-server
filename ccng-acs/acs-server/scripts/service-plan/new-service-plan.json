@@ -1,0 +1,34 @@
+{
+    "data": {"Enable": true},
+    "video": {"Enable": true},
+    "voice": {
+        "DialPlan": "system-default",
+        "Line": {
+            "1": {
+                "Enable": "Enabled",
+                "SIP": {
+                    "AuthUserName": "5001",
+                    "AuthPassword": "5001",
+                    "URI": "5001"
+                },
+                "CallingFeatures": {
+                    "CallerIDEnable": true,
+                     "CallWaitingEnable": true,
+                     "X_000631_ThreewayCallingEnable": true,
+                     "MWIEnable": true,
+                     "X_000631_DirectConnectEnable": false
+                },
+                "VoiceProcessing": {
+                    "ReceiveGain": -4,
+                    "TransmitGain": -2
+                }
+            },
+            "2": {
+                "Enable": "Disabled"
+            }
+        },
+        "FaxT38": {"Enable": true}
+    },
+    "subscriberId": "ad86ae70-6289-4074-aee6-1b7e9aa89d04",
+    "deviceId": "CXNK001D8E93"
+}

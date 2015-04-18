@@ -1,0 +1,29 @@
+# Maven
+target/
+
+# Eclipse
+.settings/
+.classpath
+.project
+
+# IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# JRebel
+rebel.xml
+
+# Auto-generated Code
+cwmp-schemas/src/main/java/broadband*
+cwmp-schemas/src/main/java/dsl*
+cwmp-schemas/src/main/java/org*
+
+# Vert.x Runtime/Artifacts
+vertx-runtime
+vertx-artifacts
+logs
+
+# Verx
+mods

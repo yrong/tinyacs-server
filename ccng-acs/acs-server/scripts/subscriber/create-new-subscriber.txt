@@ -1,0 +1,7 @@
+-X POST
+--header "Content-Type: application/json"
+-u "apiclient@venturelabs.com:apiclient"
+-d @new-subscriber.json
+--url http://localhost:8082/api/subscriber
+-v
+

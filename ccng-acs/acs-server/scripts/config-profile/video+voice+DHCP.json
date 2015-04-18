@@ -1,0 +1,47 @@
+{
+    "name": "Voice Service Profile for Unit Test",
+    "configurations": [
+        {
+            "category": "Video Service",
+            "parameterValues": {
+                "X_000631_VlanMuxID": 26,
+                "X_000631_VlanMux8021p": 5,
+                "ServiceConnectionType": "DHCP"
+            }
+        },
+        {
+            "category": "Voice Service",
+            "parameterValues": {
+                "X_000631_VlanMuxID": 101,
+                "X_000631_VlanMux8021p": 5,
+                "ServiceConnectionType": "DHCP",
+                "ProxyServer": "0.0.0.0",
+                "ProxyServerPort": 10000,
+                "DNSPrimary":  "0.0.0.0",
+                "RTPCodec1st": "G.711MuLaw",
+                "PacketRate1st": 20,
+                "SilenceSuppression1st": true,
+                "RTPCodec2nd": "none",
+                "RTPCodec3rd": "none",
+                "RegistrationPeriod": 36000,
+                "DistinctiveRingPrefix": "CalixCcfgRingPrefix",
+                "CallWaitingTonePrefix": "CallingWaitingToneCCFG",
+                "DTMFMethod": "RFC2833",
+                "HookFlashMethod": "SIPInfo",
+                "ReleaseTimer": 15
+            }
+        },
+        {
+            "category": "DHCP Server",
+            "parameterValues": {
+                "DHCPServerEnable": true,
+                "DeviceIpAddress": "192.168.2.1",
+                "MinAddress": "192.168.2.2",
+                "MaxAddress": "192.168.2.100",
+                "DHCPLeaseTime": 86400,
+                "DomainName": "Calix",
+                "X_000631_HostName": "Calix"
+            }
+        }
+    ]
+}

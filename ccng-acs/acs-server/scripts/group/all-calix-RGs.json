@@ -1,0 +1,9 @@
+{
+	"name": "All-Calix-RGs",
+    "cpeFilter": {
+        "manufacturer": "Calix"
+    },
+    "description": "All Calix RGs",
+    "type": "dynamic",
+    "orgId": "2550"
+}

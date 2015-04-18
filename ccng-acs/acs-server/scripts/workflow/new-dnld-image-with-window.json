@@ -1,0 +1,23 @@
+{
+	"name": "Download SW Image",
+    "groups": ["7edfa28e-141c-4db6-b9db-f61ac8701bc3"],
+    "actions": [
+        {
+            "actionType":"Download SW/FW Image",
+            "fileId" : "54ff5a45e4b064e782cb46bb"
+        }
+    ],
+    "execPolicy": {
+        "initialTrigger": {
+            "type": "Maintenance Window"
+        },
+        "window": {
+            "startDateTime": "2015-1-13T1:19:10.000Z",
+            "windowLength": 1000,
+            "recurringInterval": 1010,
+            "maxRecurrence": 2000000
+        },
+        "maxConcurrentDevices": 100
+    },
+    "description": "Test Apply Configuration Profile with maintenance window, targeting all Calix RGs."
+}

@@ -1,0 +1,6 @@
+-X GET
+--header "Content-Type: application/json"
+-d @all-config-files.json
+--url http://localhost:8081/cc/file?orgId=50
+-v
+

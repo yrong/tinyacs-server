@@ -1,0 +1,13 @@
+{
+    "operation":"GetParameterValues",
+    "cpeIdentifier": {
+        "serialNumber" : "08A027C00000"
+    },
+    "getOptions": {
+        "cachedData": false,
+        "liveData": true
+    },
+    "parameterNames": [
+        "InternetGatewayDevice.DeviceInfo.HardwareVersion"
+    ]
+}

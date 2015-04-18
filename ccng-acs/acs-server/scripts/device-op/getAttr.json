@@ -1,0 +1,15 @@
+{
+    "operation":"GetParameterAttributes",
+    "cpeIdentifier": {
+        "serialNumber" : "CXNK001D8E93"
+    },
+    "getOptions": {
+        "cachedData": false,
+        "liveData": true
+    },
+    "parameterNames": [
+        "InternetGatewayDevice.DeviceInfo.X_000631_IGDChangeCounter",
+        "InternetGatewayDevice.ManagementServer.PeriodicInformEnable",
+        "InternetGatewayDevice.ManagementServer.PeriodicInformInterval"
+    ]
+}
