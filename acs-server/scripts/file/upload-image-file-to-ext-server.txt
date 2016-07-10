@@ -1,0 +1,4 @@
+--form "fileupload=@/home/ronyang/ccng/844e_mvp/images/CALIX_800G_11.1.254.171.bin;filename=CALIX_800G_11.1.254.171.bin"
+-u "cc:cc"
+--URL http://172.23.46.136:8000/images/
+-v

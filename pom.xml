@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+    <!--parent>
+        <groupId>com.calix.sxa</groupId>
+        <artifactId>sxa-base-pom</artifactId>
+        <version>0.0.4</version>
+    </parent-->
+
+    <groupId>com.calix.sxa</groupId>
+        <artifactId>sxa-cc-parent</artifactId>
+        <version>0.0.24-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>vertx-common</module>
+        <module>cwmp-schemas</module>
+        <module>task-mgmt</module>
+        <module>acs-common</module>
+        <module>acs-server</module>
+        <module>cpe-server</module>
+        <module>cpe-sim</module>
+  </modules>
+
+    <scm>
+        <connection>scm:git:https://github.com/yrong/tinyacs.git</connection>
+        <developerConnection>scm:git:https://github.com/yrong/tinyacs.git</developerConnection>
+    </scm>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.wildfly.plugins</groupId>
+                <artifactId>wildfly-maven-plugin</artifactId>
+                <version>1.0.1.Final</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

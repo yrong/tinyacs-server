@@ -7,7 +7,7 @@
             "orgId": 10,
             "sn": 10,
             "collectionNames": ["devices", "tasks"],
-            "destination": "/home/jqin/tmp",
+            "destination": "/home/ronyang/tmp",
             "delay": 5
     }
 }

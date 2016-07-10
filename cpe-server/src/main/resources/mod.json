@@ -1,0 +1,12 @@
+{
+
+  // Java verticle
+  "main":"vertx2.cpeserver.CpeServerMainVertice",
+
+  // If your module is going to be registered in the Vert.x module registry you will also need the following
+  // mandatory fields
+  "description":"Calix SXA CC - CPE Server",
+  "author": "Jack Qin",
+
+  "auto-redeploy": false
+}

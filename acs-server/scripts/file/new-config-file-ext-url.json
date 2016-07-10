@@ -1,0 +1,7 @@
+{
+    "orgId": "2550",
+    "name": "Golden-Config-File-Ext-URL",
+    "description": "Golden Config File hosted on external HTTP server",
+    "type": "Configuration File",
+    "externalUrl": "http://vmlnx-ronyang.calix.local:8022/2550/ConfigFile/CXNK00186F49-1420069804527"
+}

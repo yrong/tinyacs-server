@@ -1,2 +1,2 @@
 -X DELETE
---url http://vmlnx-jqin:8090?queue=tasks_acs_demo&id=10-tasks_acs_demo-demo-client-demo-Wed-Jun-04-01:57:36-PDT-201410
+--url http://vmlnx-ronyang:8090?queue=tasks_acs_demo&id=10-tasks_acs_demo-demo-client-demo-Wed-Jun-04-01:57:36-PDT-201410

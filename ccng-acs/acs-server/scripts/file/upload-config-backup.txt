@@ -1,7 +1,0 @@
--X POST
---header "Content-Type:application/octet-stream"
---header "Transfer-Encoding: chunked"
---data-binary @tmp-backup.bin
---URL http://vmlnx-jqin.calix.local:8080/files/auto-backup-2550-000631-CXNK00186F49
--u "2550-000631-CXNK00186F49:auto-backup"
--v

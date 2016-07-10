@@ -1,0 +1,7 @@
+-X POST
+--header "Content-Type:application/octet-stream"
+--header "Transfer-Encoding: chunked"
+-u "233176d:a4f234c"
+--data-binary @tmp-goldencfg-2.1.1.1.conf
+--URL "http://vmlnx-ronyang.calix.local:8080/files/552304d7e4b0242e2f208158"
+-v

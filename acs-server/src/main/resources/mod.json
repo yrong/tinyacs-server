@@ -1,0 +1,9 @@
+{
+  // Java verticle
+  "main":"vertx2.acs.AcsMainVertice",
+
+  // If your module is going to be registered in the Vert.x module registry you will also need the following
+  // mandatory fields
+  "description":"SXA-CC ACS Main Vertice",
+  "author": "Jack Qin"
+}
