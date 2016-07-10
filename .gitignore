@@ -15,6 +15,9 @@ target/
 # JRebel
 rebel.xml
 
+# log
+*.log
+
 # Auto-generated Code
 cwmp-schemas/src/main/java/broadband*
 cwmp-schemas/src/main/java/dsl*
