@@ -1,6 +1,6 @@
 package vertx2.cpeserver.deviceop;
 
-import com.calix.sxa.VertxJsonUtils;
+import vertx2.VertxJsonUtils;
 import vertx2.cpeserver.session.CwmpRequest;
 import vertx2.cpeserver.session.CwmpSession;
 import vertx2.cwmp.CwmpException;
@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
 
 /**
- * Project: SXA-CC
+ * Project: cwmp
  *
  * This class defines methods for Diagnostics Operations.
  *

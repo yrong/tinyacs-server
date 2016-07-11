@@ -1,8 +1,8 @@
 package vertx2.cpeserver.deviceop;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxJsonUtils;
-import com.calix.sxa.VertxMongoUtils;
+import vertx2.VertxException;
+import vertx2.VertxJsonUtils;
+import vertx2.VertxMongoUtils;
 import vertx2.cpeserver.session.CwmpRequest;
 import vertx2.cpeserver.session.CwmpSession;
 import vertx2.cwmp.CwmpException;
@@ -18,7 +18,7 @@ import org.vertx.java.core.Handler;
 import org.vertx.java.core.json.JsonObject;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * This class defines methods for Download Operations.
  *
@@ -265,7 +265,7 @@ public class Download {
                             }),
                             null
                     );
-                } catch (SxaVertxException e) {
+                } catch (VertxException e) {
                     log.error(session.cpeKey + ": failed to query files DB with internal id " + internalFileId
                             + " due to exception " + e.getMessage() + "!");
                     /**

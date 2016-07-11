@@ -1,8 +1,8 @@
 package vertx2.model;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxJsonUtils;
-import com.calix.sxa.VertxMongoUtils;
+import vertx2.VertxException;
+import vertx2.VertxJsonUtils;
+import vertx2.VertxMongoUtils;
 import vertx2.util.AcsConstants;
 import vertx2.util.AcsMiscUtils;
 import org.slf4j.Logger;
@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * @author: ronyang
  */
@@ -117,9 +117,9 @@ public class Subscriber {
     /**
      * Validate a Subscriber JSON Object.
      * @param subscriber
-     * @throws SxaVertxException
+     * @throws VertxException
      */
-    public static void validate(JsonObject subscriber) throws SxaVertxException {
+    public static void validate(JsonObject subscriber) throws VertxException {
         // Validate the request by simply instantiate a new Subscriber POJO
         VertxJsonUtils.validateFields(subscriber, MANDATORY_FIELDS, OPTIONAL_FIELDS);
 
@@ -339,7 +339,7 @@ public class Subscriber {
                     new VertxMongoUtils.FindOneHandler(handler),
                     null
             );
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
         }
     }

@@ -1,8 +1,8 @@
 package vertx2.util.sxajboss;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxHttpClientUtils;
-import com.calix.sxa.VertxUtils;
+import vertx2.VertxException;
+import vertx2.VertxHttpClientUtils;
+import vertx2.VertxUtils;
 import vertx2.util.AcsConfigProperties;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -15,7 +15,7 @@ import org.vertx.java.core.http.HttpClient;
 import org.vertx.java.core.http.HttpClientResponse;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * SXA JBoss API Utils
  *
@@ -27,18 +27,18 @@ public class SxaJBossApiUtils {
     /**
      * Constants
      */
-    public static String SXA_BROKER_BASE_URL;
+    public static String CWMP_BROKER_BASE_URL;
     public static final int DEFAULT_JBOSS_TIMEOUT = 10000;
 
     /**
      * Static Exception(s)
      */
-    public static final SxaVertxException SXA_JBOSS_UNDEFINED =
-            new SxaVertxException("SXA JBOSS Server Hostname Not Defined!");
-    public static final SxaVertxException SXA_JBOSS_UNREACHABLE =
-            new SxaVertxException("Unable to reach SXA JBOSS Server!");
-    public static final SxaVertxException UNABLE_TO_GET_BASE_URL_FROM_BROKER =
-            new SxaVertxException("Unable to get the base URL from SXA Broker!");
+    public static final VertxException CWMP_JBOSS_UNDEFINED =
+            new VertxException("SXA JBOSS Server Hostname Not Defined!");
+    public static final VertxException CWMP_JBOSS_UNREACHABLE =
+            new VertxException("Unable to reach SXA JBOSS Server!");
+    public static final VertxException UNABLE_TO_GET_BASE_URL_FROM_BROKER =
+            new VertxException("Unable to get the base URL from SXA Broker!");
 
     /**
      * Static HTTP Client (to be initialized)
@@ -54,24 +54,24 @@ public class SxaJBossApiUtils {
             return;
         }
 
-        if (AcsConfigProperties.SXA_JBOSS_API_HOST == null) {
+        if (AcsConfigProperties.CWMP_JBOSS_API_HOST == null) {
             log.error(
                     VertxUtils.highlightWithHashes(
-                    "Please initialize the " + AcsConfigProperties.SXA_JBOSS_API_HOST_SYS_ENV_VAR + " environment var!")
+                    "Please initialize the " + AcsConfigProperties.CWMP_JBOSS_API_HOST_SYS_ENV_VAR + " environment var!")
             );
             return;
         }
         log.info(VertxUtils.highlightWithHashes("SXA JBoss Host/Port: "
-                        + AcsConfigProperties.SXA_JBOSS_API_HOST + ":" + AcsConfigProperties.SXA_JBOSS_API_PORT));
+                        + AcsConfigProperties.CWMP_JBOSS_API_HOST + ":" + AcsConfigProperties.CWMP_JBOSS_API_PORT));
 
         // Create a new HTTP Client
         jbossApiHttpClient = vertx.createHttpClient()
-                .setHost(AcsConfigProperties.SXA_JBOSS_API_HOST)
-                .setPort(AcsConfigProperties.SXA_JBOSS_API_PORT);
+                .setHost(AcsConfigProperties.CWMP_JBOSS_API_HOST)
+                .setPort(AcsConfigProperties.CWMP_JBOSS_API_PORT);
 
         // Init Broker Base URL
-        SXA_BROKER_BASE_URL = "http://" + AcsConfigProperties.SXA_JBOSS_API_HOST + ":"
-                + AcsConfigProperties.SXA_JBOSS_API_PORT + "/sxa-broker/rest/module-registry/url/";
+        CWMP_BROKER_BASE_URL = "http://" + AcsConfigProperties.CWMP_JBOSS_API_HOST + ":"
+                + AcsConfigProperties.CWMP_JBOSS_API_PORT + "/sxa-broker/rest/module-registry/url/";
     }
 
     /**
@@ -93,7 +93,7 @@ public class SxaJBossApiUtils {
     ) {
         if (jbossApiHttpClient == null) {
             if (exceptionHandler != null) {
-                exceptionHandler.handle(SXA_JBOSS_UNDEFINED);
+                exceptionHandler.handle(CWMP_JBOSS_UNDEFINED);
             }  else {
                 log.error("SXA JBoss Server Hostname is undefined!");
             }
@@ -152,7 +152,7 @@ public class SxaJBossApiUtils {
          * For example "http://vmlnx-sxa06.calix.local:8080/plugin-cc-0.0.21.DASH-SNAPSHOT/rest" for "plugin-cc".
          */
         VertxHttpClientUtils.sendHttpRequest(
-                SXA_BROKER_BASE_URL + moduleName,
+                CWMP_BROKER_BASE_URL + moduleName,
                 jbossApiHttpClient,
                 HttpMethod.GET,
                 null,

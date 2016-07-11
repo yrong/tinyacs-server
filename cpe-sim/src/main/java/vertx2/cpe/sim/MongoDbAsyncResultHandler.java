@@ -11,7 +11,7 @@ import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.java.core.json.JsonObject;
 
 /**
- * Project:  sxa-cc-parent
+ * Project:  cwmp-parent
  *
  * @author: ronyang
  */

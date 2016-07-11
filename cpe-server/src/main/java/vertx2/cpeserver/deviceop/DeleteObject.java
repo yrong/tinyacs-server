@@ -7,7 +7,7 @@ import vertx2.cwmp.CwmpUtils;
 import vertx2.cpeserver.session.CwmpRequest;
 import vertx2.cpeserver.session.CwmpSession;
 import vertx2.model.CpeDeviceOp;
-import vertx2.model.SxaCcTr098ModelExtensions;
+import vertx2.model.CWMPTr098ModelExtensions;
 import dslforumOrgCwmp12.DeleteObjectDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,8 +82,8 @@ public class DeleteObject {
                 deleteObjectMessage.soapEnv.getBody().addNewDeleteObject();
 
         // Insert the provided parameter names
-        if (SxaCcTr098ModelExtensions.containSxaCcAbstractName(objectName)) {
-            objectName = SxaCcTr098ModelExtensions.convertSxaCcAbstractNameToActualName(session.cpe, objectName);
+        if (CWMPTr098ModelExtensions.containCWMPAbstractName(objectName)) {
+            objectName = CWMPTr098ModelExtensions.convertCWMPAbstractNameToActualName(session.cpe, objectName);
         }
         deleteObject.setObjectName(objectName);
         deleteObject.setParameterKey(CwmpUtils.getParameterKey());
@@ -111,8 +111,8 @@ public class DeleteObject {
         public void responseHandler(CwmpSession session, CwmpRequest request, CwmpMessage responseMessage)
                 throws CwmpException {
             String objectName = deviceOp.getString("objectName");
-            if (SxaCcTr098ModelExtensions.containSxaCcAbstractName(objectName)) {
-                objectName = SxaCcTr098ModelExtensions.convertSxaCcAbstractNameToActualName(session.cpe, objectName);
+            if (CWMPTr098ModelExtensions.containCWMPAbstractName(objectName)) {
+                objectName = CWMPTr098ModelExtensions.convertCWMPAbstractNameToActualName(session.cpe, objectName);
             }
             int responseStatus = responseMessage.soapEnv.getBody().getDeleteObjectResponse().getStatus();
             log.info("The DeleteObject request has been processed successfully (status=" + responseStatus +

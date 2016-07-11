@@ -26,10 +26,10 @@ public class VertxConfigProperties {
     /**
      * System Environment Variable Names for MongoDB
      */
-    public static final String mongoHostSysEnvVar = "SXA_MONGO_HOST";
-    public static final String mongoPortSysEnvVar = "SXA_MONGO_PORT";
-    public static final String mongoDbNameSysEnvVar = "SXA_MONGO_DB_NAME";
-    public static final String mongoSeedsSysEnvVar = "SXA_MONGO_SEEDS";
+    public static final String mongoHostSysEnvVar = "CWMP_MONGO_HOST";
+    public static final String mongoPortSysEnvVar = "CWMP_MONGO_PORT";
+    public static final String mongoDbNameSysEnvVar = "CWMP_MONGO_DB_NAME";
+    public static final String mongoSeedsSysEnvVar = "CWMP_MONGO_SEEDS";
 
     /**
      * Actual MongoDb Server Host
@@ -52,11 +52,11 @@ public class VertxConfigProperties {
     /**
      * System Environment Variable Names for REDIS Server Hostname/Port/Timeout/DB_Index
      */
-    public static final String redisHostSysEnvVar = "SXA_REDIS_HOST";
-    public static final String redisPortSysEnvVar = "SXA_REDIS_PORT";
-    public static final String redisTimeoutSysEnvVar = "SXA_REDIS_TIMEOUT";
-    public static final String redisDbIndexSysEnvVar = "SXA_REDIS_DB_INDEX";
-    public static final String redisPasswordSysEnvVar = "SXA_REDIS_PASSWORD";
+    public static final String redisHostSysEnvVar = "CWMP_REDIS_HOST";
+    public static final String redisPortSysEnvVar = "CWMP_REDIS_PORT";
+    public static final String redisTimeoutSysEnvVar = "CWMP_REDIS_TIMEOUT";
+    public static final String redisDbIndexSysEnvVar = "CWMP_REDIS_DB_INDEX";
+    public static final String redisPasswordSysEnvVar = "CWMP_REDIS_PASSWORD";
 
     /**
      * Actual REDIS Server Hostname/Port/Timeout/DB_Index Values
@@ -70,7 +70,7 @@ public class VertxConfigProperties {
     /**
      * Local Hostname
      */
-    public static final String LOCAL_HOSTNAME_SYS_ENV_VAR = "SXA_LOCAL_HOSTNAME";
+    public static final String LOCAL_HOSTNAME_SYS_ENV_VAR = "CWMP_LOCAL_HOSTNAME";
     public static final String LOCAL_HOSTNAME = VertxUtils.initStringProp(LOCAL_HOSTNAME_SYS_ENV_VAR,
             VertxUtils.getLocalHostname());
 }

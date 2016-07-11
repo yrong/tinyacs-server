@@ -1,7 +1,7 @@
 package vertx2.model;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxJsonUtils;
+import vertx2.VertxException;
+import vertx2.VertxJsonUtils;
 import vertx2.CcException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +11,7 @@ import java.text.ParseException;
 import java.util.Date;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * @author: ronyang
  */
@@ -66,7 +66,7 @@ public class MaintenanceWindow {
      * Constructor by JSON Object
      * @param jsonObject
      */
-    public MaintenanceWindow(JsonObject jsonObject) throws SxaVertxException {
+    public MaintenanceWindow(JsonObject jsonObject) throws VertxException {
         // Validate Field Types (all 5 fields are mandatory)
         VertxJsonUtils.validateFields(jsonObject, mandatoryFields, optionalFields);
 

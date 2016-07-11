@@ -1,6 +1,6 @@
 package vertx2.util.sxajboss;
 
-import com.calix.sxa.VertxMongoUtils;
+import vertx2.VertxMongoUtils;
 import vertx2.model.Cpe;
 import vertx2.model.CpeDeviceType;
 import vertx2.model.Subscriber;
@@ -15,7 +15,7 @@ import org.vertx.java.core.http.HttpClientResponse;
 import org.vertx.java.core.json.JsonObject;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * SXA JBoss SXA-Stager API Utils
  *
@@ -27,11 +27,11 @@ public class SxaStagerApiUtils extends SxaJBossApiUtils{
     /**
      * Constants
      */
-    public static final String SXA_STAGER_MODULE_NAME = "sxa-stager";
-    public static final String SXA_SUBSCRIBER_URL_PATH = "/sxa-subscriber/";
-    public static final String SXA_DEVICE_URL_PATH = "/sxa-device/";
+    public static final String CWMP_STAGER_MODULE_NAME = "sxa-stager";
+    public static final String CWMP_SUBSCRIBER_URL_PATH = "/sxa-subscriber/";
+    public static final String CWMP_DEVICE_URL_PATH = "/sxa-device/";
     public static final String USERNAME = "admin@calix.com";
-    public static final String PASSWORD = "sxa-cc";
+    public static final String PASSWORD = "cwmp";
     public static final JsonObject SUBSCRIBER_QUERY_TIMED_OUT = new JsonObject().putString(
             AcsConstants.FIELD_NAME_ERROR,
             "DB Timed Out when Querying Subscriber Data"
@@ -52,9 +52,9 @@ public class SxaStagerApiUtils extends SxaJBossApiUtils{
             final Handler<Boolean> handler) {
         // Send it
         sendRequest(
-            SXA_STAGER_MODULE_NAME,
+            CWMP_STAGER_MODULE_NAME,
             HttpMethod.PUT,
-            SXA_SUBSCRIBER_URL_PATH + subscriber.getString(AcsConstants.FIELD_NAME_ID),
+            CWMP_SUBSCRIBER_URL_PATH + subscriber.getString(AcsConstants.FIELD_NAME_ID),
             USERNAME,
             PASSWORD,
             subscriber.encode(),
@@ -100,9 +100,9 @@ public class SxaStagerApiUtils extends SxaJBossApiUtils{
             final String id,
             final Handler<Boolean> handler) {
         sendRequest(
-                SXA_STAGER_MODULE_NAME,
+                CWMP_STAGER_MODULE_NAME,
                 HttpMethod.DELETE,
-                SXA_SUBSCRIBER_URL_PATH + id,
+                CWMP_SUBSCRIBER_URL_PATH + id,
                 USERNAME,
                 PASSWORD,
                 null,
@@ -172,9 +172,9 @@ public class SxaStagerApiUtils extends SxaJBossApiUtils{
 
                         // Send API request to JBoss
                         sendRequest(
-                                SXA_STAGER_MODULE_NAME,
+                                CWMP_STAGER_MODULE_NAME,
                                 HttpMethod.POST,
-                                SXA_DEVICE_URL_PATH,
+                                CWMP_DEVICE_URL_PATH,
                                 USERNAME,
                                 PASSWORD,
                                 payload.encode(),
@@ -235,9 +235,9 @@ public class SxaStagerApiUtils extends SxaJBossApiUtils{
 
         // Send API request to JBoss
         sendRequest(
-                SXA_STAGER_MODULE_NAME,
+                CWMP_STAGER_MODULE_NAME,
                 HttpMethod.DELETE,
-                SXA_DEVICE_URL_PATH + cpeKey,
+                CWMP_DEVICE_URL_PATH + cpeKey,
                 USERNAME,
                 PASSWORD,
                 payload.encode(),

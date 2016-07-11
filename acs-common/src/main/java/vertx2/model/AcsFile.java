@@ -1,8 +1,8 @@
 package vertx2.model;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxJsonUtils;
-import com.calix.sxa.VertxMongoUtils;
+import vertx2.VertxException;
+import vertx2.VertxJsonUtils;
+import vertx2.VertxMongoUtils;
 import vertx2.CcException;
 import vertx2.util.AcsConfigProperties;
 import vertx2.util.AcsConstants;
@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * ACS "File" Data Model Definition.
  *
@@ -38,7 +38,7 @@ public class AcsFile {
     /**
      * DB Collection Name
      */
-    public static final String DB_COLLECTION_NAME = "sxacc-files";
+    public static final String DB_COLLECTION_NAME = "CWMP-files";
 
     /**
      * Auto Backup Constants
@@ -142,15 +142,15 @@ public class AcsFile {
     /**
      * Static Exception(s)
      */
-    public static final SxaVertxException INVALID_FILE_NAME =
-            new SxaVertxException("Invalid File Name!");
-    public static final SxaVertxException INVALID_EXTERNAL_URL =
-            new SxaVertxException("Invalid External URL!");
+    public static final VertxException INVALID_FILE_NAME =
+            new VertxException("Invalid File Name!");
+    public static final VertxException INVALID_EXTERNAL_URL =
+            new VertxException("Invalid External URL!");
 
     /**
      * Validate a JSON Object
      */
-    public static void validate(JsonObject file) throws SxaVertxException{
+    public static void validate(JsonObject file) throws VertxException{
         /**
          * Get File Type
          */
@@ -183,7 +183,7 @@ public class AcsFile {
                 break;
 
             default:
-                throw new SxaVertxException("Invalid File Type " + file.getString(FIELD_NAME_TYPE));
+                throw new VertxException("Invalid File Type " + file.getString(FIELD_NAME_TYPE));
         }
 
         /**
@@ -220,9 +220,9 @@ public class AcsFile {
      * Dot ('.') cannot be the last char in file name.
      *
      * @param name
-     * @throws SxaVertxException
+     * @throws VertxException
      */
-    public static void validateFilename(String name) throws SxaVertxException{
+    public static void validateFilename(String name) throws VertxException{
         for (int i = 0; i < name.length(); i ++) {
             char aChar = name.charAt(i);
             if (aChar == '_' || aChar == '-') {
@@ -437,7 +437,7 @@ public class AcsFile {
                         .putNumber(AcsFile.FIELD_NAME_SIZE, 0),
                     null
             );
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
         }
     }

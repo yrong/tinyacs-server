@@ -1,7 +1,7 @@
 package vertx2.acs.utils;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxMongoUtils;
+import vertx2.VertxException;
+import vertx2.VertxMongoUtils;
 import vertx2.model.*;
 import vertx2.util.AcsApiUtils;
 import vertx2.util.AcsConstants;
@@ -19,7 +19,7 @@ import org.vertx.java.core.json.JsonObject;
 import java.util.TreeMap;
 
 /**
- * Project:  SXA-CC (aka CCFG)
+ * Project:  cwmp (aka CCFG)
  *
  * Replacement Utils.
  *
@@ -72,7 +72,7 @@ public class ReplacementUtils {
                         ),
                         null
                 );
-            } catch (SxaVertxException e) {
+            } catch (VertxException e) {
                 e.printStackTrace();
             }
         } else {
@@ -246,7 +246,7 @@ public class ReplacementUtils {
                         }
                     }
             );
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
         }
     }

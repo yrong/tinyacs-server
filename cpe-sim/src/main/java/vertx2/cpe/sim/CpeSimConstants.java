@@ -1,9 +1,9 @@
 package vertx2.cpe.sim;
 
-import com.calix.sxa.VertxUtils;
+import vertx2.VertxUtils;
 
 /**
- * Project:  sxa-cc-parent
+ * Project:  cwmp-parent
  *
  * @author: ronyang
  */
@@ -21,7 +21,7 @@ public class CpeSimConstants {
     /**
      * MongoDB Collection Name
      */
-    public static final String MONGO_CPE_SIM__COLLECTION = "sxacc-cpe-sim-devices";
+    public static final String MONGO_CPE_SIM__COLLECTION = "CWMP-cpe-sim-devices";
 
     /**
      * Default ACS URL
@@ -43,11 +43,11 @@ public class CpeSimConstants {
     /**
      * System Environment Variable Names for ACS URL/Username/Password
      */
-    public static final String ACS_HOST_SYS_ENV_VAR = "SXA_CC_ACS_HOST";
-    public static final String ACS_PORT_SYS_ENV_VAR = "SXA_CC_ACS_PORT";
-    public static final String ACS_URL_SUFFIX_SYS_ENV_VAR = "SXA_CC_ACS_URL_SUFFIX";
-    public static final String ACS_USERNAME_SYS_ENV_VAR = "SXA_CC_ACS_USERNAME";
-    public static final String ACS_PASSWORD_SYS_ENV_VAR = "SXA_CC_ACS_PASSWORD";
+    public static final String ACS_HOST_SYS_ENV_VAR = "CWMP_ACS_HOST";
+    public static final String ACS_PORT_SYS_ENV_VAR = "CWMP_ACS_PORT";
+    public static final String ACS_URL_SUFFIX_SYS_ENV_VAR = "CWMP_ACS_URL_SUFFIX";
+    public static final String ACS_USERNAME_SYS_ENV_VAR = "CWMP_ACS_USERNAME";
+    public static final String ACS_PASSWORD_SYS_ENV_VAR = "CWMP_ACS_PASSWORD";
 
     /**
      * Actual ACS URL/Username/Password

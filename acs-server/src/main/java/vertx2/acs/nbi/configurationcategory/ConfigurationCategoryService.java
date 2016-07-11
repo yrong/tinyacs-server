@@ -1,7 +1,7 @@
 package vertx2.acs.nbi.configurationcategory;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxMongoUtils;
+import vertx2.VertxException;
+import vertx2.VertxMongoUtils;
 import vertx2.acs.nbi.AbstractAcNbiCrudService;
 import vertx2.acs.nbi.model.AcsNbiRequest;
 import vertx2.model.AcsApiCrudTypeEnum;
@@ -14,7 +14,7 @@ import org.vertx.java.core.json.JsonObject;
 import java.util.List;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * @author: ronyang
  */
@@ -58,10 +58,10 @@ public class ConfigurationCategoryService extends AbstractAcNbiCrudService {
      * @param nbiRequest
      * @param crudType   Type of the CRUD operation.
      * @return boolean
-     * @throws com.calix.sxa.SxaVertxException
+     * @throws vertx2.VertxException
      */
     @Override
-    public boolean validate(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws SxaVertxException {
+    public boolean validate(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws VertxException {
         switch (crudType) {
             case Create:
             case Update:
@@ -199,7 +199,7 @@ public class ConfigurationCategoryService extends AbstractAcNbiCrudService {
                             nbiRequest.body,
                             getMongoSaveHandler(nbiRequest)
                     );
-                } catch (SxaVertxException e) {
+                } catch (VertxException e) {
                     e.printStackTrace();
                     nbiRequest.sendResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR,
                             getServerInternalErrorWithDetails());

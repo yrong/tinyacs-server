@@ -1,6 +1,6 @@
 package vertx2.acs.nbi.model;
 
-import com.calix.sxa.VertxUtils;
+import vertx2.VertxUtils;
 import vertx2.acs.nbi.AbstractAcNbiCrudService;
 import vertx2.util.AcsConstants;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -10,7 +10,7 @@ import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
 /**
- * Project:  SXA-CC CCNG ACS API
+ * Project:  cwmp CCNG ACS API
  *
  * The ACS API supports both HTTP transport as well as Vert.x Event Bus transport for internal clients.
  *

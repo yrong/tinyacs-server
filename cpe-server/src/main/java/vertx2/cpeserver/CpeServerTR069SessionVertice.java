@@ -1,8 +1,8 @@
 package vertx2.cpeserver;
 
-import com.calix.sxa.VertxConfigProperties;
-import com.calix.sxa.VertxHttpClientUtils;
-import com.calix.sxa.VertxUtils;
+import vertx2.VertxConfigProperties;
+import vertx2.VertxHttpClientUtils;
+import vertx2.VertxUtils;
 import vertx2.cache.DialPlanCache;
 import vertx2.cache.OrganizationCache;
 import vertx2.connreq.ConnectionRequestConstants;

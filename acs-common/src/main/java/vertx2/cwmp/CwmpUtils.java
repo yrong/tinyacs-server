@@ -1,6 +1,6 @@
 package vertx2.cwmp;
 
-import com.calix.sxa.VertxUtils;
+import vertx2.VertxUtils;
 import vertx2.model.CpeDeviceOp;
 import dslforumOrgCwmp12.FaultDocument;
 import dslforumOrgCwmp12.IDDocument;

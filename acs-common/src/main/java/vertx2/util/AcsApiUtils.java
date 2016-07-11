@@ -10,7 +10,7 @@ import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.json.JsonObject;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * ACS API Client Utils
  *
@@ -67,13 +67,13 @@ public class AcsApiUtils {
     /**
      * Get the Document Type by MongoDB Collection Name.
      *
-     * For example, "sxacc-devices" will produce "device"
+     * For example, "CWMP-devices" will produce "device"
      *
      * @param dbCollectionName
      * @return
      */
     public static String getDocumentTypeByCollectionName(String dbCollectionName) {
-        // Remove the "sxacc-" prefix
+        // Remove the "CWMP-" prefix
         String withoutPrefix = dbCollectionName.substring(dbCollectionName.indexOf("-") + 1);
         // Remove the trailing "s"
         return withoutPrefix.substring(0, withoutPrefix.length() - 1);

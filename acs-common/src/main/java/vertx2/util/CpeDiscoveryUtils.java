@@ -1,6 +1,6 @@
 package vertx2.util;
 
-import com.calix.sxa.VertxRedisUtils;
+import vertx2.VertxRedisUtils;
 import vertx2.model.Cpe;
 import io.vertx.java.redis.RedisClient;
 import org.slf4j.Logger;
@@ -9,7 +9,7 @@ import org.vertx.java.core.Handler;
 import org.vertx.java.core.json.JsonObject;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * Util Methods related to CPE Discovery.
  *

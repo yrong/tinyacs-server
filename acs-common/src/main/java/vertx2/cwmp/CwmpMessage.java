@@ -20,9 +20,9 @@
  */
 package vertx2.cwmp;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxJsonUtils;
-import com.calix.sxa.VertxMongoUtils;
+import vertx2.VertxException;
+import vertx2.VertxJsonUtils;
+import vertx2.VertxMongoUtils;
 import vertx2.model.Cpe;
 import vertx2.util.AcsConfigProperties;
 import vertx2.util.AcsConstants;
@@ -51,7 +51,7 @@ public class CwmpMessage {
     /**
      * Name of the MongoDB Collection that stores all CWMP messages
      */
-    public static final String DB_COLLECTION_NAME = "sxacc-cwmp-messages";
+    public static final String DB_COLLECTION_NAME = "CWMP-cwmp-messages";
 
     /**
      * Message TTL by (in # of milliseconds)
@@ -741,7 +741,7 @@ public class CwmpMessage {
                     null
             );
             bPersisted = true;
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
         }
     }

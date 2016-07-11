@@ -1,6 +1,6 @@
 package vertx2.model;
 
-import com.calix.sxa.VertxJsonUtils;
+import vertx2.VertxJsonUtils;
 import vertx2.util.AcsConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +23,7 @@ public class DialPlan {
     /**
      * DB Collection Name
      */
-    public static final String DB_COLLECTION_NAME = "sxacc-dial-plans";
+    public static final String DB_COLLECTION_NAME = "CWMP-dial-plans";
 
     /**
      * Field Name Constants
@@ -87,7 +87,7 @@ public class DialPlan {
             );
 
     /**
-     * Convert an SXACC Dial Plan JSON Object to RG Data Model Object
+     * Convert an CWMP Dial Plan JSON Object to RG Data Model Object
      * @param dialPlan
      */
     public static JsonObject toRgDataModelObject(JsonObject dialPlan) {

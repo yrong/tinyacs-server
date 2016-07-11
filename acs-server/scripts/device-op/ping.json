@@ -8,7 +8,7 @@
     },
     "diagType": "InternetGatewayDevice.IPPingDiagnostics",
     "diagParameters": {
-        "Interface": "X_CALIX_SXACC_DefaultWanConnectionPath",
+        "Interface": "X_CALIX_CWMP_DefaultWanConnectionPath",
         "Host": "172.23.34.82",
         "NumberOfRepetitions": 2,
         "DataBlockSize": 1000,

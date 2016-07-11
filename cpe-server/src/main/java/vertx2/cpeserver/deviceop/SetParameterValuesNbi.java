@@ -1,6 +1,6 @@
 package vertx2.cpeserver.deviceop;
 
-import com.calix.sxa.VertxJsonUtils;
+import vertx2.VertxJsonUtils;
 import vertx2.cpeserver.session.CwmpRequest;
 import vertx2.cpeserver.session.CwmpSession;
 import vertx2.cwmp.CwmpException;
@@ -15,7 +15,7 @@ import org.vertx.java.core.json.JsonObject;
 import org.xmlsoap.schemas.soap.envelope.Body;
 
 /**
- * Project:  sxa-cc-parent
+ * Project:  cwmp-parent
  *
  * This class extends CpeSetParameterValues by posting async result to the provided callback URL
  *
@@ -107,9 +107,9 @@ public class SetParameterValuesNbi extends SetParameterValues {
             for (String nbiPath : nbiProvisioning.getFieldNames()) {
                 String tr098Path = NbiDeviceProvisioning.nbiPathToTr098Path(nbiPath) + ".";
 
-                // Look for SXA-CC Extensions
-                if (SxaCcTr098ModelExtensions.containSxaCcAbstractName(tr098Path)) {
-                    tr098Path = SxaCcTr098ModelExtensions.convertSxaCcAbstractNameToActualName(session.cpe, tr098Path);
+                // Look for cwmp Extensions
+                if (CWMPTr098ModelExtensions.containCWMPAbstractName(tr098Path)) {
+                    tr098Path = CWMPTr098ModelExtensions.convertCWMPAbstractNameToActualName(session.cpe, tr098Path);
                 }
 
                 parameterValueList = jsonObjToParameterValuesList(
@@ -218,8 +218,8 @@ public class SetParameterValuesNbi extends SetParameterValues {
             this.keyParameter = keyParameter;
             this.keyParameterName = keyParameter.getString("name");
 
-            if (SxaCcTr098ModelExtensions.containSxaCcAbstractName(pathPrefix)) {
-                this.pathPrefix = SxaCcTr098ModelExtensions.convertSxaCcAbstractNameToActualName(
+            if (CWMPTr098ModelExtensions.containCWMPAbstractName(pathPrefix)) {
+                this.pathPrefix = CWMPTr098ModelExtensions.convertCWMPAbstractNameToActualName(
                         session.cpe, pathPrefix);
             } else {
                 this.pathPrefix = pathPrefix;

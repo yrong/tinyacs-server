@@ -1,8 +1,8 @@
 package vertx2.acs;
 
-import com.calix.sxa.VertxConstants;
-import com.calix.sxa.VertxDeployUtils;
-import com.calix.sxa.VertxUtils;
+import vertx2.VertxConstants;
+import vertx2.VertxDeployUtils;
+import vertx2.VertxUtils;
 import vertx2.acs.cache.PassiveWorkflowCache;
 import vertx2.acs.nbi.AbstractAcNbiCrudService;
 import vertx2.acs.nbi.AcsApiService;
@@ -41,8 +41,8 @@ import vertx2.model.Workflow;
 import vertx2.util.AcsApiUtils;
 import vertx2.util.AcsConfigProperties;
 import vertx2.util.AcsConstants;
-import com.calix.sxa.taskmgmt.worker.TaskPollerVertice;
-import com.calix.sxa.taskmgmt.worker.WorkerUtils;
+import vertx2.taskmgmt.worker.TaskPollerVertice;
+import vertx2.taskmgmt.worker.WorkerUtils;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.util.internal.StringUtil;
 import io.vertx.java.redis.RedisClient;
@@ -78,9 +78,9 @@ public class AcsMainVertice extends Verticle {
             " ACS Server " + VertxUtils.getLocalHostname() + ":" + AcsConfigProperties.ACS_INTERNAL_API_PORT;
 
     /**
-     * All Regular SXA-CC API Services
+     * All Regular cwmp API Services
      */
-    AcsApiService[] allSxaCcApiServices = new AcsApiService[] {
+    AcsApiService[] allCWMPApiServices = new AcsApiService[] {
             new ConfigurationProfileService(),
             new DeviceOpService(),
             new DeviceTypeService(),
@@ -101,7 +101,7 @@ public class AcsMainVertice extends Verticle {
     };
 
     /**
-     * SXA-CC Service Map <URL Path String --> API Service>
+     * cwmp Service Map <URL Path String --> API Service>
      */
     Map<String, AcsApiService> serviceMap = new HashMap<> ();
 
@@ -194,7 +194,7 @@ public class AcsMainVertice extends Verticle {
                      *
                      * TODO: Add release version to the URL path.
                      */
-                    for (AcsApiService service : allSxaCcApiServices) {
+                    for (AcsApiService service : allCWMPApiServices) {
                         log.info("Installing " + service.getServiceName() + " service...");
                         // Setup HTTP URL path for this service
                         serviceMap.put(service.getServiceName(), service);
@@ -214,11 +214,11 @@ public class AcsMainVertice extends Verticle {
                     }
 
                     /**
-                     * Start the SXA-CC Internal API HTTP server
+                     * Start the cwmp Internal API HTTP server
                      */
-                    HttpServer sxaCcApiServer = vertx.createHttpServer();
-                    sxaCcApiServer.requestHandler(internalApiHttpRequestHandler);
-                    sxaCcApiServer.listen(AcsConfigProperties.ACS_INTERNAL_API_PORT);
+                    HttpServer CWMPApiServer = vertx.createHttpServer();
+                    CWMPApiServer.requestHandler(internalApiHttpRequestHandler);
+                    CWMPApiServer.listen(AcsConfigProperties.ACS_INTERNAL_API_PORT);
                     log.info(VertxUtils.highlightWithHashes(
                             "Internal API Port #: " + AcsConfigProperties.ACS_INTERNAL_API_PORT));
 
@@ -260,14 +260,14 @@ public class AcsMainVertice extends Verticle {
          */
         vertx.eventBus().publish(VertxConstants.VERTX_ADDRESS_SERVER_EVENTS,
                 serverName + " is shutting down...");
-        for (AcsApiService service : allSxaCcApiServices) {
+        for (AcsApiService service : allCWMPApiServices) {
             log.info("Shutting down " + service.getServiceName() + " service...");
             service.stop(vertx);
         }
     }
 
     /**
-     * SXA-CC Internal API HTTP Request Handler
+     * cwmp Internal API HTTP Request Handler
      */
     Handler<HttpServerRequest> internalApiHttpRequestHandler = new Handler<HttpServerRequest>() {
         /**

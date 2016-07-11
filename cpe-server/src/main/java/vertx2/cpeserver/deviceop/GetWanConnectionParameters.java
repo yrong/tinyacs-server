@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
 
 /**
- * Project:  sxa-cc-parent
+ * Project:  cwmp-parent
  *
  * Get the CPE's WAN MAC Address.
  *

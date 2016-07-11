@@ -1,6 +1,6 @@
 package vertx2.model;
 
-import com.calix.sxa.VertxJsonUtils;
+import vertx2.VertxJsonUtils;
 import vertx2.util.AcsConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * This class defines the data model for the Organization Objects.
  *
@@ -34,7 +34,7 @@ public class Organization {
     /**
      * DB Collection for CPE Devices
      */
-    public static final String DB_COLLECTION_NAME = "sxacc-organizations";
+    public static final String DB_COLLECTION_NAME = "CWMP-organizations";
 
     /**
      * Field Name Constant(s)
@@ -77,7 +77,7 @@ public class Organization {
      */
     public static final String[] INDEX_FIELDS = {
             FIELD_NAME_ID,
-            //FIELD_NAME_NAME,      // multiple organizations may have duplicate name, see SXACC-1273
+            //FIELD_NAME_NAME,      // multiple organizations may have duplicate name, see CWMP-1273
             FIELD_NAME_URL,
             FIELD_NAME_API_CLIENT_USERNAME
     };

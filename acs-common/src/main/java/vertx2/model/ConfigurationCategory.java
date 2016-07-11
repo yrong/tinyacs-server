@@ -1,7 +1,7 @@
 package vertx2.model;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxJsonUtils;
+import vertx2.VertxException;
+import vertx2.VertxJsonUtils;
 import vertx2.util.AcsConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * Data Model For Configuration Categories.
  *
@@ -24,7 +24,7 @@ public class ConfigurationCategory {
     /**
      * DB Collection Name
      */
-    public static final String DB_COLLECTION_NAME = "sxacc-configuration-categories";
+    public static final String DB_COLLECTION_NAME = "CWMP-configuration-categories";
 
     /**
      * Field Name Constants
@@ -140,7 +140,7 @@ public class ConfigurationCategory {
      * @param configCategory
      * @throws vertx2.CcException
      */
-    public static void validate(JsonObject configCategory) throws SxaVertxException {
+    public static void validate(JsonObject configCategory) throws VertxException {
         // Validate Field Types
         VertxJsonUtils.validateFields(configCategory, MANDATORY_FIELDS, OPTIONAL_FIELDS);
 
@@ -156,12 +156,12 @@ public class ConfigurationCategory {
                         PARAMETER_MANDATORY_FIELDS,
                         PARAMETER_OPTIONAL_FIELDS
                 );
-            } catch (SxaVertxException ex) {
+            } catch (VertxException ex) {
                 String paramName = aParameter.getString(AcsConstants.FIELD_NAME_NAME);
                 if (paramName == null) {
-                    throw new SxaVertxException("Found a Parameter Definition with no \"name\"!");
+                    throw new VertxException("Found a Parameter Definition with no \"name\"!");
                 } else {
-                    throw new SxaVertxException("Definition of parameter " + paramName + ": " + ex.getMessage());
+                    throw new VertxException("Definition of parameter " + paramName + ": " + ex.getMessage());
                 }
             }
 

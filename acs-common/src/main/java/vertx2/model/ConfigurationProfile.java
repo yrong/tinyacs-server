@@ -1,7 +1,7 @@
 package vertx2.model;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxJsonUtils;
+import vertx2.VertxException;
+import vertx2.VertxJsonUtils;
 import vertx2.cache.ConfigurationCategoryCache;
 import vertx2.util.AcsConstants;
 import org.slf4j.Logger;
@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * Configuration Profile Data Model.
  *
@@ -26,7 +26,7 @@ public class ConfigurationProfile {
     /**
      * DB Collection Name
      */
-    public static final String DB_COLLECTION_NAME = "sxacc-configuration-profiles";
+    public static final String DB_COLLECTION_NAME = "CWMP-configuration-profiles";
 
     /**
      * Field Name Constants
@@ -78,7 +78,7 @@ public class ConfigurationProfile {
      * @param configProfile
      * @throws vertx2.CcException
      */
-    public static void validate(JsonObject configProfile) throws SxaVertxException {
+    public static void validate(JsonObject configProfile) throws VertxException {
         // Validate Field Types
         VertxJsonUtils.validateFields(configProfile, MANDATORY_FIELDS, OPTIONAL_FIELDS);
 
@@ -95,7 +95,7 @@ public class ConfigurationProfile {
      * @return
      */
     public static void processParameterValues(JsonObject profile, ConfigurationCategoryCache categoryCache)
-            throws SxaVertxException {
+            throws VertxException {
         JsonObject paramValues = new JsonObject();
         JsonArray services = new JsonArray();
         JsonArray dynamicObjects = new JsonArray();
@@ -131,7 +131,7 @@ public class ConfigurationProfile {
                     String index = rawPerCategoryParamValues.getField(indexParamName).toString();
                     tr098PathPrefix = tr098PathPrefix.replace("${" + indexParamName + "}", index);
                 } else {
-                    throw new SxaVertxException(
+                    throw new VertxException(
                             "Invalid Profile Instance! (" + indexParamName + " is undefined in "+ categoryName + ")"
                     );
                 }
@@ -207,20 +207,20 @@ public class ConfigurationProfile {
                 try {
                     Integer vlanId = perCategoryParamValues.getInteger("X_000631_VlanMuxID");
                     if (vlanId == null) {
-                        throw new SxaVertxException("VLAN ID is undefined for " + serviceName + "!");
+                        throw new VertxException("VLAN ID is undefined for " + serviceName + "!");
                     }
                     String vlanIdString = (vlanId > 0)?
                             "VLAN " + String.valueOf(vlanId)
                             :
                             "Untagged VLAN";
                     if (vlanToServiceNameMap.containsKey(vlanId)) {
-                        throw new SxaVertxException(vlanIdString + " is already used by "
+                        throw new VertxException(vlanIdString + " is already used by "
                                 + vlanToServiceNameMap.get(vlanId) + "!");
                     } else {
                         vlanToServiceNameMap.put(vlanId, serviceName);
                     }
                 } catch (Exception ex) {
-                    throw new SxaVertxException("Illegal Profile Format!");
+                    throw new VertxException("Illegal Profile Format!");
                 }
 
                 /**

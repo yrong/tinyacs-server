@@ -1,13 +1,13 @@
 package vertx2.cpeserver.deviceop;
 
-import com.calix.sxa.VertxJsonUtils;
+import vertx2.VertxJsonUtils;
 import vertx2.cpeserver.session.CwmpRequest;
 import vertx2.cpeserver.session.CwmpSession;
 import vertx2.cwmp.CwmpException;
 import vertx2.cwmp.CwmpMessage;
 import vertx2.model.Cpe;
 import vertx2.model.CpeDeviceOp;
-import vertx2.model.SxaCcTr098ModelExtensions;
+import vertx2.model.CWMPTr098ModelExtensions;
 import dslforumOrgCwmp12.GetParameterValuesResponseDocument;
 import dslforumOrgCwmp12.ParameterNames;
 import dslforumOrgCwmp12.ParameterValueStruct;
@@ -17,7 +17,7 @@ import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
 /**
- * Project:  sxa-cc-parent
+ * Project:  cwmp-parent
  *
  * This class extends CpeGetParameterValues by posting async result to the provided callback URL
  *
@@ -43,8 +43,8 @@ public class GetParameterValuesNbi extends GetParameterValues {
             ParameterNames paramNames = ParameterNames.Factory.newInstance();
             for (int i=0; i < rawParameterNames.size(); i ++) {
                 String paramName = rawParameterNames.get(i);
-                if (SxaCcTr098ModelExtensions.containSxaCcAbstractName(paramName)) {
-                    paramName = SxaCcTr098ModelExtensions.convertSxaCcAbstractNameToActualName(session.cpe, paramName);
+                if (CWMPTr098ModelExtensions.containCWMPAbstractName(paramName)) {
+                    paramName = CWMPTr098ModelExtensions.convertCWMPAbstractNameToActualName(session.cpe, paramName);
                 }
                 paramNames.addString(paramName);
             }
@@ -100,10 +100,10 @@ public class GetParameterValuesNbi extends GetParameterValues {
             JsonArray paramNames = deviceOp.getArray(CpeDeviceOp.FIELD_NAME_PARAM_NAMES);
             for (int i=0; i < paramNames.size(); i ++) {
                 String paramName = paramNames.get(i);
-                if (SxaCcTr098ModelExtensions.containSxaCcAbstractName(paramName)) {
+                if (CWMPTr098ModelExtensions.containCWMPAbstractName(paramName)) {
                     paramValues.putString(
                             paramName,
-                            SxaCcTr098ModelExtensions.convertSxaCcAbstractNameToActualName(session.cpe, paramName)
+                            CWMPTr098ModelExtensions.convertCWMPAbstractNameToActualName(session.cpe, paramName)
                     );
                 }
             }

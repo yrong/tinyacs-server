@@ -1,6 +1,6 @@
 -X POST
 --header "Content-Type: application/json"
--d @new-subscriber-sxacc-hvtel.json
+-d @new-subscriber-CWMP-hvtel.json
 --url http://cmssim05:8081/cc/subscriber?orgId=7564
 -v
 

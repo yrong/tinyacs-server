@@ -10,7 +10,7 @@ import org.vertx.java.core.AsyncResultHandler;
 import org.vertx.java.platform.Verticle;
 
 /**
- * Project:  sxa-cc-parent
+ * Project:  cwmp-parent
  *
  * @author: jqin
  */

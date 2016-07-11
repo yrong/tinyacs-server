@@ -1,6 +1,6 @@
 package vertx2.cache;
 
-import com.calix.sxa.VertxMongoUtils;
+import vertx2.VertxMongoUtils;
 import vertx2.model.AcsApiCrudTypeEnum;
 import vertx2.util.AcsConstants;
 import org.vertx.java.core.Handler;
@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.TreeMap;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  * 
  * Abstract Local Cache where each org has its own tree map.
  *

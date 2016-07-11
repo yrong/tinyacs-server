@@ -1,14 +1,14 @@
 package vertx2.model;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxJsonUtils;
+import vertx2.VertxException;
+import vertx2.VertxJsonUtils;
 import vertx2.CcException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * Workflow Initial Trigger.
  *
@@ -96,10 +96,10 @@ public class WorkflowTrigger {
      * Constructor by a JSON Object
      *
      * @param jsonObject
-     * @throws SxaVertxException
+     * @throws VertxException
      * @throws CcException
      */
-    public WorkflowTrigger (JsonObject jsonObject) throws SxaVertxException, CcException {
+    public WorkflowTrigger (JsonObject jsonObject) throws VertxException, CcException {
         // Validate Field Types
         VertxJsonUtils.validateFields(jsonObject, mandatoryFields, optionalFields);
 

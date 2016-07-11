@@ -10,7 +10,7 @@ import java.lang.reflect.Constructor;
 import java.util.Map;
 
 /**
- * Project:  sxa-cc-parent
+ * Project:  cwmp-parent
  *
  * @author: jqin
  */

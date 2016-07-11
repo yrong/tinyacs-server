@@ -1,11 +1,11 @@
 package vertx2.acs.worker.workflow;
 
-import com.calix.sxa.VertxConstants;
-import com.calix.sxa.VertxUtils;
+import vertx2.VertxConstants;
+import vertx2.VertxUtils;
 import vertx2.cache.GroupCache;
 import vertx2.model.CpeGroup;
 import vertx2.util.AcsConstants;
-import com.calix.sxa.taskmgmt.worker.WorkerVertice;
+import vertx2.taskmgmt.worker.WorkerVertice;
 import io.vertx.java.redis.RedisClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * Extending the default (Task) Worker Vertice to add custom workflow logic.
  *

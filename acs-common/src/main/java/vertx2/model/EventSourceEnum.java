@@ -1,7 +1,7 @@
 package vertx2.model;
 
 /**
- * Project:  SXA-CC (aka CCFG)
+ * Project:  cwmp (aka CCFG)
  *
  * CCFG Event Source Enums
  *

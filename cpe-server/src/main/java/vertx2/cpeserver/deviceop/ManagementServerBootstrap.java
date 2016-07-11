@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Project: SXA-CC
+ * Project: cwmp
  *
  * Bootstrap the following Management Server Attributes:
  *

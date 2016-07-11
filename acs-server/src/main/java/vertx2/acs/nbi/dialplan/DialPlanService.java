@@ -1,7 +1,7 @@
 package vertx2.acs.nbi.dialplan;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxJsonUtils;
+import vertx2.VertxException;
+import vertx2.VertxJsonUtils;
 import vertx2.acs.nbi.AbstractAcNbiCrudService;
 import vertx2.acs.nbi.model.AcsNbiRequest;
 import vertx2.model.AcsApiCrudTypeEnum;
@@ -79,10 +79,10 @@ public class DialPlanService extends AbstractAcNbiCrudService {
      * @param nbiRequest
      * @param crudType   Type of the CRUD operation.
      * @return boolean
-     * @throws com.calix.sxa.SxaVertxException
+     * @throws vertx2.VertxException
      */
     @Override
-    public boolean validate(final AcsNbiRequest nbiRequest, final AcsApiCrudTypeEnum crudType) throws SxaVertxException {
+    public boolean validate(final AcsNbiRequest nbiRequest, final AcsApiCrudTypeEnum crudType) throws VertxException {
         switch (crudType) {
             case Create:
             case Update:

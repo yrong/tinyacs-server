@@ -12,7 +12,7 @@ import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.java.core.json.JsonObject;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * Vert.x MongoDB GridFS File.
  *
@@ -111,7 +111,7 @@ public class VertxMongoGridFsFile {
          */
         byte[] chunkMessageHeader = new JsonObject()
                 .putString(VertxMongoGridFsVertice.FIELD_NAME_FILES_ID, fileId)
-                .putString(VertxMongoGridFsVertice.FIELD_NAME_BUCKET, VertxMongoGridFsVertice.SXACC_BUCKET)
+                .putString(VertxMongoGridFsVertice.FIELD_NAME_BUCKET, VertxMongoGridFsVertice.CWMP_BUCKET)
                 .putNumber(VertxMongoGridFsVertice.FIELD_NAME_N, chunkNumber)
                 .encode()
                 .getBytes();
@@ -156,7 +156,7 @@ public class VertxMongoGridFsFile {
                 VertxConstants.VERTX_ADDRESS_MONGODB_GRID_FS,
                 new JsonObject()
                         .putString(VertxMongoGridFsVertice.FIELD_NAME_ACTION, VertxMongoGridFsVertice.ACTION_SAVE_FILE)
-                        .putString(VertxMongoGridFsVertice.FIELD_NAME_BUCKET, VertxMongoGridFsVertice.SXACC_BUCKET)
+                        .putString(VertxMongoGridFsVertice.FIELD_NAME_BUCKET, VertxMongoGridFsVertice.CWMP_BUCKET)
                         .putString(VertxMongoGridFsVertice.FIELD_NAME_ID, fileId)
                         .putObject(VertxMongoGridFsVertice.FIELD_NAME_METADATA, metadata)
                         .putNumber(VertxMongoGridFsVertice.FIELD_NAME_LENGTH, fileSize)
@@ -291,7 +291,7 @@ public class VertxMongoGridFsFile {
                 VertxConstants.VERTX_ADDRESS_MONGODB_GRID_FS,
                 new JsonObject()
                         .putString(VertxMongoGridFsVertice.FIELD_NAME_ACTION, VertxMongoGridFsVertice.ACTION_GET_FILE)
-                        .putString(VertxMongoGridFsVertice.FIELD_NAME_BUCKET, VertxMongoGridFsVertice.SXACC_BUCKET)
+                        .putString(VertxMongoGridFsVertice.FIELD_NAME_BUCKET, VertxMongoGridFsVertice.CWMP_BUCKET)
                         .putString(VertxMongoGridFsVertice.FIELD_NAME_ID, id),
                 DEFAULT_TIMEOUT,
                 handler
@@ -306,7 +306,7 @@ public class VertxMongoGridFsFile {
                 VertxConstants.VERTX_ADDRESS_MONGODB_GRID_FS,
                 new JsonObject()
                         .putString(VertxMongoGridFsVertice.FIELD_NAME_ACTION, VertxMongoGridFsVertice.ACTION_GET_CHUNK)
-                        .putString(VertxMongoGridFsVertice.FIELD_NAME_BUCKET, VertxMongoGridFsVertice.SXACC_BUCKET)
+                        .putString(VertxMongoGridFsVertice.FIELD_NAME_BUCKET, VertxMongoGridFsVertice.CWMP_BUCKET)
                         .putString(VertxMongoGridFsVertice.FIELD_NAME_FILES_ID, fileId)
                         .putNumber(VertxMongoGridFsVertice.FIELD_NAME_N, chunkNumber),
                 DEFAULT_TIMEOUT,
@@ -395,7 +395,7 @@ public class VertxMongoGridFsFile {
                 VertxConstants.VERTX_ADDRESS_MONGODB_GRID_FS,
                 new JsonObject()
                         .putString(VertxMongoGridFsVertice.FIELD_NAME_ACTION, VertxMongoGridFsVertice.ACTION_DELETE_FILE)
-                        .putString(VertxMongoGridFsVertice.FIELD_NAME_BUCKET, VertxMongoGridFsVertice.SXACC_BUCKET)
+                        .putString(VertxMongoGridFsVertice.FIELD_NAME_BUCKET, VertxMongoGridFsVertice.CWMP_BUCKET)
                         .putString(VertxMongoGridFsVertice.FIELD_NAME_ID, id),
                 DEFAULT_TIMEOUT,
                 handler
@@ -413,7 +413,7 @@ public class VertxMongoGridFsFile {
                 VertxConstants.VERTX_ADDRESS_MONGODB_GRID_FS,
                 new JsonObject()
                         .putString(VertxMongoGridFsVertice.FIELD_NAME_ACTION, VertxMongoGridFsVertice.ACTION_DELETE_FILE)
-                        .putString(VertxMongoGridFsVertice.FIELD_NAME_BUCKET, VertxMongoGridFsVertice.SXACC_BUCKET)
+                        .putString(VertxMongoGridFsVertice.FIELD_NAME_BUCKET, VertxMongoGridFsVertice.CWMP_BUCKET)
                         .putObject(VertxMongoGridFsVertice.FIELD_NAME_METADATA, metadata),
                 DEFAULT_TIMEOUT,
                 handler

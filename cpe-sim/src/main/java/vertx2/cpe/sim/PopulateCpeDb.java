@@ -1,8 +1,8 @@
 package vertx2.cpe.sim;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxMongoUtils;
-import com.calix.sxa.VertxUtils;
+import vertx2.VertxException;
+import vertx2.VertxMongoUtils;
+import vertx2.VertxUtils;
 import vertx2.model.Cpe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +13,7 @@ import org.vertx.java.core.http.HttpServerRequest;
 import org.vertx.java.core.json.JsonObject;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * Populate MongoDB directly with many CPE records into.
  *
@@ -87,7 +87,7 @@ public class PopulateCpeDb {
                     CpeSimUtils.getDefaultCpeDataObjectBySn(sn, orgId, oui),
                     saveResultHandler
             );
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
         }
     }
@@ -148,7 +148,7 @@ public class PopulateCpeDb {
                                 CpeSimUtils.getDefaultCpeDataObjectBySn(sn, orgId, oui),
                                 saveResultHandler
                         );
-                    } catch (SxaVertxException e) {
+                    } catch (VertxException e) {
                         e.printStackTrace();
                     }
                 }

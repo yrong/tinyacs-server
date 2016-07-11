@@ -5,7 +5,7 @@ SXA Task Management Web Service that is built on top of Vert.x.
 Just go to "task-mgmt/java" directory and run "mvn clean install"
 
 3. How to start the service
-Run "vertx runmod com.calix.sxa~task-mgmt-ws-vertice~0.0.1.DEV-SNAPSHOT" from command line.
+Run "vertx runmod vertx2~task-mgmt-ws-vertice~0.0.1.DEV-SNAPSHOT" from command line.
 
 The server will be listening on port 8090.
 

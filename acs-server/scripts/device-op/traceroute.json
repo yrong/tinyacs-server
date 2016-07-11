@@ -8,7 +8,7 @@
     },
     "diagType": "InternetGatewayDevice.TraceRouteDiagnostics",
     "diagParameters": {
-        "Interface": "X_CALIX_SXACC_DefaultWanConnectionPath",
+        "Interface": "X_CALIX_CWMP_DefaultWanConnectionPath",
         "Host": "google.com",
         "NumberOfTries" : 1,
         "MaxHopCount":20,

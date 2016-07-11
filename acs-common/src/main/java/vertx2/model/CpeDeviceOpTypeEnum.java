@@ -1,7 +1,7 @@
 package vertx2.model;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * CPE Device Operation Type Enum
  *

@@ -1,6 +1,6 @@
 package vertx2.cpeserver.deviceop;
 
-import com.calix.sxa.VertxJsonUtils;
+import vertx2.VertxJsonUtils;
 import vertx2.cpeserver.session.CwmpRequest;
 import vertx2.cpeserver.session.CwmpSession;
 import vertx2.cwmp.CwmpException;
@@ -17,7 +17,7 @@ import org.vertx.java.core.json.JsonObject;
 import org.xmlsoap.schemas.soap.envelope.Body;
 
 /**
- * Project:  SXA-CC (aka CCFG)
+ * Project:  cwmp (aka CCFG)
  *
  * Handle Dynamic Objects creation/update (required when applying some special profile like DNS-host-mapping).
  *

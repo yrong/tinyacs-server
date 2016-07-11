@@ -1,6 +1,6 @@
 package vertx2.acs.nbi.BuildInfo;
 
-import com.calix.sxa.VertxUtils;
+import vertx2.VertxUtils;
 import vertx2.acs.cache.PassiveWorkflowCache;
 import vertx2.acs.nbi.AcsApiService;
 import vertx2.acs.nbi.model.AcsNbiRequest;
@@ -18,7 +18,7 @@ import org.vertx.java.core.Vertx;
 import org.vertx.java.core.buffer.Buffer;
 
 /**
- * Project:  SXA-CC Master Branch
+ * Project:  cwmp Master Branch
  *
  * @author: ronyang
  */

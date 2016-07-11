@@ -1,15 +1,15 @@
 package vertx2.util;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * ACS NBI Constants.
  *
  * @author: ronyang
  */
 public class AcsConstants {
-    // SXA-CC Group ID
-    public static final String SXA_CC_GROUP_ID = "vertx2";
+    // cwmp Group ID
+    public static final String CWMP_GROUP_ID = "vertx2";
 
     /**
      * API Service Names
@@ -108,7 +108,7 @@ public class AcsConstants {
     public static final String FIELD_NAME_ACS_CRUD_TYPE = "crudType";
 
     // HTTP Digest Auth Realm
-    public static final String SXA_CC_AUTH_REALM = "CalixGcs";
+    public static final String CWMP_AUTH_REALM = "CalixGcs";
     // HTTP Basic Auth Realm
-    public static final String HTTP_BASIC_AUTH_CHALLENGE = "Basic realm=\"" + SXA_CC_AUTH_REALM + "\"";
+    public static final String HTTP_BASIC_AUTH_CHALLENGE = "Basic realm=\"" + CWMP_AUTH_REALM + "\"";
 }

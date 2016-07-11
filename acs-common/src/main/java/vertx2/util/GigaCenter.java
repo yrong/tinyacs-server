@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Project:  SXA-CC_PRE-CA_Rel1
+ * Project:  cwmp_PRE-CA_Rel1
  *
  * Calix GigaCenter Specific Tricks/Utils.
  *

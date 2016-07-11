@@ -1,13 +1,13 @@
 package vertx2.util;
 
-import com.calix.sxa.VertxUtils;
+import vertx2.VertxUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Project:  sxa-cc-parent
+ * Project:  cwmp-parent
  *
- * SXA-CC ACS Configuration Property Utils.
+ * cwmp ACS Configuration Property Utils.
  *
  * For now, the Configuration Properties are read from System environment.
  *
@@ -64,61 +64,61 @@ public class AcsConfigProperties {
     /**
      * Default SXA JBOSS API Port #
      */
-    public static final String DEFAULT_SXA_JBOSS_API_HOST = null;
-    public static final int DEFAULT_SXA_JBOSS_API_PORT = 8080;
+    public static final String DEFAULT_CWMP_JBOSS_API_HOST = null;
+    public static final int DEFAULT_CWMP_JBOSS_API_PORT = 8080;
 
     /**
      * System Environment Variable Names for ACS NBI API Server Hostname/Port/ContextRoot
      */
-    public static final String ACS_INTERNAL_API_HOST_SYS_ENV_VAR = "SXA_CC_ACS_INTERNAL_API_HOST";
-    public static final String ACS_EXTERNAL_API_PORT_SYS_ENV_VAR = "SXA_CC_ACS_API_EXTERNAL_PORT";
-    public static final String ACS_INTERNAL_API_PORT_SYS_ENV_VAR = "SXA_CC_ACS_INTERNAL_API_PORT";
-    public static final String ACS_INTERNAL_API_CONTEXT_ROOT_SYS_ENV_VAR = "SXA_CC_ACS_INTERNAL_API_CONTEXT_ROOT";
-    public static final String ACS_EXTERNAL_API_CONTEXT_ROOT_SYS_ENV_VAR = "SXA_CC_ACS_EXTERNAL_API_CONTEXT_ROOT";
+    public static final String ACS_INTERNAL_API_HOST_SYS_ENV_VAR = "CWMP_ACS_INTERNAL_API_HOST";
+    public static final String ACS_EXTERNAL_API_PORT_SYS_ENV_VAR = "CWMP_ACS_API_EXTERNAL_PORT";
+    public static final String ACS_INTERNAL_API_PORT_SYS_ENV_VAR = "CWMP_ACS_INTERNAL_API_PORT";
+    public static final String ACS_INTERNAL_API_CONTEXT_ROOT_SYS_ENV_VAR = "CWMP_ACS_INTERNAL_API_CONTEXT_ROOT";
+    public static final String ACS_EXTERNAL_API_CONTEXT_ROOT_SYS_ENV_VAR = "CWMP_ACS_EXTERNAL_API_CONTEXT_ROOT";
 
     /**
      * System Environment Variable Names for ACS File Server Host/Ports/FileStorePath
      */
-    public static final String ACS_FILE_STORE_PATH_ENV_VAR = "SXA_CC_ACS_FILE_STORE_PATH";
+    public static final String ACS_FILE_STORE_PATH_ENV_VAR = "CWMP_ACS_FILE_STORE_PATH";
 
     /**
      * System Environment Variable Names for CPE Server Load Balancer Hostname/Port/Timeout/DB_Index
      */
-    public static final String CPE_SERVER_LB_HOST_SYS_ENV_VAR = "SXA_CPE_SERVER_LB_HOST";
-    public static final String CPE_SERVER_LB_PORT_SYS_ENV_VAR = "SXA_CPE_SERVER_LB_PORT";
-    public static final String CPE_SERVER_LB_HTTPS_ENABLED_ENV_VAR = "SXA_CPE_SERVER_LB_HTTPS_ENABLED";
+    public static final String CPE_SERVER_LB_HOST_SYS_ENV_VAR = "CWMP_CPE_SERVER_LB_HOST";
+    public static final String CPE_SERVER_LB_PORT_SYS_ENV_VAR = "CWMP_CPE_SERVER_LB_PORT";
+    public static final String CPE_SERVER_LB_HTTPS_ENABLED_ENV_VAR = "CWMP_CPE_SERVER_LB_HTTPS_ENABLED";
 
     /**
      * System Environment Variable Name for Max # of concurrent discovery sessions
      */
-    public static final String PERFORM_DEEP_DISCOVERY_SYS_ENV_VAR = "SXA_CC_PERFORM_DEEP_DISCOVERY";
-    public static final String MAX_DISCOVERY_SESSIONS_SYS_ENV_VAR = "SXA_CC_MAX_DISCOVERY_SESSIONS";
+    public static final String PERFORM_DEEP_DISCOVERY_SYS_ENV_VAR = "CWMP_PERFORM_DEEP_DISCOVERY";
+    public static final String MAX_DISCOVERY_SESSIONS_SYS_ENV_VAR = "CWMP_MAX_DISCOVERY_SESSIONS";
 
     /**
      * System Environment Variable Name for # of passive workflow worker vertice(s)
      */
     public static final String NBR_OF_PASSIVE_WORKFLOW_WORKER_VERTICES_SYS_ENV_VAR =
-            "SXA_CC_NBR_OF_PASSIVE_WORKFLOW_WORKER_VERTICES";
+            "CWMP_NBR_OF_PASSIVE_WORKFLOW_WORKER_VERTICES";
 
     /**
      * System Environment Variable Name for Max # of concurrent auto backup tasks
      */
-    public static final String MAX_AUTO_BACKUP_TASKS_SYS_ENV_VAR = "SXA_CC_MAX_AUTO_BACKUP_TASKS";
+    public static final String MAX_AUTO_BACKUP_TASKS_SYS_ENV_VAR = "CWMP_MAX_AUTO_BACKUP_TASKS";
     /**
      * System Environment Variable Name for auto backup soak time
      */
-    public static final String AUTO_BACKUP_SOAK_TIME_SYS_ENV_VAR = "SXA_CC_AUTO_BACKUP_SOAK_TIME";
+    public static final String AUTO_BACKUP_SOAK_TIME_SYS_ENV_VAR = "CWMP_AUTO_BACKUP_SOAK_TIME";
 
     /**
      * System Environment Variable Name for CWMP Message TTL
      */
-    public static final String CWMP_MESSAGE_TTL_SYS_ENV_VAR = "SXA_CC_CWMP_MESSAGE_TTL";
+    public static final String CWMP_MESSAGE_TTL_SYS_ENV_VAR = "CWMP_CWMP_MESSAGE_TTL";
 
     /**
      * System Environment Variable Names for ACS NBI API Server Hostname/Port/ContextRoot
      */
-    public static final String SXA_JBOSS_API_HOST_SYS_ENV_VAR = "SXA_JBOSS_API_HOST";
-    public static final String SXA_JBOSS_API_PORT_SYS_ENV_VAR = "SXA_JBOSS_API_PORT";
+    public static final String CWMP_JBOSS_API_HOST_SYS_ENV_VAR = "CWMP_JBOSS_API_HOST";
+    public static final String CWMP_JBOSS_API_PORT_SYS_ENV_VAR = "CWMP_JBOSS_API_PORT";
 
     /**
      * Actual ACS_NBI_API Server Hostname/Port/ContextRoot/FileStorePath
@@ -205,8 +205,8 @@ public class AcsConfigProperties {
     /**
      * Actual SXA JBoss API Hostname/Port
      */
-    public static final String SXA_JBOSS_API_HOST =
-            VertxUtils.initStringProp(SXA_JBOSS_API_HOST_SYS_ENV_VAR, DEFAULT_SXA_JBOSS_API_HOST);
-    public static final int SXA_JBOSS_API_PORT =
-            VertxUtils.initIntegerProp(SXA_JBOSS_API_PORT_SYS_ENV_VAR, DEFAULT_SXA_JBOSS_API_PORT);
+    public static final String CWMP_JBOSS_API_HOST =
+            VertxUtils.initStringProp(CWMP_JBOSS_API_HOST_SYS_ENV_VAR, DEFAULT_CWMP_JBOSS_API_HOST);
+    public static final int CWMP_JBOSS_API_PORT =
+            VertxUtils.initIntegerProp(CWMP_JBOSS_API_PORT_SYS_ENV_VAR, DEFAULT_CWMP_JBOSS_API_PORT);
 }

@@ -10,7 +10,7 @@ import org.vertx.java.core.http.HttpClientResponse;
 import org.vertx.java.core.json.JsonObject;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * SXA JBoss Plugin-CC API Utils
  *
@@ -22,10 +22,10 @@ public class SxaPluginCcApiUtils extends SxaJBossApiUtils{
     /**
      * Constants
      */
-    public static final String SXA_PLUGIN_CC_MODULE_NAME = "plugin-cc";
+    public static final String CWMP_PLUGIN_CC_MODULE_NAME = "plugin-cc";
     public static final String CPE_DISCOVERY_URL_PATH = "/cpe-discovery";
     public static final String CPE_DELETE_URL_PATH = "/cpe-delete/";
-    public static final String PASSWORD = "sxa-cc";
+    public static final String PASSWORD = "cwmp";
 
     /**
      * Notify SXA Plugin-CC that a new CPE has been discovered.
@@ -51,7 +51,7 @@ public class SxaPluginCcApiUtils extends SxaJBossApiUtils{
 
         // Send it
         sendRequest(
-            SXA_PLUGIN_CC_MODULE_NAME,
+            CWMP_PLUGIN_CC_MODULE_NAME,
             HttpMethod.POST,
             CPE_DISCOVERY_URL_PATH,
             cpe.deviceId.orgId,     // use "orgId" as username
@@ -95,7 +95,7 @@ public class SxaPluginCcApiUtils extends SxaJBossApiUtils{
             final String cpeKey,
             final Handler<String> handler) {
         sendRequest(
-                SXA_PLUGIN_CC_MODULE_NAME,
+                CWMP_PLUGIN_CC_MODULE_NAME,
                 HttpMethod.DELETE,
                 CPE_DELETE_URL_PATH + cpeKey,
                 orgId,     // use "orgId" as username

@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * This class defines the data model for the CPE Group Objects, as well as many util methods such as comparing/matching
  * a CPE to a group's CPE filter.
@@ -39,7 +39,7 @@ public class CpeGroup extends MultiTenantObject {
     /**
      * Cpe Group Constant Strings
      */
-    public static final String DB_COLLECTION_NAME = "sxacc-groups";
+    public static final String DB_COLLECTION_NAME = "CWMP-groups";
     public static final String FIELD_NAME_GROUP_TYPE = "type";
     public static final String GROUP_TYPE_STATIC = "static";
     public static final String GROUP_TYPE_DYNAMIC = "dynamic";
@@ -241,7 +241,7 @@ public class CpeGroup extends MultiTenantObject {
                         // We only support "contains" via regex
 
                         /**
-                         * Special Case for SXACC-1296
+                         * Special Case for CWMP-1296
                          */
                         String regex = subFilterValue.toString();
                         if (regex.charAt(0) == '^' && regex.charAt(regex.length() - 1) == '$') {

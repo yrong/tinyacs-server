@@ -1,9 +1,9 @@
 package vertx2.connreq;
 
-import com.calix.sxa.VertxConfigProperties;
-import com.calix.sxa.VertxConstants;
-import com.calix.sxa.VertxHttpClientUtils;
-import com.calix.sxa.VertxRedisUtils;
+import vertx2.VertxConfigProperties;
+import vertx2.VertxConstants;
+import vertx2.VertxHttpClientUtils;
+import vertx2.VertxRedisUtils;
 import vertx2.util.AcsConstants;
 import io.vertx.java.redis.RedisClient;
 import org.slf4j.Logger;
@@ -19,7 +19,7 @@ import java.net.MalformedURLException;
 import java.util.HashMap;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * Worker Vertice that sends connection requests
  *

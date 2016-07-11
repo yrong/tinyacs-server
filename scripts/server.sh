@@ -4,20 +4,20 @@ SCRIPT_DIR=`dirname $0`
 SCRIPT_DIR=$(cd $SCRIPT_DIR; pwd)
 
 ##########################################
-###### Determine SXA-CC Home Path
+###### Determine cwmp Home Path
 ##########################################
-export SXACC_HOME=`cd $SCRIPT_DIR/..; pwd`
+export CWMP_HOME=`cd $SCRIPT_DIR/..; pwd`
 
 ##########################################
 ###### Determine Vertx Paths
 ##########################################
-VERTX_RUNTIME_PATH=$SXACC_HOME/vertx-runtime
-VERTX_ARTIFACTS_PATH=$SXACC_HOME/vertx-artifacts
+VERTX_RUNTIME_PATH=$CWMP_HOME/vertx-runtime
+VERTX_ARTIFACTS_PATH=$CWMP_HOME/vertx-artifacts
 
 ##########################################
 ###### Default Module Version
 ##########################################
-MOD_VERSION=$(cat $SXACC_HOME/conf/version.txt)
+MOD_VERSION=$(cat $CWMP_HOME/conf/version.txt)
 
 #############################################
 ###### Function for Printing Usages and quit.
@@ -90,14 +90,14 @@ ARTIFACT_NAME=$VERTX_ARTIFACTS_PATH/${MOD_NAME}-${MOD_VERSION}-mod.zip
 ##########################################
 ###### Add "conf" and "libs" to classpath
 ##########################################
-export CLASSPATH=$SXACC_HOME/conf:$SXACC_HOME/libs/*
+export CLASSPATH=$CWMP_HOME/conf:$CWMP_HOME/libs/*
 
 ##########################################
 ###### Log File
 ##########################################
 # Get current timestamp for archiving the log files
 CURRENT_TIME=$(date +"%Y-%m-%d-%T")
-LOG_DIR=$SXACC_HOME/logs/$MOD_NAME/$CURRENT_TIME
+LOG_DIR=$CWMP_HOME/logs/$MOD_NAME/$CURRENT_TIME
 LOG_FILE=$LOG_DIR/$MOD_NAME.log
 MONITOR_CLUSTER_LOG=$LOG_DIR/$MOD_NAME-monitor-cluster.log
 
@@ -141,7 +141,7 @@ if [ "$ACTION" = "start" ]; then
   ##########################################
   ###### Initialize System Env
   ##########################################
-  DEFAULT_PROPERTIES=$SXACC_HOME/conf/sxacc-acs-default-properties.sh
+  DEFAULT_PROPERTIES=$CWMP_HOME/conf/CWMP-acs-default-properties.sh
   if [ -f $DEFAULT_PROPERTIES ]; then
     echo '########################################################################'
     echo ''
@@ -150,23 +150,23 @@ if [ "$ACTION" = "start" ]; then
     source $DEFAULT_PROPERTIES
     echo ''
   fi
-  if [ "$SXACC_ACS_CUSTOM_PROPERTIES" == "" ]; then
-    export SXACC_ACS_CUSTOM_PROPERTIES=$SXACC_HOME/conf/sxacc-acs-custom-properties.sh
+  if [ "$CWMP_ACS_CUSTOM_PROPERTIES" == "" ]; then
+    export CWMP_ACS_CUSTOM_PROPERTIES=$CWMP_HOME/conf/CWMP-acs-custom-properties.sh
   fi
-  if [ -f $SXACC_ACS_CUSTOM_PROPERTIES ]; then
-    echo "Initializing System Env Variables with custom values from $SXACC_ACS_CUSTOM_PROPERTIES..."
-    cat $SXACC_ACS_CUSTOM_PROPERTIES
-    source $SXACC_ACS_CUSTOM_PROPERTIES
+  if [ -f $CWMP_ACS_CUSTOM_PROPERTIES ]; then
+    echo "Initializing System Env Variables with custom values from $CWMP_ACS_CUSTOM_PROPERTIES..."
+    cat $CWMP_ACS_CUSTOM_PROPERTIES
+    source $CWMP_ACS_CUSTOM_PROPERTIES
     echo ''
   fi
 
   ##########################################
-  ###### $SXA_JBOSS_API_HOST must be set
+  ###### $CWMP_JBOSS_API_HOST must be set
   ##########################################
-  if [ "$SXA_JBOSS_API_HOST" == "" ]; then
+  if [ "$CWMP_JBOSS_API_HOST" == "" ]; then
     echo '#############################################################################'
     echo ''
-    echo 'Please set system env SXA_JBOSS_API_HOST to point to the SXA JBoss Host!!!!!!'
+    echo 'Please set system env CWMP_JBOSS_API_HOST to point to the SXA JBoss Host!!!!!!'
     echo ''
     echo '#############################################################################'
     exit 1
@@ -229,7 +229,7 @@ if [ "$ACTION" = "start" ]; then
     echo "Failed to start $MOD_NAME!"
   else
     echo "Started the $MOD_NAME (pid $server_pid ). Log file: $LOG_FILE."
-    cd $SXACC_HOME/logs/$MOD_NAME/
+    cd $CWMP_HOME/logs/$MOD_NAME/
     unlink current
     ln -s $LOG_DIR current
     echo ''
@@ -337,7 +337,7 @@ elif [ "$ACTION" = "check-version" ]; then
   rawResult=${rawResult%-mod.zip*}
   version=${rawResult%-mod.zip*}
   echo "version: $version"
-  echo "Updating $SXACC_HOME/conf/version.txt with the new version..."
-  rm $SXACC_HOME/conf/version.txt
-  echo $version > $SXACC_HOME/conf/version.txt
+  echo "Updating $CWMP_HOME/conf/version.txt with the new version..."
+  rm $CWMP_HOME/conf/version.txt
+  echo $version > $CWMP_HOME/conf/version.txt
 fi

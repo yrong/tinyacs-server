@@ -1,7 +1,7 @@
 package vertx2.cache;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxMongoUtils;
+import vertx2.VertxException;
+import vertx2.VertxMongoUtils;
 import vertx2.model.AcsApiCrudTypeEnum;
 import vertx2.util.AcsConstants;
 import vertx2.util.AcsMiscUtils;
@@ -15,7 +15,7 @@ import org.vertx.java.core.json.JsonObject;
 import java.util.HashMap;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  * 
  * Abstract Local Cache which can be extended to implement any type of local cache.
  *
@@ -143,7 +143,7 @@ public abstract class AbstractLocalCache {
                     null,
                     batchSize,
                     false);
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
         }
     }

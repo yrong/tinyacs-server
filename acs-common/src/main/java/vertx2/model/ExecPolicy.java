@@ -1,13 +1,13 @@
 package vertx2.model;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxJsonUtils;
+import vertx2.VertxException;
+import vertx2.VertxJsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
 
 /**
- * Project:  sxa-cc-parent
+ * Project:  cwmp-parent
  *
  * @author: ronyang
  */
@@ -77,9 +77,9 @@ public class ExecPolicy {
      *
      * @param execPolicyJsonObject    A JSON Object
 
-     * @throws com.calix.sxa.SxaVertxException
+     * @throws vertx2.VertxException
      */
-    public ExecPolicy(JsonObject execPolicyJsonObject) throws SxaVertxException{
+    public ExecPolicy(JsonObject execPolicyJsonObject) throws VertxException{
         this.rawJsonObject = execPolicyJsonObject;
         /**
          * Call the common validation method first

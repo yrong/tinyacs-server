@@ -1,7 +1,7 @@
 package vertx2.model;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxMongoUtils;
+import vertx2.VertxException;
+import vertx2.VertxMongoUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vertx.java.core.Handler;
@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Project:  SXA-CC ACS
+ * Project:  cwmp ACS
  *
  * This class defines the CPE Device Type Objects, as well as some MongoDB CRUD operation Utils.
  *
@@ -204,7 +204,7 @@ public class CpeDeviceType extends MultiTenantObject {
     /**
      * Name of the MongoDB Collection
      */
-    public static final String DB_COLLECTION_NAME = "sxacc-device-types";
+    public static final String DB_COLLECTION_NAME = "CWMP-device-types";
 
     /**
      * Save the Device Type if new.
@@ -236,13 +236,13 @@ public class CpeDeviceType extends MultiTenantObject {
                                             deviceTypeJsonObject,
                                             null
                                     );
-                                } catch (SxaVertxException e) {
+                                } catch (VertxException e) {
                                     e.printStackTrace();
                                 }
                             }
                         }
                     });
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
         }
     }

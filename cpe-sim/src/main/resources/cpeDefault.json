@@ -5,7 +5,7 @@
   "manufacturerOUI" : "000631",
   "productClass" : "ENT",
   "modelName" : "844E-SIM",
-  "hardwareVersion" : "SXA-CC CPE Simulator v0.0.1",
+  "hardwareVersion" : "cwmp CPE Simulator v0.0.1",
   "softwareVersion" : "0.0.1",
   "serialNumber" : "08A027C00000",
   "paramValues" : {
@@ -13,7 +13,7 @@
       "DeviceSummary" : "InternetGatewayDevice:1.1[](Baseline:1, EthernetLAN:1, USBLAN:1, Time:1, IPPing:1, DeviceAssociation:1, QoS:1",
       "DeviceInfo" : {
         "SpecVersion" : "1.0",
-        "HardwareVersion" : "SXA-CC CPE Simulator v0.0.1",
+        "HardwareVersion" : "cwmp CPE Simulator v0.0.1",
         "SoftwareVersion" : "0.0.1",
         "ProvisioningCode" : "",
         "ModelName" : "844G-SIM",

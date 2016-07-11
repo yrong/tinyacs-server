@@ -1,10 +1,10 @@
 package vertx2.cpeserver;
 
-import com.calix.sxa.VertxUtils;
+import vertx2.VertxUtils;
 import vertx2.util.AcsConfigProperties;
 
 /**
- * Project:  sxa-cc-parent
+ * Project:  cwmp-parent
  *
  * @author: ronyang
  */

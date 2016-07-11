@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * CPE Auto Discovery Related Code, including the data model learning.
  *

@@ -9,7 +9,7 @@ import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * Vert.x Redis Client Utils that will work with vert.x mod-redis.
  *

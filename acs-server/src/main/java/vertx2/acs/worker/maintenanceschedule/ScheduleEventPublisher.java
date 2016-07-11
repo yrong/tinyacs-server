@@ -5,7 +5,7 @@ import vertx2.util.AcsConstants;
 import org.vertx.java.platform.Verticle;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * This class is responsible for publishing "maintenance window open"/"maintenance window close " events for each
  * existing maintenance schedules.

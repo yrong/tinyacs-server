@@ -83,7 +83,7 @@
                 {"value": "G.729a", "displayName": "G.729a"}
             ],
             "defaultValue": "G.711MuLaw",
-            "tr098PathOverride": ["X_CALIX_SXACC_RTP_CODEC_1ST_ORDER.Codec"]
+            "tr098PathOverride": ["X_CALIX_CWMP_RTP_CODEC_1ST_ORDER.Codec"]
         },{
             "name": "PacketRate1st",
             "displayName": "Packet Rate First Order (ms)",
@@ -95,14 +95,14 @@
                 {"value": "30", "displayName": "30"}
             ],
             "defaultValue": "10",
-            "tr098PathOverride": ["X_CALIX_SXACC_RTP_CODEC_1ST_ORDER.PacketizationPeriod"]
+            "tr098PathOverride": ["X_CALIX_CWMP_RTP_CODEC_1ST_ORDER.PacketizationPeriod"]
         },{
             "name": "SilenceSuppression1st",
             "displayName": "Silence Suppression First Order",
             "description": "The first order boolean value indicates whether to support silence suppression for the codec.",
             "type": "boolean",
             "defaultValue": false,
-            "tr098PathOverride": ["X_CALIX_SXACC_RTP_CODEC_1ST_ORDER.SilenceSuppression"]
+            "tr098PathOverride": ["X_CALIX_CWMP_RTP_CODEC_1ST_ORDER.SilenceSuppression"]
         },{
             "name": "RTPCodec2nd",
             "displayName": "RTP Codec Second Order",
@@ -115,7 +115,7 @@
                 {"value": "", "displayName": "None"}
             ],
             "defaultValue": "",
-            "tr098PathOverride": ["X_CALIX_SXACC_RTP_CODEC_2ND_ORDER.Codec"]
+            "tr098PathOverride": ["X_CALIX_CWMP_RTP_CODEC_2ND_ORDER.Codec"]
         },{
             "name": "PacketRate2nd",
             "displayName": "Packet Rate Second Order (ms)",
@@ -128,7 +128,7 @@
             ],
             "defaultValue": "10",
             "tr098PathOverride": [
-                "X_CALIX_SXACC_RTP_CODEC_2ND_ORDER.PacketizationPeriod"
+                "X_CALIX_CWMP_RTP_CODEC_2ND_ORDER.PacketizationPeriod"
             ]
         },{
             "name": "SilenceSuppression2nd",
@@ -137,7 +137,7 @@
             "type": "boolean",
             "defaultValue": false,
             "tr098PathOverride": [
-                "X_CALIX_SXACC_RTP_CODEC_2ND_ORDER.SilenceSuppression"
+                "X_CALIX_CWMP_RTP_CODEC_2ND_ORDER.SilenceSuppression"
             ]
         },{
             "name": "RTPCodec3rd",
@@ -151,7 +151,7 @@
                 {"value": "", "displayName": "None"}
             ],
             "defaultValue": "",
-            "tr098PathOverride": ["X_CALIX_SXACC_RTP_CODEC_3RD_ORDER.Codec"]
+            "tr098PathOverride": ["X_CALIX_CWMP_RTP_CODEC_3RD_ORDER.Codec"]
         },{
             "name": "PacketRate3rd",
             "displayName": "Packet Rate Third Order (ms)",
@@ -164,7 +164,7 @@
             ],
             "defaultValue": "10",
             "tr098PathOverride": [
-                "X_CALIX_SXACC_RTP_CODEC_3RD_ORDER.PacketizationPeriod"
+                "X_CALIX_CWMP_RTP_CODEC_3RD_ORDER.PacketizationPeriod"
             ]
         },{
             "name": "SilenceSuppression3rd",
@@ -173,7 +173,7 @@
             "type": "boolean",
             "defaultValue": false,
             "tr098PathOverride": [
-                "X_CALIX_SXACC_RTP_CODEC_3RD_ORDER.SilenceSuppression"
+                "X_CALIX_CWMP_RTP_CODEC_3RD_ORDER.SilenceSuppression"
             ]
         },{
             "name": "TimerT1",

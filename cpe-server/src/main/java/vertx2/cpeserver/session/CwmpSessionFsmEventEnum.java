@@ -1,7 +1,7 @@
 package vertx2.cpeserver.session;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * CWMP Session FSM Event Enum.
  *

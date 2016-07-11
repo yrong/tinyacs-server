@@ -1,6 +1,6 @@
 package vertx2.fileserver;
 
-import com.calix.sxa.*;
+import vertx2.*;
 import vertx2.cache.OrganizationCache;
 import vertx2.model.AcsFile;
 import vertx2.model.AcsFileType;
@@ -30,7 +30,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * File Server Request Handler for both Upload and Download.
  *
@@ -125,7 +125,7 @@ public class FileServerRequestHandler implements Handler<HttpServerRequest> {
         req.pause();
 
         /**
-         * Try to find it in the "sxacc-files" collection
+         * Try to find it in the "CWMP-files" collection
          */
         try {
             /**
@@ -153,7 +153,7 @@ public class FileServerRequestHandler implements Handler<HttpServerRequest> {
                     findOneHandler,
                     bIsDownload ? null : QUERY_KEY_NO_CONTENT
             );
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
         }
     }
@@ -345,7 +345,7 @@ public class FileServerRequestHandler implements Handler<HttpServerRequest> {
                         update,
                         null
                 );
-            } catch (SxaVertxException e) {
+            } catch (VertxException e) {
                 e.printStackTrace();
             }
         } else {
@@ -358,7 +358,7 @@ public class FileServerRequestHandler implements Handler<HttpServerRequest> {
                     log.info(filename + ": Uploaded to memory buffer. Size: " + buffer.length());
 
                     /**
-                     * Update File Size and Upload Time in "sxacc-files" collection
+                     * Update File Size and Upload Time in "CWMP-files" collection
                      */
                     final JsonObject sets = VertxMongoUtils.addSet(null, AcsFile.FIELD_NAME_SIZE, buffer.length());
                     if (fileType.equals(AcsFileType.Image)) {
@@ -464,7 +464,7 @@ public class FileServerRequestHandler implements Handler<HttpServerRequest> {
                         case SipConfigFile:
                         case LogFile:
                             /**
-                             * Save the File Content into "sxacc-files" collection as embedded binary content.
+                             * Save the File Content into "CWMP-files" collection as embedded binary content.
                              */
                             if (matcher != null) {
                                 updateFileRecord(
@@ -514,7 +514,7 @@ public class FileServerRequestHandler implements Handler<HttpServerRequest> {
                                                 }
                                             }
                                     );
-                                } catch (SxaVertxException e) {
+                                } catch (VertxException e) {
                                     e.printStackTrace();
                                 }
                             }
@@ -531,7 +531,7 @@ public class FileServerRequestHandler implements Handler<HttpServerRequest> {
     }
 
     /**
-     * Update the "sxacc-files" collection
+     * Update the "CWMP-files" collection
      */
     public void updateFileRecord(
             final HttpServerRequest req,
@@ -562,7 +562,7 @@ public class FileServerRequestHandler implements Handler<HttpServerRequest> {
                         }
                     }
             );
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
         }
     }
@@ -753,7 +753,7 @@ public class FileServerRequestHandler implements Handler<HttpServerRequest> {
                     log.info(filename + ": Successfully saved into GridFS.");
 
                     /**
-                     * Last Step is to update File Record (in "sxacc-files" collection)
+                     * Last Step is to update File Record (in "CWMP-files" collection)
                      */
                     updateFileRecord(
                             req,

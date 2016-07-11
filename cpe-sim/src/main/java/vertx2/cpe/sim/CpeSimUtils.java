@@ -1,8 +1,8 @@
 package vertx2.cpe.sim;
 
-import com.calix.sxa.VertxConstants;
-import com.calix.sxa.VertxMongoUtils;
-import com.calix.sxa.VertxUtils;
+import vertx2.VertxConstants;
+import vertx2.VertxMongoUtils;
+import vertx2.VertxUtils;
 import vertx2.model.Cpe;
 import vertx2.util.AcsConstants;
 import io.netty.handler.codec.http.HttpMethod;
@@ -25,7 +25,7 @@ import org.vertx.java.core.json.impl.Base64;
 import java.util.Set;
 
 /**
- * Project:  sxa-cc-parent
+ * Project:  cwmp-parent
  *
  * Profile Management Util Methods.
  *

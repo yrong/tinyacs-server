@@ -1,16 +1,16 @@
 #!/bin/bash
 
 ######################################################################
-###### Determine SXA-CC Home Path
+###### Determine cwmp Home Path
 ######################################################################
 SCRIPT_DIR=`dirname $0`
 SCRIPT_DIR=$(cd $SCRIPT_DIR; pwd)
-SXACC_HOME=`cd $SCRIPT_DIR/..; pwd`
+CWMP_HOME=`cd $SCRIPT_DIR/..; pwd`
 
 #########################################################################
 ###### Save the current running version
 #########################################################################
-CURRENT_VERSION=`cat $SXACC_HOME/conf/version.txt`
+CURRENT_VERSION=`cat $CWMP_HOME/conf/version.txt`
 echo "#########################################################################"
 echo "Current running version is $CURRENT_VERSION."
 echo "#########################################################################"
@@ -22,7 +22,7 @@ echo "#########################################################################"
 echo "Checking the latest build version for production release..."
 echo "#########################################################################"
 $SCRIPT_DIR/server.sh check-version production
-NEW_VERSION=`cat $SXACC_HOME/conf/version.txt`
+NEW_VERSION=`cat $CWMP_HOME/conf/version.txt`
 echo "#########################################################################"
 echo "Latest build version is $NEW_VERSION."
 echo "#########################################################################"
@@ -37,8 +37,8 @@ fi
 #########################################################################
 ###### Restore the old version to stop the running process
 #########################################################################
-rm $SXACC_HOME/conf/version.txt
-echo $NEW_VERSION > $SXACC_HOME/conf/version.txt
+rm $CWMP_HOME/conf/version.txt
+echo $NEW_VERSION > $CWMP_HOME/conf/version.txt
 echo "#########################################################################"
 echo "Stopping the running processes..."
 echo "#########################################################################"
@@ -48,7 +48,7 @@ $SCRIPT_DIR/server.sh stop cpe
 #########################################################################
 ###### Update the version file with the new version string
 #########################################################################
-echo $CURRENT_VERSION > $SXACC_HOME/conf/version.txt
+echo $CURRENT_VERSION > $CWMP_HOME/conf/version.txt
 
 #########################################################################
 ###### Fetch the new artifacts

@@ -1,7 +1,7 @@
 package vertx2.acs.nbi.serviceplan;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxMongoUtils;
+import vertx2.VertxException;
+import vertx2.VertxMongoUtils;
 import vertx2.acs.cache.PassiveWorkflowCache;
 import vertx2.acs.nbi.AbstractAcNbiCrudService;
 import vertx2.acs.nbi.model.AcsNbiRequest;
@@ -113,10 +113,10 @@ public class ServicePlanService extends AbstractAcNbiCrudService {
      * @param nbiRequest
      * @param crudType   Type of the CRUD operation.
      * @return boolean
-     * @throws com.calix.sxa.SxaVertxException
+     * @throws vertx2.VertxException
      */
     @Override
-    public boolean validate(final AcsNbiRequest nbiRequest, final AcsApiCrudTypeEnum crudType) throws SxaVertxException {
+    public boolean validate(final AcsNbiRequest nbiRequest, final AcsApiCrudTypeEnum crudType) throws VertxException {
         switch (crudType) {
             case Create:
             case Update:
@@ -191,7 +191,7 @@ public class ServicePlanService extends AbstractAcNbiCrudService {
                                                 deviceQueryResultHandler,
                                                 DEVICE_QUERY_KEYS
                                         );
-                                    } catch (SxaVertxException e) {
+                                    } catch (VertxException e) {
                                         nbiRequest.sendResponse(
                                                 HttpResponseStatus.INTERNAL_SERVER_ERROR,
                                                 MONGODB_TIMED_OUT
@@ -379,7 +379,7 @@ public class ServicePlanService extends AbstractAcNbiCrudService {
                     deviceQueryResultHandler,
                     DEVICE_QUERY_KEYS
             );
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             nbiRequest.sendResponse(
                     HttpResponseStatus.INTERNAL_SERVER_ERROR,
                     MONGODB_TIMED_OUT
@@ -413,7 +413,7 @@ public class ServicePlanService extends AbstractAcNbiCrudService {
                     ),
                     handler
             );
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
         }
     }
@@ -616,7 +616,7 @@ public class ServicePlanService extends AbstractAcNbiCrudService {
                     ),
                     null
             );
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
         }
     }

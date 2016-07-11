@@ -1,15 +1,15 @@
 package vertx2.acs.worker.workflow;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxMongoUtils;
-import com.calix.sxa.VertxRedisUtils;
-import com.calix.sxa.VertxUtils;
+import vertx2.VertxException;
+import vertx2.VertxMongoUtils;
+import vertx2.VertxRedisUtils;
+import vertx2.VertxUtils;
 import vertx2.model.*;
 import vertx2.util.AcsConstants;
-import com.calix.sxa.taskmgmt.TaskConstants;
-import com.calix.sxa.taskmgmt.TaskUtils;
-import com.calix.sxa.taskmgmt.worker.AbstractSxaTaskImpl;
-import com.calix.sxa.taskmgmt.worker.WorkerVertice;
+import vertx2.taskmgmt.TaskConstants;
+import vertx2.taskmgmt.TaskUtils;
+import vertx2.taskmgmt.worker.AbstractSxaTaskImpl;
+import vertx2.taskmgmt.worker.WorkerVertice;
 import io.vertx.java.redis.RedisClient;
 import net.greghaines.jesque.utils.ResqueConstants;
 import org.slf4j.Logger;
@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 /**
- * Project:  SXA-CC ACS Server
+ * Project:  cwmp ACS Server
  *
  * Workflow Worker utilizing the general purpose task worker framework.
  *
@@ -357,7 +357,7 @@ public class ActiveWorkflowTaskWorker extends AbstractSxaTaskImpl{
                                         ),
                                         null
                                 );
-                            } catch (SxaVertxException e) {
+                            } catch (VertxException e) {
                                 e.printStackTrace();
                             }
                         }
@@ -382,7 +382,7 @@ public class ActiveWorkflowTaskWorker extends AbstractSxaTaskImpl{
                     ),
                     null
             );
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
         }
 
@@ -426,7 +426,7 @@ public class ActiveWorkflowTaskWorker extends AbstractSxaTaskImpl{
                     QUERY_KEYS,
                     workflow.execPolicy.maxConcurrentDevices * 2 + 1
             );
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
         }
     }
@@ -708,7 +708,7 @@ public class ActiveWorkflowTaskWorker extends AbstractSxaTaskImpl{
                     }
                 }
             });
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
             return null;
         }
@@ -835,7 +835,7 @@ public class ActiveWorkflowTaskWorker extends AbstractSxaTaskImpl{
                     ),
                     null
             );
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
         }
     }

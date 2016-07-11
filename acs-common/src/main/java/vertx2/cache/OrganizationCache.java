@@ -6,7 +6,7 @@ import org.vertx.java.core.Vertx;
 import org.vertx.java.core.json.JsonObject;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * An in-memory cache that contains all the organizations
  *

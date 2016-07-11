@@ -7,7 +7,7 @@ import org.vertx.java.core.json.impl.Base64;
 import java.util.Random;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * Misc Util Methods
  *

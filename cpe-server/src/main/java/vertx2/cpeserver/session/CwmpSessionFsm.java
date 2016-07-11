@@ -1,7 +1,7 @@
 package vertx2.cpeserver.session;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxMongoUtils;
+import vertx2.VertxException;
+import vertx2.VertxMongoUtils;
 import vertx2.cpeserver.CpeServerConstants;
 import vertx2.cwmp.*;
 import vertx2.model.Cpe;
@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * CWMP Session Finite State Machine (all static util methods)
  *
@@ -190,7 +190,7 @@ public class CwmpSessionFsm {
                             // Keys
                             null
                     );
-                } catch (SxaVertxException e) {
+                } catch (VertxException e) {
                     // This should never happen though
                     e.printStackTrace();
                     session.state = CwmpSessionFsmStateEnum.Terminated;

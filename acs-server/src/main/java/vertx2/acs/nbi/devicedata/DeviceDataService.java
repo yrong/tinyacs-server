@@ -1,9 +1,9 @@
 package vertx2.acs.nbi.devicedata;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxJsonUtils;
-import com.calix.sxa.VertxMongoUtils;
-import com.calix.sxa.VertxUtils;
+import vertx2.VertxException;
+import vertx2.VertxJsonUtils;
+import vertx2.VertxMongoUtils;
+import vertx2.VertxUtils;
 import vertx2.acs.nbi.AbstractAcNbiCrudService;
 import vertx2.acs.nbi.model.AcsNbiRequest;
 import vertx2.connreq.ConnectionRequestUtils;
@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * Device Pre-Provisioning Service API.
  *
@@ -131,7 +131,7 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
     public static final JsonObject FAILED_TO_UPDATE_SUBSCRIBER_DB =
             new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR,
                     "Internal Server Error! (failed to update the subscriber database)");
-    public static SxaVertxException MISSING_ORG_ID = new SxaVertxException("Missing Org Id!");
+    public static VertxException MISSING_ORG_ID = new VertxException("Missing Org Id!");
 
     /**
      * Other Static Constants
@@ -198,10 +198,10 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
      * @param nbiRequest
      * @param crudType   Type of the CRUD operation.
      * @return boolean
-     * @throws com.calix.sxa.SxaVertxException
+     * @throws vertx2.VertxException
      */
     @Override
-    public boolean validate(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws SxaVertxException {
+    public boolean validate(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws VertxException {
         switch (crudType) {
             case Create:
                 VertxJsonUtils.validateFields(
@@ -284,9 +284,9 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
      * @param crudType      Type of the CRUD operation.
      *
      * @return None
-     * @throws com.calix.sxa.SxaVertxException
+     * @throws vertx2.VertxException
      */
-    public void preProcess(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws SxaVertxException {
+    public void preProcess(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws VertxException {
         switch (crudType) {
             case Create:
                 // add create time
@@ -312,7 +312,7 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
      * @param aRecord
      * @return
      */
-    private static final String HW_SN_PREFIX = "UnitSerialNumber=";     // (see SXACC-649)
+    private static final String HW_SN_PREFIX = "UnitSerialNumber=";     // (see CWMP-649)
     @Override
     public JsonObject additionalPostRetrievePerRecordHandler(AcsNbiRequest nbiRequest, JsonObject aRecord) {
         if (aRecord.containsField(Cpe.DB_FIELD_NAME_PERIODIC_INFORM_ENABLE)) {
@@ -323,7 +323,7 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
             aRecord.removeField(Cpe.DB_FIELD_NAME_PERIODIC_INFORM_ENABLE);
         }
 
-        // Extract HW Serial # from "AdditionalHardwareVersion" (see SXACC-649)
+        // Extract HW Serial # from "AdditionalHardwareVersion" (see CWMP-649)
         if (aRecord.containsField(Cpe.DB_FIELD_NAME_ADDITIONAL_HW_VER)) {
             String additionalHwVersion = aRecord.getString(Cpe.DB_FIELD_NAME_ADDITIONAL_HW_VER);
             aRecord.removeField(Cpe.DB_FIELD_NAME_ADDITIONAL_HW_VER);
@@ -549,7 +549,7 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
                         reqTracker.bQueryCount? QUERY_KEY_UNLINKED_COUNT : QUERY_KEY_UNLINKED,
                         null
                 );
-            } catch (SxaVertxException e) {
+            } catch (VertxException e) {
                 e.printStackTrace();
                 nbiRequest.sendResponseChunk(HttpResponseStatus.OK, null, false);
             }
@@ -654,7 +654,7 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
                             QUERY_KEY_UNLINKED_SUBSCRIBERS,
                             null
                     );
-                } catch (SxaVertxException e) {
+                } catch (VertxException e) {
                     e.printStackTrace();
                 }
             } else {
@@ -1002,7 +1002,7 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
                     new VertxMongoUtils.FindOneHandler(deviceQueryResultHandler),
                     QUERY_KEY_DELETE
             );
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
         }
 
@@ -1056,7 +1056,7 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
                     ),
                     null
             );
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
         }
     }
@@ -1114,7 +1114,7 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
                             getSubscriberFindOneHandler(nbiRequest, cpeKey),
                             null
                     );
-                } catch (SxaVertxException e) {
+                } catch (VertxException e) {
                     e.printStackTrace();
                 }
             } else {
@@ -1190,14 +1190,14 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
                                                 }
                                             }
                                     );
-                                } catch (SxaVertxException e) {
+                                } catch (VertxException e) {
                                     e.printStackTrace();
                                 }
                             }
                         }
                     }
             );
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             return null;
         }
     }

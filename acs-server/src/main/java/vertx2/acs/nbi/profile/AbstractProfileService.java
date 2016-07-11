@@ -1,7 +1,7 @@
 package vertx2.acs.nbi.profile;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxMongoUtils;
+import vertx2.VertxException;
+import vertx2.VertxMongoUtils;
 import vertx2.acs.nbi.AbstractAcNbiCrudService;
 import vertx2.acs.nbi.model.AcsNbiRequest;
 import vertx2.model.AcsApiCrudTypeEnum;
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * Abstract ACS Profile Services.
  *
@@ -27,7 +27,7 @@ public abstract class AbstractProfileService extends AbstractAcNbiCrudService{
      * Validate Profile Field Types.
      * @param profile
      */
-    public abstract void validateFieldTypes(JsonObject profile) throws SxaVertxException;
+    public abstract void validateFieldTypes(JsonObject profile) throws VertxException;
 
     /**
      * Validate an NBI Request.
@@ -41,10 +41,10 @@ public abstract class AbstractProfileService extends AbstractAcNbiCrudService{
      * @param crudType      Type of the CRUD operation.
      *
      * @return boolean
-     * @throws com.calix.sxa.SxaVertxException
+     * @throws vertx2.VertxException
      */
     @Override
-    public boolean validate(final AcsNbiRequest nbiRequest, final AcsApiCrudTypeEnum crudType) throws SxaVertxException {
+    public boolean validate(final AcsNbiRequest nbiRequest, final AcsApiCrudTypeEnum crudType) throws VertxException {
         boolean bPendingDbQuery = false;
 
         /**

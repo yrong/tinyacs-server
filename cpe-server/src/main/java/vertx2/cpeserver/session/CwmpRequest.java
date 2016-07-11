@@ -1,6 +1,6 @@
 package vertx2.cpeserver.session;
 
-import com.calix.sxa.VertxUtils;
+import vertx2.VertxUtils;
 import vertx2.cwmp.CwmpException;
 import vertx2.cwmp.CwmpMessage;
 import dslforumOrgCwmp12.FaultDocument;

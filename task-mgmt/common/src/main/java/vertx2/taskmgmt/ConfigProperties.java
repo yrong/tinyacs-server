@@ -5,9 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Project:  sxa-cc-parent
+ * Project:  cwmp-parent
  *
- * SXA-CC Configuration Property Utils.
+ * cwmp Configuration Property Utils.
  *
  * For now, the Configuration Properties are read from System environment.
  *
@@ -26,7 +26,7 @@ public class ConfigProperties {
     /**
      * System Environment Variable Names for Task Service Port
      */
-    public static final String taskServicePortSysEnvVar = "SXA_TASK_SERVICE_PORT";
+    public static final String taskServicePortSysEnvVar = "CWMP_TASK_SERVICE_PORT";
 
     /**
      * Actual Task Service Port
@@ -41,7 +41,7 @@ public class ConfigProperties {
     /**
      * System Environment Variable Names for Task Service
      */
-    public static final String taskServiceHostSysEnvVar = "SXA_TASK_SERVICE_HOST";
+    public static final String taskServiceHostSysEnvVar = "CWMP_TASK_SERVICE_HOST";
 
     /**
      * Actual Task Server Host

@@ -26,12 +26,12 @@
 package vertx2;
 
 
-import com.calix.sxa.SxaVertxException;
+import vertx2.VertxException;
 
 /**
  * Common SXA CC ACS exceptions.
  */
-public class CcException extends SxaVertxException {
+public class CcException extends VertxException {
     /**
      * Commonly Used Static Exceptions
      */

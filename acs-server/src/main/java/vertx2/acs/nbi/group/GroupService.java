@@ -1,7 +1,7 @@
 package vertx2.acs.nbi.group;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxJsonUtils;
+import vertx2.VertxException;
+import vertx2.VertxJsonUtils;
 import vertx2.acs.nbi.AbstractAcNbiCrudService;
 import vertx2.acs.nbi.model.AcsNbiRequest;
 import vertx2.model.AcsApiCrudTypeEnum;
@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Project:  SXA-CC ACS API
+ * Project:  cwmp ACS API
  *
  * Device Group Web Service Implementation.
  *
@@ -96,17 +96,17 @@ public class GroupService extends AbstractAcNbiCrudService {
      * @param crudType      Type of the CRUD operation.
      *
      * @return boolean
-     * @throws com.calix.sxa.SxaVertxException
+     * @throws vertx2.VertxException
      */
-    public boolean validate(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws SxaVertxException {
+    public boolean validate(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws VertxException {
         switch (crudType) {
             case Create:
             case Update:
                 JsonObject group = nbiRequest.body;
                 try {
                     VertxJsonUtils.validateFields(group, groupMandatoryFields, groupOptionalFields);
-                } catch (SxaVertxException ex) {
-                    throw new SxaVertxException("Invalid group! Caught exception " + ex.getMessage());
+                } catch (VertxException ex) {
+                    throw new VertxException("Invalid group! Caught exception " + ex.getMessage());
                 }
 
                 /**
@@ -115,7 +115,7 @@ public class GroupService extends AbstractAcNbiCrudService {
                 String groupType = group.getString(CpeGroup.FIELD_NAME_GROUP_TYPE);
                 if (!CpeGroup.GROUP_TYPE_DYNAMIC.equals(groupType) &&
                         !CpeGroup.GROUP_TYPE_STATIC.equals(groupType)) {
-                    throw new SxaVertxException("Invalid  Group Type!");
+                    throw new VertxException("Invalid  Group Type!");
                 }
 
                 /**
@@ -135,7 +135,7 @@ public class GroupService extends AbstractAcNbiCrudService {
                              */
                             if (regex != null) {
                                 /**
-                                 * Special Case for SXACC-1296
+                                 * Special Case for CWMP-1296
                                  */
                                 if (regex.charAt(0) == '^' && regex.charAt(regex.length() - 1) == '$') {
                                     // Remove the leading '^' and trailing '$'
@@ -150,7 +150,7 @@ public class GroupService extends AbstractAcNbiCrudService {
                                     if (aChar >= 'A' && aChar <= 'Z') {
                                         continue;
                                     }
-                                    throw new SxaVertxException(
+                                    throw new VertxException(
                                             "Found illegal character '" + aChar + "' in the \"Contains\" rule!"
                                     );
                                 }
@@ -171,10 +171,10 @@ public class GroupService extends AbstractAcNbiCrudService {
      * @param nbiRequest
      * @param crudType   Type of the CRUD operation.
      * @return None
-     * @throws com.calix.sxa.SxaVertxException
+     * @throws vertx2.VertxException
      */
     @Override
-    public void preProcess(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws SxaVertxException {
+    public void preProcess(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws VertxException {
         /**
          * For Crete/Update: Convert CPE Filter from JSON Object into raw JSON String
          */

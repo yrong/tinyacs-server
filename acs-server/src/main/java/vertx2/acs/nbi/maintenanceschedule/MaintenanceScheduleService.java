@@ -1,6 +1,6 @@
 package vertx2.acs.nbi.maintenanceschedule;
 
-import com.calix.sxa.SxaVertxException;
+import vertx2.VertxException;
 import vertx2.acs.nbi.AbstractAcNbiCrudService;
 import vertx2.acs.nbi.model.AcsNbiRequest;
 import vertx2.model.AcsApiCrudTypeEnum;
@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * @author: ronyang
  */
@@ -59,10 +59,10 @@ public class MaintenanceScheduleService extends AbstractAcNbiCrudService{
      * @param nbiRequest
      * @param crudType   Type of the CRUD operation.
      * @return boolean
-     * @throws com.calix.sxa.SxaVertxException
+     * @throws vertx2.VertxException
      */
     @Override
-    public boolean validate(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws SxaVertxException {
+    public boolean validate(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws VertxException {
         /**
          * Perform basic Validate Mandatory/Optional Field Types
          */

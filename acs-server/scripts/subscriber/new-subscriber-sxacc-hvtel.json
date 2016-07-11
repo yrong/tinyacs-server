@@ -1,7 +1,7 @@
 {
-    "name": "SXA-CC Integration User",
+    "name": "cwmp Integration User",
     "type": "Business",
-    "customId": "sxacc-hvtel",
+    "customId": "CWMP-hvtel",
     "servicePrefix": "123489071",
     "locations": [
         {

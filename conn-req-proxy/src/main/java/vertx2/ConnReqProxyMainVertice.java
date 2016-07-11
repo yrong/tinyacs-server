@@ -1,8 +1,8 @@
 package vertx2;
 
-import com.calix.sxa.VertxConstants;
-import com.calix.sxa.VertxDeployUtils;
-import com.calix.sxa.VertxUtils;
+import vertx2.VertxConstants;
+import vertx2.VertxDeployUtils;
+import vertx2.VertxUtils;
 import vertx2.connreq.ConnectionRequestManagerVertice;
 import vertx2.util.AcsConstants;
 import org.slf4j.Logger;
@@ -18,7 +18,7 @@ import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * Connection-Request Proxy.
  *

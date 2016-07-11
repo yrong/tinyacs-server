@@ -27,17 +27,17 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.calix.sxa</groupId>
+            <groupId>vertx2</groupId>
             <artifactId>vertx-common</artifactId>
             <version>0.0.24-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>com.calix.sxa</groupId>
+            <groupId>vertx2</groupId>
             <artifactId>task-mgmt-common</artifactId>
             <version>0.0.24-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>com.calix.sxa</groupId>
+            <groupId>vertx2</groupId>
             <artifactId>cwmp-schemas</artifactId>
             <version>0.0.24-SNAPSHOT</version>
         </dependency>

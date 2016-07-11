@@ -2,7 +2,7 @@ package vertx2.model;
 
 
 import broadbandForumOrgCwmpDatamodel14.DocumentDocument;
-import com.calix.sxa.VertxUtils;
+import vertx2.VertxUtils;
 import org.apache.xmlbeans.XmlException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

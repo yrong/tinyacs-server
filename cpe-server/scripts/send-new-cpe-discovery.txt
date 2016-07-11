@@ -1,6 +1,6 @@
 -v
 -X POST
--u "2095070:sxa-cc"
+-u "2095070:cwmp"
 -d @new-cpe-discovery.json
 --header "Content-Type: application/json"
 --url "http://vmlnx-fiji.calix.local:8080/plugin-cc-0.0.23.DEV-SNAPSHOT/rest/cpe-discovery"

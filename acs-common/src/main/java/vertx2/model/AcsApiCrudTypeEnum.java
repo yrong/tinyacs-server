@@ -1,7 +1,7 @@
 package vertx2.model;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * ACS API CRUD Operation Type Enums.
  *

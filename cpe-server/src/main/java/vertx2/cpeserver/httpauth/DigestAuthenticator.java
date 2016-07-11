@@ -8,7 +8,7 @@ import org.vertx.java.core.json.JsonObject;
 
 
 /**
- * Project:  SXA-CC ACS
+ * Project:  cwmp ACS
  *
  * This class defines HTTP Digest Authentication Function (as a server)
  *

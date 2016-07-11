@@ -1,13 +1,13 @@
 package vertx2.model;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxJsonUtils;
+import vertx2.VertxException;
+import vertx2.VertxJsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
 
 /**
- * Project:  SXA-CC ACS API
+ * Project:  cwmp ACS API
  *
  * CPE Identifier Class
  *
@@ -57,21 +57,21 @@ public class CpeIdentifier {
     /**
      * Static Exception
      */
-    public static final SxaVertxException MISSING_SN_OR_MAC_ADDR =
-            new SxaVertxException("Missing CPE SN or MAC Address!");
+    public static final VertxException MISSING_SN_OR_MAC_ADDR =
+            new VertxException("Missing CPE SN or MAC Address!");
 
     /**
      * Validate a given CPE Identifier JSON Object.
      *
      * @param cpeIdentifier
      */
-    public static void validate(JsonObject cpeIdentifier) throws SxaVertxException{
+    public static void validate(JsonObject cpeIdentifier) throws VertxException{
         try {
             /**
              * Call the common validation method first
              */
             VertxJsonUtils.validateFields(cpeIdentifier, mandatoryFields, optionalFields);
-        } catch (SxaVertxException ex) {
+        } catch (VertxException ex) {
             log.error("Invalidate CPE Identifier!\n" + cpeIdentifier.encodePrettily());
             throw ex;
         }
@@ -100,7 +100,7 @@ public class CpeIdentifier {
     public static JsonObject getCpeMatcher(
             String orgId,
             JsonObject cpeIdentifier
-    ) throws SxaVertxException{
+    ) throws VertxException{
         // Validate CPE Identifier
         validate(cpeIdentifier);
 

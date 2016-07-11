@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.vertx.java.core.json.JsonObject;
 
 /**
- * Project:  sxa-cc-parent
+ * Project:  cwmp-parent
  *
  * This class extends CpeSetParameterAttributes by posting async result to the provided callback URL
  *

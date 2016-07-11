@@ -1,6 +1,6 @@
 package vertx2.cpeserver.session;
 
-import com.calix.sxa.VertxConstants;
+import vertx2.VertxConstants;
 import vertx2.cpeserver.CpeServerConstants;
 import vertx2.cpeserver.CpeServerTR069SessionVertice;
 import vertx2.cwmp.CwmpException;
@@ -18,7 +18,7 @@ import org.vertx.java.core.eventbus.impl.JsonObjectMessage;
 import org.vertx.java.core.json.JsonObject;
 
 /**
- * Project:  SXA-CC CPE Server
+ * Project:  cwmp CPE Server
  *
  * Handle the "HTTP" Requests (wrapped as JsonObject Messages) forwarded from the HTTP Load Balancer Vertices.
  *

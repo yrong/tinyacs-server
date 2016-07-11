@@ -1,8 +1,8 @@
 package vertx2.acs.nbi.profile;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxJsonUtils;
-import com.calix.sxa.VertxMongoUtils;
+import vertx2.VertxException;
+import vertx2.VertxJsonUtils;
+import vertx2.VertxMongoUtils;
 import vertx2.acs.nbi.model.AcsNbiRequest;
 import vertx2.cache.ConfigurationCategoryCache;
 import vertx2.model.*;
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * ACS API Configuration Profile Services.
  *
@@ -28,8 +28,8 @@ public class ConfigurationProfileService extends AbstractProfileService{
     /**
      * Static Constants
      */
-    public static final SxaVertxException EDIT_PROFILE_PROHIBITED =
-            new SxaVertxException("Editing in-use Profile is Prohibited!");
+    public static final VertxException EDIT_PROFILE_PROHIBITED =
+            new VertxException("Editing in-use Profile is Prohibited!");
 
     /**
      * Start the service
@@ -65,7 +65,7 @@ public class ConfigurationProfileService extends AbstractProfileService{
      * @param profile
      */
     @Override
-    public void validateFieldTypes(JsonObject profile) throws SxaVertxException {
+    public void validateFieldTypes(JsonObject profile) throws VertxException {
         ConfigurationProfile.validate(profile);
     }
 
@@ -81,10 +81,10 @@ public class ConfigurationProfileService extends AbstractProfileService{
      * @param crudType      Type of the CRUD operation.
      *
      * @return boolean
-     * @throws com.calix.sxa.SxaVertxException
+     * @throws vertx2.VertxException
      */
     @Override
-    public boolean validate(final AcsNbiRequest nbiRequest, final AcsApiCrudTypeEnum crudType) throws SxaVertxException {
+    public boolean validate(final AcsNbiRequest nbiRequest, final AcsApiCrudTypeEnum crudType) throws VertxException {
         /**
          * Perform basic Validate Mandatory/Optional Field Types
          */

@@ -1,9 +1,9 @@
 package vertx2.acs.nbi;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxJsonUtils;
-import com.calix.sxa.VertxMongoUtils;
-import com.calix.sxa.VertxUtils;
+import vertx2.VertxException;
+import vertx2.VertxJsonUtils;
+import vertx2.VertxMongoUtils;
+import vertx2.VertxUtils;
 import vertx2.acs.cache.PassiveWorkflowCache;
 import vertx2.acs.nbi.model.AcsNbiRequest;
 import vertx2.cache.ConfigurationProfileCache;
@@ -26,7 +26,7 @@ import org.vertx.java.core.json.JsonObject;
 import java.util.*;
 
 /**
- * Project:  SXA-CC / CCNG ACS API
+ * Project:  cwmp / CCNG ACS API
  *
  * Abstract/Common/Base CRUD Service.
  *
@@ -114,14 +114,14 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
                     "One or more index fields contain values currently used by another " + getServiceName());
     public static final JsonObject INVALID_URL_PATH_OR_QUERY_PARAMETERS = new JsonObject()
             .putString(AcsConstants.FIELD_NAME_ERROR, "Invalid URL Path and/or Query Parameter(s)!");
-    public static final SxaVertxException INVALID_URL_PATH_OR_QUERY_PARAMETERS_EXCEPTION =
-            new SxaVertxException("Invalid URL Path and/or Query Parameter(s)!");
+    public static final VertxException INVALID_URL_PATH_OR_QUERY_PARAMETERS_EXCEPTION =
+            new VertxException("Invalid URL Path and/or Query Parameter(s)!");
     public static final JsonObject MISSING_REQUIRED_FIELD = new JsonObject()
             .putString(AcsConstants.FIELD_NAME_ERROR, "Missing Required Field(s)!");
     public final JsonObject MISSING_ID = new JsonObject()
             .putString(AcsConstants.FIELD_NAME_ERROR, "Missing " + getServiceName() +" Id!");
-    public final SxaVertxException MISSING_ID_EXCEPTION =
-            new SxaVertxException("Missing " + getServiceName() +" Id!");
+    public final VertxException MISSING_ID_EXCEPTION =
+            new VertxException("Missing " + getServiceName() +" Id!");
     public static final JsonObject MISSING_ID_OR_FILTER = new JsonObject()
             .putString(AcsConstants.FIELD_NAME_ERROR, "Missing Document ID Or Filter(s)!");
     public final JsonObject NO_MATCH_FOUND = new JsonObject()
@@ -131,8 +131,8 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
             "Internal server error! Please contact Calix Support Team.";
     public static final JsonObject RESOURCE_EXISTS = new JsonObject()
             .putString(AcsConstants.FIELD_NAME_ERROR, "Trying to create resource that already exists!");
-    public static final SxaVertxException MISSING_REQUIRED_FIELD_EXCEPTION =
-            new SxaVertxException("Missing Required Field(s)!");
+    public static final VertxException MISSING_REQUIRED_FIELD_EXCEPTION =
+            new VertxException("Missing Required Field(s)!");
     public static final String MONGODB_TIMED_OUT_STRING =
             "Internal Server Error (ACS DB Timed Out)! Please contact Calix Support Team.";
     public static final JsonObject MONGODB_TIMED_OUT =
@@ -140,8 +140,8 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
     public final JsonObject CROSS_REF_CHECK_FAILED = new JsonObject()
             .putString(AcsConstants.FIELD_NAME_ERROR,
                     "Trying to delete a " + getServiceName() + " that is being referenced by other object(s)!");
-    public static final SxaVertxException INVALID_QUERY_PARAMETER =
-            new SxaVertxException("Invalid Query Parameter(s)!");
+    public static final VertxException INVALID_QUERY_PARAMETER =
+            new VertxException("Invalid Query Parameter(s)!");
 
     /**
      * Start the service
@@ -310,10 +310,10 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
      *
      * @return  The matcher, or null if the service has no index field.
      *
-     * @throws com.calix.sxa.SxaVertxException  if one or more index fields are missing.
+     * @throws vertx2.VertxException  if one or more index fields are missing.
      */
     public JsonObject buildIndexMatcher(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType)
-            throws SxaVertxException{
+            throws VertxException{
         String[] indexFields = getIndexFieldName();
 
         if (indexFields == null) {
@@ -369,7 +369,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
      * @param nbiRequest
      */
     public void processPathParameters(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType, String[] pathParams)
-            throws SxaVertxException {
+            throws VertxException {
         if (pathParams.length > 3) {
             // Save the path params
             nbiRequest.urlPathParams = new String[pathParams.length - 3];
@@ -413,7 +413,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
      *
      * @param nbiRequest
      */
-    public void processQueryParameters(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws SxaVertxException {
+    public void processQueryParameters(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws VertxException {
         if (nbiRequest.httpServerRequest.params().size() == 0) {
             return;
         }
@@ -539,9 +539,9 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
      * @param crudType      Type of the CRUD operation.
      *
      * @return boolean
-     * @throws com.calix.sxa.SxaVertxException
+     * @throws vertx2.VertxException
      */
-    public abstract boolean validate(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws SxaVertxException;
+    public abstract boolean validate(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws VertxException;
 
     /**
      * After validation, perform any service specific actions against this request.
@@ -552,9 +552,9 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
      * @param crudType      Type of the CRUD operation.
      *
      * @return None
-     * @throws com.calix.sxa.SxaVertxException
+     * @throws vertx2.VertxException
      */
-    public void preProcess(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws SxaVertxException {
+    public void preProcess(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws VertxException {
 
     }
 
@@ -608,7 +608,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
             try {
                 processPathParameters(nbiRequest, crudType, pathParams);
                 processQueryParameters(nbiRequest, crudType);
-            } catch (SxaVertxException ex) {
+            } catch (VertxException ex) {
                 log.error("Caught exception " + ex.getMessage() + " while processing URL "
                         + nbiRequest.httpServerRequest.absoluteURI() + "!");
                 nbiRequest.sendResponse(HttpResponseStatus.BAD_REQUEST, INVALID_URL_PATH_OR_QUERY_PARAMETERS);
@@ -623,8 +623,8 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
         boolean bValidationCompleted = false;
         try {
             bValidationCompleted = validate(nbiRequest, crudType);
-        } catch (SxaVertxException e) {
-            log.error("Caught SxaVertxException " + e.getMessage() + " while processing " + crudType.name() + " request!\n"
+        } catch (VertxException e) {
+            log.error("Caught VertxException " + e.getMessage() + " while processing " + crudType.name() + " request!\n"
                     + nbiRequest.body.encodePrettily());
             nbiRequest.sendResponse(
                     HttpResponseStatus.BAD_REQUEST,
@@ -651,8 +651,8 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
          */
         try {
             preProcess(nbiRequest, crudType);
-        } catch (SxaVertxException e) {
-            log.error("Caught SxaVertxException " + e.getMessage() + " while pre-processing " + crudType.name() + " request!\n"
+        } catch (VertxException e) {
+            log.error("Caught VertxException " + e.getMessage() + " while pre-processing " + crudType.name() + " request!\n"
                     + nbiRequest.body.encodePrettily());
             nbiRequest.sendResponse(
                     HttpResponseStatus.BAD_REQUEST,
@@ -771,7 +771,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
                             }
                         }
                 );
-            } catch (SxaVertxException e) {
+            } catch (VertxException e) {
                 e.printStackTrace();
                 nbiRequest.sendResponseChunk(HttpResponseStatus.OK, null, false);
             }
@@ -807,7 +807,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
                         buildRetrieveQueryKeys(nbiRequest),
                         null
                 );
-            } catch (SxaVertxException e) {
+            } catch (VertxException e) {
                 e.printStackTrace();
                 nbiRequest.sendResponseChunk(HttpResponseStatus.OK, null, false);
             }
@@ -832,7 +832,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
         JsonObject indexMatcher = null;
         try {
             indexMatcher = buildIndexMatcher(nbiRequest, AcsApiCrudTypeEnum.Create);
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             log.error("Create request is missing one or more index field(s)!");
             nbiRequest.sendResponse(HttpResponseStatus.BAD_REQUEST, MISSING_REQUIRED_FIELD);
             return;
@@ -863,7 +863,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
                         getMongoSaveHandler(nbiRequest)
                 );
             }
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
             nbiRequest.sendResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR,
                     getServerInternalErrorWithDetails());
@@ -888,7 +888,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
         JsonObject indexMatcher = null;
         try {
             indexMatcher = buildIndexMatcher(nbiRequest, AcsApiCrudTypeEnum.Update);
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             log.error("Caught exception " + e.getMessage());
             nbiRequest.sendResponse(HttpResponseStatus.BAD_REQUEST, MISSING_REQUIRED_FIELD);
             return;
@@ -929,7 +929,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
                     null,        // null query key means returns everything
                     2       // batch size
             );
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
             nbiRequest.sendResponse(
                     HttpResponseStatus.BAD_REQUEST,
@@ -1023,7 +1023,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
                             ),
                             null
                     );
-                } catch (SxaVertxException e) {
+                } catch (VertxException e) {
                     e.printStackTrace();
                 }
                 return;
@@ -1069,7 +1069,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
     /**
      * Build MongoDB Matcher for Retrieve
      */
-    public JsonObject buildRetrieveMatcher(AcsNbiRequest nbiRequest) throws SxaVertxException{
+    public JsonObject buildRetrieveMatcher(AcsNbiRequest nbiRequest) throws VertxException{
         return nbiRequest.body;
     }
 
@@ -1580,7 +1580,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
                             nbiRequest.body,
                             getMongoSaveHandler(nbiRequest)
                     );
-                } catch (SxaVertxException e) {
+                } catch (VertxException e) {
                     e.printStackTrace();
                     nbiRequest.sendResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR,
                             getServerInternalErrorWithDetails());
@@ -1740,7 +1740,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
         JsonObject indexMatcher = null;
         try {
             indexMatcher = buildIndexMatcher(nbiRequest, crudType);
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
         }
         JsonObject thisRecord = nbiRequest.body;
@@ -1844,7 +1844,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
                     nbiRequest.body,
                     getMongoUpdateHandler(nbiRequest)
             );
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
             nbiRequest.sendResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR,
                     getServerInternalErrorWithDetails());
@@ -2011,7 +2011,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
                         matcher,
                         handler
                 );
-            } catch (SxaVertxException e) {
+            } catch (VertxException e) {
                 e.printStackTrace();
                 handler.nbiRequest.sendResponse(
                         HttpResponseStatus.INTERNAL_SERVER_ERROR,

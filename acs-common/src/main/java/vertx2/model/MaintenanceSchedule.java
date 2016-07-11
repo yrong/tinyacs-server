@@ -1,7 +1,7 @@
 package vertx2.model;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxJsonUtils;
+import vertx2.VertxException;
+import vertx2.VertxJsonUtils;
 import vertx2.util.AcsConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * @author: ronyang
  */
@@ -21,7 +21,7 @@ public class MaintenanceSchedule extends MaintenanceWindow{
     /**
      * DB Collection Name
      */
-    public static final String DB_COLLECTION_NAME = "sxacc-maintenance-schedules";
+    public static final String DB_COLLECTION_NAME = "CWMP-maintenance-schedules";
 
     /**
      * Index Field(s)
@@ -65,7 +65,7 @@ public class MaintenanceSchedule extends MaintenanceWindow{
      * Constructor by JSON Object
      * @param jsonObject
      */
-    public MaintenanceSchedule(JsonObject jsonObject) throws SxaVertxException {
+    public MaintenanceSchedule(JsonObject jsonObject) throws VertxException {
         super(jsonObject);
 
         // Validate Field Types (all 5 fields are mandatory)

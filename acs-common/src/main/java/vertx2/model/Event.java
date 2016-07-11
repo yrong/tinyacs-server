@@ -1,13 +1,13 @@
 package vertx2.model;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxMongoUtils;
+import vertx2.VertxException;
+import vertx2.VertxMongoUtils;
 import vertx2.util.AcsConstants;
 import org.vertx.java.core.eventbus.EventBus;
 import org.vertx.java.core.json.JsonObject;
 
 /**
- * Project:  SXA-CC (aka CCFG)
+ * Project:  cwmp (aka CCFG)
  *
  * Event Data model.
  *
@@ -17,7 +17,7 @@ public class Event {
     /**
      * DB Collection Name
      */
-    public static final String DB_COLLECTION_NAME = "sxacc-events";
+    public static final String DB_COLLECTION_NAME = "CWMP-events";
 
     /**
      * Field Name Constants
@@ -62,7 +62,7 @@ public class Event {
                     jsonObject,
                     null
             );
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
         }
     }

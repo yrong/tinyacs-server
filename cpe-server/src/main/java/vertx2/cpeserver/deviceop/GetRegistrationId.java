@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Project:  sxa-cc-parent
+ * Project:  cwmp-parent
  *
  * Get the CPE's Registration Id during discovery process.
  *

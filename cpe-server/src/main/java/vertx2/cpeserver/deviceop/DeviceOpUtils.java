@@ -1,9 +1,9 @@
 package vertx2.cpeserver.deviceop;
 
-import com.calix.sxa.VertxConstants;
-import com.calix.sxa.VertxHttpClientUtils;
-import com.calix.sxa.VertxRedisUtils;
-import com.calix.sxa.VertxUtils;
+import vertx2.VertxConstants;
+import vertx2.VertxHttpClientUtils;
+import vertx2.VertxRedisUtils;
+import vertx2.VertxUtils;
 import vertx2.connreq.ConnectionRequestConstants;
 import vertx2.connreq.ConnectionRequestFsm;
 import vertx2.connreq.ConnectionRequestUtils;

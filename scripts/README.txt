@@ -1,9 +1,9 @@
-This directory contains the scripts for deploying/starting/stopping/restarting SXA-CC Vert.x Modules (CPE server
+This directory contains the scripts for deploying/starting/stopping/restarting cwmp Vert.x Modules (CPE server
 and ACS Server).
 
 The target deployment directory tree must be setup this way:
 
-$SXACC_HOME
+$CWMP_HOME
     |
     |
     ---- scripts
@@ -23,7 +23,7 @@ $SXACC_HOME
     |       |
     |       |
     |       ---- logback.xml
-    |            sxacc-acs.properties
+    |            CWMP-acs.properties
     |
     ---- vertx-artifacts
     |       |
@@ -46,14 +46,14 @@ $SXACC_HOME
 The "scripts"/"conf"/"libs" directories are checked into the GIT repo, and shall be manually copied into the deployment
 server.
 
-The recommended root location is "/home/sxacc-dev" (for a dedicated user account "sxacc-dev").
+The recommended root location is "/home/CWMP-dev" (for a dedicated user account "CWMP-dev").
 
 The "vertx-artifacts" directory shall be created during installation, and the Vertx artifacts (the 2 zip files) shall be
 manually copied into the "vertx-artifacts" directory.
 
 Prior to starting ACS server and CPE server:
  1. MongoDB and Redis Servers must be installed and started in the same machine.
- 2. The Linux System env variable "SXA_JBOSS_API_HOST" must be set properly to point the SXA JBOSS Host.
+ 2. The Linux System env variable "CWMP_JBOSS_API_HOST" must be set properly to point the SXA JBOSS Host.
 
 To start the ACS server, simply run the following shall command:
 

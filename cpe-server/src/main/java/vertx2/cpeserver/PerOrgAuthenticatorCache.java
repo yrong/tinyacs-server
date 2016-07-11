@@ -11,7 +11,7 @@ import org.vertx.java.core.Vertx;
 import org.vertx.java.core.json.JsonObject;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  * 
  * Maintain a local cache of all the organizations.
  *

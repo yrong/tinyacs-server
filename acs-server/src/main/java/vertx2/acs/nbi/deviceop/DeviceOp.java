@@ -1,8 +1,8 @@
 package vertx2.acs.nbi.deviceop;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxJsonUtils;
-import com.calix.sxa.VertxRedisUtils;
+import vertx2.VertxException;
+import vertx2.VertxJsonUtils;
+import vertx2.VertxRedisUtils;
 import vertx2.acs.nbi.model.AcsNbiRequest;
 import vertx2.model.*;
 import vertx2.util.AcsConstants;
@@ -20,7 +20,7 @@ import org.vertx.java.core.json.JsonObject;
 import java.util.UUID;
 
 /**
- * Project:  SXA-CC ACS NBI
+ * Project:  cwmp ACS NBI
  *
  * Device Operation Data Model.
  *
@@ -147,7 +147,7 @@ public class DeviceOp extends CpeDeviceOp{
             JsonObject deviceOpJsonObject,
             AcsNbiRequest nbiRequest,
             long internalDeviceOpSn,
-            String internalCallbackUrl) throws SxaVertxException{
+            String internalCallbackUrl) throws VertxException{
         this.vertx = vertx;
         this.deviceOpJsonObject = deviceOpJsonObject;
         this.nbiRequest = nbiRequest;
@@ -161,8 +161,8 @@ public class DeviceOp extends CpeDeviceOp{
              * Call the common validation method first
              */
             VertxJsonUtils.validateFields(deviceOpJsonObject, mandatoryFields, optionalFields);
-        } catch (SxaVertxException ex) {
-            throw new SxaVertxException("Invalid Device Op! Caught exception " + ex.getMessage());
+        } catch (VertxException ex) {
+            throw new VertxException("Invalid Device Op! Caught exception " + ex.getMessage());
         }
 
         /**
@@ -171,9 +171,9 @@ public class DeviceOp extends CpeDeviceOp{
         try {
             operationType = getOperationType(deviceOpJsonObject);
             validateByOpType(deviceOpJsonObject, operationType);
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
-            throw new SxaVertxException("Invalidate Operation " + deviceOpJsonObject.getString(FIELD_NAME_OPERATION) + "!");
+            throw new VertxException("Invalidate Operation " + deviceOpJsonObject.getString(FIELD_NAME_OPERATION) + "!");
         }
 
         /**
@@ -196,7 +196,7 @@ public class DeviceOp extends CpeDeviceOp{
                     getOptionsEnum = GetOptionsEnum.CachedDataOnly;
                 }
             } catch (Exception e) {
-                throw new SxaVertxException("Invalid Device Op! Caught exception when validating \""
+                throw new VertxException("Invalid Device Op! Caught exception when validating \""
                         + FIELD_NAME_GET_OPTIONS + "\"" + e.getMessage());
             }
         }

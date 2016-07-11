@@ -1,6 +1,6 @@
 package vertx2.cpeserver;
 
-import com.calix.sxa.VertxUtils;
+import vertx2.VertxUtils;
 import vertx2.cpeserver.httpauth.PerOrgAuthenticator;
 import vertx2.cpeserver.session.CwmpSessionCookieUtils;
 import vertx2.cwmp.CwmpFaultCodes;

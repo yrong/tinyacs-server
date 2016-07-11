@@ -1,7 +1,7 @@
 package vertx2.connreq;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * Constant Field Names for making a connection-request request.
  *

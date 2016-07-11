@@ -1,6 +1,6 @@
 package vertx2.acs.nbi.organization;
 
-import com.calix.sxa.*;
+import vertx2.*;
 import vertx2.acs.nbi.AbstractAcNbiCrudService;
 import vertx2.acs.nbi.model.AcsNbiRequest;
 import vertx2.cwmp.CwmpMessage;
@@ -19,9 +19,9 @@ import java.net.URL;
 import java.util.List;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
- * SXA-CC Organization Service.
+ * cwmp Organization Service.
  *
  * @author: ronyang
  */
@@ -29,10 +29,10 @@ public class OrganizationService extends AbstractAcNbiCrudService {
     /**
      * Constant(s)
      */
-    public static final SxaVertxException INVALID_URL = new SxaVertxException("Invalid URL!");
-    public static final SxaVertxException INVALID_HTTP_PROTOCOL = new SxaVertxException("Invalid HTTP Protocol!");
-    public static final SxaVertxException INVALID_EXT_IMAGE_SERVER_URL =
-            new SxaVertxException("Invalid External Image File Server URL!");
+    public static final VertxException INVALID_URL = new VertxException("Invalid URL!");
+    public static final VertxException INVALID_HTTP_PROTOCOL = new VertxException("Invalid HTTP Protocol!");
+    public static final VertxException INVALID_EXT_IMAGE_SERVER_URL =
+            new VertxException("Invalid External Image File Server URL!");
     public static final JsonObject DELETE_EXISTING_IMAGES_FIRST = new JsonObject()
             .putString(
                     AcsConstants.FIELD_NAME_ERROR,
@@ -77,10 +77,10 @@ public class OrganizationService extends AbstractAcNbiCrudService {
      * @param crudType      Type of the CRUD operation.
      *
      * @return boolean
-     * @throws com.calix.sxa.SxaVertxException
+     * @throws vertx2.VertxException
      */
     @Override
-    public boolean validate(final AcsNbiRequest nbiRequest, final AcsApiCrudTypeEnum crudType) throws SxaVertxException {
+    public boolean validate(final AcsNbiRequest nbiRequest, final AcsApiCrudTypeEnum crudType) throws VertxException {
         /**
          * Common Validation for both Create and Update
          */
@@ -161,14 +161,14 @@ public class OrganizationService extends AbstractAcNbiCrudService {
         switch (crudType) {
             case Create:
                 if (existingOrg != null) {
-                    throw new SxaVertxException("Organization Id " + orgId + " is already in use by "
+                    throw new VertxException("Organization Id " + orgId + " is already in use by "
                             + existingOrg.name + "!");
                 }
                 break;
 
             case Update:
                 if (existingOrg == null) {
-                    throw new SxaVertxException("Organization Id " + orgId + " Not Found!");
+                    throw new VertxException("Organization Id " + orgId + " Not Found!");
                 } else {
                     /**
                      * If adding/changing External Image Server, all existing images must be deleted first
@@ -223,11 +223,11 @@ public class OrganizationService extends AbstractAcNbiCrudService {
      *
      * @return  The matcher, or null if the service has no index field.
      *
-     * @throws com.calix.sxa.SxaVertxException  if one or more index fields are missing.
+     * @throws vertx2.VertxException  if one or more index fields are missing.
      */
     @Override
     public JsonObject buildIndexMatcher(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType)
-            throws SxaVertxException{
+            throws VertxException{
         JsonObject org = nbiRequest.body;
 
         // Name/URL/API-Client-Username must be unique
@@ -251,10 +251,10 @@ public class OrganizationService extends AbstractAcNbiCrudService {
      * @param crudType      Type of the CRUD operation.
      *
      * @return None
-     * @throws com.calix.sxa.SxaVertxException
+     * @throws vertx2.VertxException
      */
     @Override
-    public void preProcess(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws SxaVertxException {
+    public void preProcess(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws VertxException {
     };
 
     /**
@@ -320,7 +320,7 @@ public class OrganizationService extends AbstractAcNbiCrudService {
                             matcher,
                             null
                     );
-                } catch (SxaVertxException e) {
+                } catch (VertxException e) {
                     e.printStackTrace();
                 }
             }

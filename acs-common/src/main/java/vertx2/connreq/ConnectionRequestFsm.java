@@ -1,9 +1,9 @@
 package vertx2.connreq;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxMongoUtils;
-import com.calix.sxa.VertxRedisUtils;
-import com.calix.sxa.VertxUtils;
+import vertx2.VertxException;
+import vertx2.VertxMongoUtils;
+import vertx2.VertxRedisUtils;
+import vertx2.VertxUtils;
 import vertx2.cwmp.CwmpMessage;
 import vertx2.model.Cpe;
 import vertx2.model.CpeIdentifier;
@@ -28,7 +28,7 @@ import org.vertx.java.core.json.JsonObject;
 import redis.clients.jedis.Jedis;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * Connection Request Finite State Machine.
  *
@@ -356,7 +356,7 @@ public class ConnectionRequestFsm {
                 httpResponseHandler
         );
         clientRequest.exceptionHandler(httpExceptionHandler);
-        clientRequest.headers().set("User-Agent", "Calix SXA-CC");
+        clientRequest.headers().set("User-Agent", "Calix cwmp");
         clientRequest.headers().set("Accept", "*/*");
         // Set timeout (in ms)
         clientRequest.setTimeout(ConnectionRequestConstants.DEFAULT_CONN_REQ_TIMEOUT);
@@ -417,7 +417,7 @@ public class ConnectionRequestFsm {
                     dbObject,
                     null
             );
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
         }
     }

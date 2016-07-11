@@ -3,7 +3,7 @@ package vertx2.cwmp;
 import dslforumOrgCwmp12.*;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * @author: ronyang
  */

@@ -1,6 +1,6 @@
 package vertx2.acs.nbi.file;
 
-import com.calix.sxa.*;
+import vertx2.*;
 import vertx2.acs.nbi.AbstractAcNbiCrudService;
 import vertx2.acs.nbi.model.AcsNbiRequest;
 import vertx2.model.*;
@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * ACS API File Services.
  *
@@ -118,9 +118,9 @@ public class FileService extends AbstractAcNbiCrudService{
      * @param crudType      Type of the CRUD operation.
      *
      * @return boolean
-     * @throws com.calix.sxa.SxaVertxException
+     * @throws vertx2.VertxException
      */
-    public boolean validate(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws SxaVertxException {
+    public boolean validate(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws VertxException {
         /**
          * Perform basic Validate Mandatory/Optional Field Types
          */
@@ -156,10 +156,10 @@ public class FileService extends AbstractAcNbiCrudService{
      * @param crudType      Type of the CRUD operation.
      *
      * @return None
-     * @throws com.calix.sxa.SxaVertxException
+     * @throws vertx2.VertxException
      */
     @Override
-    public void preProcess(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws SxaVertxException {
+    public void preProcess(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws VertxException {
         switch (crudType) {
             case Create:
                 // Initialize the file-size and number-of-downloads to 0
@@ -323,7 +323,7 @@ public class FileService extends AbstractAcNbiCrudService{
      * Build MongoDB Matcher for Retrieve
      */
     @Override
-    public JsonObject buildRetrieveMatcher(AcsNbiRequest nbiRequest) throws SxaVertxException {
+    public JsonObject buildRetrieveMatcher(AcsNbiRequest nbiRequest) throws VertxException {
         if (nbiRequest.body.containsField(AcsConstants.FIELD_NAME_ID)) {
             return nbiRequest.body;
         }
@@ -602,7 +602,7 @@ public class FileService extends AbstractAcNbiCrudService{
                             ),
                     null
             );
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
         }
     }

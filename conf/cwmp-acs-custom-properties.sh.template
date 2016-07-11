@@ -1,14 +1,14 @@
 #################################################################################
 ### Export System Environment Variables for ACS File Store
 #################################################################################
-#export SXA_CC_ACS_FILE_STORE_PATH="/home/sxacc/acs-file-store"
+#export CWMP_ACS_FILE_STORE_PATH="/home/CWMP/acs-file-store"
 
 #################################################################################
 ### System Environment Variables for MongoDB Host/Port/DB_Name
 #################################################################################
-#export SXA_MONGO_HOST="gcs.calix.com"
+#export CWMP_MONGO_HOST="gcs.calix.com"
 
 #################################################################################
 ### System Environment Variables for SXA JBOSS API Server Hostname
 #################################################################################
-#export SXA_JBOSS_API_HOST="gcs.calix.com"
+#export CWMP_JBOSS_API_HOST="gcs.calix.com"

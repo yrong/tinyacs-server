@@ -2,8 +2,8 @@ package vertx2.cpe.sim;
 
 import broadbandForumOrgCwmpDatamodel14.ModelObject;
 import broadbandForumOrgCwmpDatamodel14.ModelParameter;
-import com.calix.sxa.VertxJsonUtils;
-import com.calix.sxa.VertxMongoUtils;
+import vertx2.VertxJsonUtils;
+import vertx2.VertxMongoUtils;
 import vertx2.cwmp.*;
 import vertx2.model.Cpe;
 import vertx2.model.CpeDeviceDataModel;
@@ -31,7 +31,7 @@ import java.util.GregorianCalendar;
 import java.util.Set;
 
 /**
- * Project:  sxa-cc-parent
+ * Project:  cwmp-parent
  *
  * A CPE CWMP Session
  *

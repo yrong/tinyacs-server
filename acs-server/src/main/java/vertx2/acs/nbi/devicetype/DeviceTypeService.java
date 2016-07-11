@@ -1,7 +1,7 @@
 package vertx2.acs.nbi.devicetype;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxMongoUtils;
+import vertx2.VertxException;
+import vertx2.VertxMongoUtils;
 import vertx2.acs.nbi.AbstractAcNbiCrudService;
 import vertx2.acs.nbi.model.AcsNbiRequest;
 import vertx2.model.AcsApiCrudTypeEnum;
@@ -17,7 +17,7 @@ import org.vertx.java.core.json.JsonObject;
 import java.util.List;
 
 /**
- * Project:  SXA-CC ACS API
+ * Project:  cwmp ACS API
  *
  * Device Type Web Service Implementation.
  *
@@ -72,14 +72,14 @@ public class DeviceTypeService extends AbstractAcNbiCrudService {
      * @param crudType      Type of the CRUD operation.
      *
      * @return boolean
-     * @throws SxaVertxException
+     * @throws VertxException
      */
-    public boolean validate(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws SxaVertxException {
+    public boolean validate(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws VertxException {
         switch (crudType) {
             case Create:
             case Update:
             case Delete:
-                throw new SxaVertxException("Device Types are read only!");
+                throw new VertxException("Device Types are read only!");
         }
 
         return true;
@@ -192,7 +192,7 @@ public class DeviceTypeService extends AbstractAcNbiCrudService {
                                     }
                                 }
                         );
-                    } catch (SxaVertxException e) {
+                    } catch (VertxException e) {
                         e.printStackTrace();
                     }
                 }

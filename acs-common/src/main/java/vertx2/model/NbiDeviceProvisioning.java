@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * NBI Provisioning (for external API clients) Data Model and Utils.
  *
@@ -34,7 +34,7 @@ public class NbiDeviceProvisioning {
     public static HashMap<String, String> initNbiToTr098PathMap (){
         HashMap<String, String> map = new HashMap<>();
 
-        map.put("WANPPPConnection", "X_CALIX_SXACC_DefaultWanConnectionPath");
+        map.put("WANPPPConnection", "X_CALIX_CWMP_DefaultWanConnectionPath");
         map.put("WLANConfiguration", "InternetGatewayDevice.LANDevice.1.WLANConfiguration");
 
         return map;

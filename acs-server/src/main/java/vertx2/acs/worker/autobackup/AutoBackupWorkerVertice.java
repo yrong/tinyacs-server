@@ -1,7 +1,7 @@
 package vertx2.acs.worker.autobackup;
 
-import com.calix.sxa.VertxConstants;
-import com.calix.sxa.VertxRedisUtils;
+import vertx2.VertxConstants;
+import vertx2.VertxRedisUtils;
 import vertx2.model.*;
 import vertx2.util.AcsApiUtils;
 import vertx2.util.AcsConfigProperties;
@@ -18,7 +18,7 @@ import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * Auto Backup Worker Vertice.
  *

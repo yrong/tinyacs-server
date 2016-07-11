@@ -1,6 +1,6 @@
 package vertx2.acs.cache;
 
-import com.calix.sxa.VertxMongoUtils;
+import vertx2.VertxMongoUtils;
 import vertx2.cache.AbstractMultiOrgLocalCache;
 import vertx2.model.ExecPolicy;
 import vertx2.model.Workflow;
@@ -12,7 +12,7 @@ import org.vertx.java.core.json.JsonObject;
 import java.util.Comparator;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * Local cache of all passive workflows.
  *

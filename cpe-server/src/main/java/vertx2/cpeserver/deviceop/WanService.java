@@ -1,8 +1,8 @@
 package vertx2.cpeserver.deviceop;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxJsonUtils;
-import com.calix.sxa.VertxMongoUtils;
+import vertx2.VertxException;
+import vertx2.VertxJsonUtils;
+import vertx2.VertxMongoUtils;
 import vertx2.cpeserver.session.CwmpRequest;
 import vertx2.cpeserver.session.CwmpSession;
 import vertx2.cwmp.CwmpException;
@@ -20,7 +20,7 @@ import org.vertx.java.core.json.JsonObject;
 import java.util.ArrayList;
 
 /**
- * Project:  SXA-CC (aka CCFG)
+ * Project:  cwmp (aka CCFG)
  *
  * Apply WAN Service Profile.
  *
@@ -252,9 +252,9 @@ public class WanService {
      * Start the procedure
      */
     public void start() {
-        wanIpConnectionPrefix = SxaCcTr098ModelExtensions.convertSxaCcAbstractNameToActualName(
+        wanIpConnectionPrefix = CWMPTr098ModelExtensions.convertCWMPAbstractNameToActualName(
                 session.cpe,
-                SxaCcTr098ModelExtensions.WAN_CONNECTION_DEVICE + ".WANIPConnection."
+                CWMPTr098ModelExtensions.WAN_CONNECTION_DEVICE + ".WANIPConnection."
         );
 
         // Check if service plan was already saved in this session
@@ -362,7 +362,7 @@ public class WanService {
                         ),
                         null
                 );
-            } catch (SxaVertxException e) {
+            } catch (VertxException e) {
                 log.error(e.getMessage());
             }
         } else {
@@ -1213,7 +1213,7 @@ public class WanService {
                     log.error("Unable to find dial plan " + dialPlanId + "! Using system-default for now.");
                     dialPlan = DialPlan.SYSTEM_DEFAULT_DIAL_PLAN;
                 }
-                // Convert the SXACC dial-plan object to RG object and merge with other voice settings
+                // Convert the CWMP dial-plan object to RG object and merge with other voice settings
                 VertxJsonUtils.merge(subscriberVoiceSettings, DialPlan.toRgDataModelObject(dialPlan));
 
                 parameterValueList = SetParameterValues.jsonObjToParameterValuesList(
@@ -1398,7 +1398,7 @@ public class WanService {
                         break;
 
                     default:
-                        if (name.startsWith(SxaCcTr098ModelExtensions.RTP_CODEC_PREFIX)) {
+                        if (name.startsWith(CWMPTr098ModelExtensions.RTP_CODEC_PREFIX)) {
                             /**
                              * Process Abstract Codec Parameters
                              */
@@ -1408,9 +1408,9 @@ public class WanService {
                             if (codecIndex != null) {
                                 // Found a enabled code in profile
                                 int priority;
-                                if (name.equals(SxaCcTr098ModelExtensions.FIRST_ORDER_RTP_CODEC)) {
+                                if (name.equals(CWMPTr098ModelExtensions.FIRST_ORDER_RTP_CODEC)) {
                                     priority = 1;
-                                } else if (name.equals(SxaCcTr098ModelExtensions.SECOND_ORDER_RTP_CODEC)) {
+                                } else if (name.equals(CWMPTr098ModelExtensions.SECOND_ORDER_RTP_CODEC)) {
                                     priority = 2;
                                 } else {
                                     priority = 3;

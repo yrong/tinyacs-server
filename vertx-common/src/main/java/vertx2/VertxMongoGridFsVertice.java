@@ -11,7 +11,7 @@ import org.vertx.java.core.json.JsonObject;
 import java.util.List;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * Extending the existing vertx-mod-mongo-gridfs (from EnglishTown) to add delete function.
  *
@@ -27,9 +27,9 @@ public class VertxMongoGridFsVertice extends GridFSModule {
     public static final String ACTION_DELETE_FILE = "deleteFile";
 
     /**
-     * GridFS Bucket Used by SXACC Files
+     * GridFS Bucket Used by CWMP Files
      */
-    public static final String SXACC_BUCKET = "sxacc_fs";
+    public static final String CWMP_BUCKET = "CWMP_fs";
 
     /**
      * Field Names
@@ -78,7 +78,7 @@ public class VertxMongoGridFsVertice extends GridFSModule {
             /**
              * Initialize the Mongo GridFS Instance with custom bucket
              */
-            gridFS = new GridFS(db, SXACC_BUCKET);
+            gridFS = new GridFS(db, CWMP_BUCKET);
         } catch (Exception ex) {
             logger.error(ex.getMessage());
             ex.printStackTrace();

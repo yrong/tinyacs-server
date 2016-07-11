@@ -1,8 +1,8 @@
 package vertx2.acs.nbi.workflow;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxConstants;
-import com.calix.sxa.VertxMongoUtils;
+import vertx2.VertxException;
+import vertx2.VertxConstants;
+import vertx2.VertxMongoUtils;
 import vertx2.acs.nbi.AbstractAcNbiCrudService;
 import vertx2.acs.nbi.model.AcsNbiRequest;
 import vertx2.acs.worker.workflow.ActiveWorkflowTaskWorker;
@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Project:  SXA-CC ACS API
+ * Project:  cwmp ACS API
  *
  * Workflow Web Service Implementation.
  *
@@ -149,29 +149,29 @@ public class WorkflowService extends AbstractAcNbiCrudService {
     /**
      * Static CcExceptions and Errors
      */
-    public static final SxaVertxException INVALID_SUSPEND_RESUME_SUSPEND_REQUEST =
-            new SxaVertxException("Invalid Suspend/Resume/Suspend Request!");
+    public static final VertxException INVALID_SUSPEND_RESUME_SUSPEND_REQUEST =
+            new VertxException("Invalid Suspend/Resume/Suspend Request!");
     public static final JsonObject INVALID_CPE_ID = new JsonObject().putString(
             AcsConstants.FIELD_NAME_ERROR, "Invalid Device ID(s)!"
     );
-    public static final SxaVertxException INVALID_GROUP_ID = new SxaVertxException("Invalid Device Group ID(s)!");
-    public static final SxaVertxException APPLY_MULTIPLE_VIDEO_SERVICE = new SxaVertxException(
+    public static final VertxException INVALID_GROUP_ID = new VertxException("Invalid Device Group ID(s)!");
+    public static final VertxException APPLY_MULTIPLE_VIDEO_SERVICE = new VertxException(
             "Cannot apply multiple video services!"
     );
-    public static final SxaVertxException APPLY_MULTIPLE_VOICE_SERVICE = new SxaVertxException(
+    public static final VertxException APPLY_MULTIPLE_VOICE_SERVICE = new VertxException(
             "Cannot apply multiple voice services!"
     );
-    public static final SxaVertxException APPLY_SERVICE_PROFILE_TO_GPON_DEVICES = new SxaVertxException(
+    public static final VertxException APPLY_SERVICE_PROFILE_TO_GPON_DEVICES = new VertxException(
             "Service Profiles cannot be applied to 8xxG Models!"
     );
-    public static final SxaVertxException APPLY_SERVICE_PROFILE_WITHOUT_MODELS = new SxaVertxException(
+    public static final VertxException APPLY_SERVICE_PROFILE_WITHOUT_MODELS = new VertxException(
             "When applying Service Profiles via Workflows, the device group must explicitly match on one or more 844E Models!"
     );
 
-    public static final SxaVertxException DOWNLOAD_SW_IMAGE_TO_GPON_DEVICES = new SxaVertxException(
+    public static final VertxException DOWNLOAD_SW_IMAGE_TO_GPON_DEVICES = new VertxException(
             "Cannot download SW/FW Images to 8xxG Models!"
     );
-    public static final SxaVertxException DOWNLOAD_SW_IMAGE_WITHOUT_MODELS = new SxaVertxException(
+    public static final VertxException DOWNLOAD_SW_IMAGE_WITHOUT_MODELS = new VertxException(
             "When downloading SW/FW Images via Workflows, the device group must explicitly match on one or more 844E Models!"
     );
 
@@ -218,9 +218,9 @@ public class WorkflowService extends AbstractAcNbiCrudService {
      * @param crudType      Type of the CRUD operation.
      *
      * @return boolean
-     * @throws com.calix.sxa.SxaVertxException
+     * @throws vertx2.VertxException
      */
-    public boolean validate(final AcsNbiRequest nbiRequest, final AcsApiCrudTypeEnum crudType) throws SxaVertxException {
+    public boolean validate(final AcsNbiRequest nbiRequest, final AcsApiCrudTypeEnum crudType) throws VertxException {
         switch (crudType) {
             case Update:
                 // Check for suspend/suspend/resume requests
@@ -291,7 +291,7 @@ public class WorkflowService extends AbstractAcNbiCrudService {
                             // Check for VLAN ID conflicts
                             int vlan = aService.getInteger("X_000631_VlanMuxID");
                             if (allVLANs.contains(vlan)) {
-                                throw new SxaVertxException(
+                                throw new VertxException(
                                         "Trying to configure multiple services using "
                                         + ((vlan == -1)? "the untagged VLAN" : ("VLAN " + vlan))
                                         + "!"
@@ -318,7 +318,7 @@ public class WorkflowService extends AbstractAcNbiCrudService {
                          * If applying service profiles, group filter must specify 844E models.
                          */
                         /*
-                        Commented out due to SXACC-1263
+                        Commented out due to CWMP-1263
                         if (bHasServiceProfile || bHasImageDownload) {
                             if (group.bGroupMatchOnGponModel(false)) {
                                 workflow.bValidationResponseSent = true;
@@ -379,11 +379,11 @@ public class WorkflowService extends AbstractAcNbiCrudService {
      *
      * @return  The matcher, or null if the service has no index field.
      *
-     * @throws com.calix.sxa.SxaVertxException  if one or more index fields are missing.
+     * @throws vertx2.VertxException  if one or more index fields are missing.
      */
     @Override
     public JsonObject buildIndexMatcher(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType)
-            throws SxaVertxException{
+            throws VertxException{
         if (crudType.equals(AcsApiCrudTypeEnum.Update)) {
             // Check for suspend/resume requests
             if (isSuspendRequest(nbiRequest) || isResumeRequest(nbiRequest)) {
@@ -412,7 +412,7 @@ public class WorkflowService extends AbstractAcNbiCrudService {
             JsonArray idArray,
             final String singleId,
             final JsonObject error)
-            throws SxaVertxException {
+            throws VertxException {
         workflow.validationPendingCount ++;
 
         final int batchSize;
@@ -567,7 +567,7 @@ public class WorkflowService extends AbstractAcNbiCrudService {
                         }
                     }
             );
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
         }
     }
@@ -610,7 +610,7 @@ public class WorkflowService extends AbstractAcNbiCrudService {
         Workflow workflow;
         try {
             workflow = Workflow.validateJsonObject(oldRecord);
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             nbiRequest.sendResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR, getServerInternalErrorWithDetails());
             log.error("Failed to create workflow pojo!\n" + oldRecord.encodePrettily());
             return VALIDATION_PENDING_OR_FAILED;
@@ -1049,7 +1049,7 @@ public class WorkflowService extends AbstractAcNbiCrudService {
                 try {
                     // Convert to Workflow POJO
                     workflow = Workflow.validateJsonObject(queryResult);
-                } catch (SxaVertxException e) {
+                } catch (VertxException e) {
                     nbiRequest.sendResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR, getServerInternalErrorWithDetails());
                     log.error("Failed to create workflow pojo!\n" + queryResult.encodePrettily());
                     return;
@@ -1115,7 +1115,7 @@ public class WorkflowService extends AbstractAcNbiCrudService {
                     new FindBeforeDeleteResultHandler(nbiRequest),
                     null        // null query key means returns everything
             );
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
             nbiRequest.sendResponse(
                     HttpResponseStatus.BAD_REQUEST,
@@ -1186,7 +1186,7 @@ public class WorkflowService extends AbstractAcNbiCrudService {
                         VertxMongoUtils.DEFAULT_MULTI_TIMEOUT,
                         null
                 );
-            } catch (SxaVertxException e) {
+            } catch (VertxException e) {
                 e.printStackTrace();
             }
         }
@@ -1237,7 +1237,7 @@ public class WorkflowService extends AbstractAcNbiCrudService {
             try {
                 // Convert to Workflow POJO
                 workflow = Workflow.validateJsonObject(response);
-            } catch (SxaVertxException e) {
+            } catch (VertxException e) {
                 log.error("Failed to create workflow pojo!\n" + queryResults.encodePrettily());
                 nbiRequest.sendResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR, getServerInternalErrorWithDetails());
                 return null;
@@ -1309,7 +1309,7 @@ public class WorkflowService extends AbstractAcNbiCrudService {
                                         matcher,
                                         this
                                 );
-                            } catch (SxaVertxException e) {
+                            } catch (VertxException e) {
                                 // This should never happen
                                 log.error("Caught exception " + e.getMessage()
                                         + " when querying counts for workflow " + workflowId
@@ -1343,7 +1343,7 @@ public class WorkflowService extends AbstractAcNbiCrudService {
                         workflow.getMatcherByState(WorkflowCpeTracker.STATE_SUCCEEDED),
                         countHandler
                 );
-            } catch (SxaVertxException e) {
+            } catch (VertxException e) {
                 // This should never happen
                 log.error("Caught exception " + e.getMessage() + " when querying counts for workflow " + workflow.id);
                 nbiRequest.sendResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR, getServerInternalErrorWithDetails());

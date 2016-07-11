@@ -1,8 +1,8 @@
 package vertx2.acs.worker.workflow;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxConstants;
-import com.calix.sxa.VertxMongoUtils;
+import vertx2.VertxException;
+import vertx2.VertxConstants;
+import vertx2.VertxMongoUtils;
 import vertx2.acs.cache.PassiveWorkflowCache;
 import vertx2.acs.utils.ReplacementUtils;
 import vertx2.model.*;
@@ -20,7 +20,7 @@ import org.vertx.java.platform.Verticle;
 import java.util.TreeMap;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * Passive Workflow Worker Vertice.
  *
@@ -305,7 +305,7 @@ public class PassiveWorkflowWorkerVertice extends Verticle{
                                                 ),
                                                 null
                                         );
-                                    } catch (SxaVertxException e) {
+                                    } catch (VertxException e) {
                                         e.printStackTrace();
                                     }
                                 }
@@ -313,7 +313,7 @@ public class PassiveWorkflowWorkerVertice extends Verticle{
                     ),
                     null
             );
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
         }
     }
@@ -403,7 +403,7 @@ public class PassiveWorkflowWorkerVertice extends Verticle{
                                             cpeKey,
                                             null
                                     );
-                                } catch (SxaVertxException e) {
+                                } catch (VertxException e) {
                                     e.printStackTrace();
                                 }
                             }

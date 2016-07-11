@@ -7,7 +7,7 @@ import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.core.json.impl.Base64;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * Abstract Per-Organization Authenticator that is used to authenticate NBI client requests.
  *

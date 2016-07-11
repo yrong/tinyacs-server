@@ -1,6 +1,6 @@
 package vertx2.cpeserver.session;
 
-import com.calix.sxa.*;
+import vertx2.*;
 import vertx2.connreq.ConnectionRequestUtils;
 import vertx2.cpeserver.CpeServerConstants;
 import vertx2.cpeserver.CpeServerTR069SessionVertice;
@@ -24,7 +24,7 @@ import redis.clients.jedis.Jedis;
 import java.util.LinkedList;
 
 /**
- * Project:  SXA-CC CPE Server
+ * Project:  cwmp CPE Server
  *
  * This class defines the CWMP Session Object and Session FSM (Finite-State-Machine) methods.
  *
@@ -131,7 +131,7 @@ public class CwmpSession {
      * @param cpeKey
      * @param cwmpMessage
      * @throws CwmpException
-     * @throws SxaVertxException
+     * @throws VertxException
      */
     public CwmpSession(
             CpeServerTR069SessionVertice sessionVertice,
@@ -142,7 +142,7 @@ public class CwmpSession {
             final String orgId,
             final String cpeKey,
             final CwmpMessage cwmpMessage)
-            throws CwmpException, SxaVertxException {
+            throws CwmpException, VertxException {
         // Save the Session Vertice and Vert.x instance
         this.sessionVertice = sessionVertice;
         this.vertx = vertx;

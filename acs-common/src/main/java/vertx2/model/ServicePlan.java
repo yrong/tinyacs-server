@@ -1,8 +1,8 @@
 package vertx2.model;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxJsonUtils;
-import com.calix.sxa.VertxMongoUtils;
+import vertx2.VertxException;
+import vertx2.VertxJsonUtils;
+import vertx2.VertxMongoUtils;
 import vertx2.cache.DialPlanCache;
 import vertx2.util.AcsConstants;
 import org.slf4j.Logger;
@@ -18,7 +18,7 @@ import java.util.List;
  *
  * Subscriber Service Plan Data Model.
  *
- * See http://wiki.calix.local/display/Compass/SXA-CC+ACS+API#SXA-CCACSAPI-"ServicePlan"Struct for more details.
+ * See http://wiki.calix.local/display/Compass/cwmp+ACS+API#cwmpACSAPI-"ServicePlan"Struct for more details.
  *
  * @author: ronyang
  */
@@ -28,7 +28,7 @@ public class ServicePlan {
     /**
      * DB Collection Name
      */
-    public static final String DB_COLLECTION_NAME = "sxacc-service-plans";
+    public static final String DB_COLLECTION_NAME = "CWMP-service-plans";
 
     /**
      * Field Name Constants
@@ -169,11 +169,11 @@ public class ServicePlan {
     /**
      * Validation Exceptions
      */
-    public static SxaVertxException INVALID_DIAL_PLAN_ID = new SxaVertxException("Invalid Voice DialPlan Id!");
-    public static SxaVertxException VOICE_LINE_1_ENABLE_INVALID_VALUE = new SxaVertxException(
+    public static VertxException INVALID_DIAL_PLAN_ID = new VertxException("Invalid Voice DialPlan Id!");
+    public static VertxException VOICE_LINE_1_ENABLE_INVALID_VALUE = new VertxException(
             "Voice Line 1 \"Enable\" Field contains invalid value! (must be \"Enabled\" or \"Disabled\")"
     );
-    public static SxaVertxException VOICE_LINE_2_ENABLE_INVALID_VALUE = new SxaVertxException(
+    public static VertxException VOICE_LINE_2_ENABLE_INVALID_VALUE = new VertxException(
             "Voice Line 1 \"Enable\" Field contains invalid value! (must be \"Enabled\" or \"Disabled\")"
     );
 
@@ -200,10 +200,10 @@ public class ServicePlan {
      * Validation Method.
      *
      * @param aServicePlan
-     * @throws SxaVertxException
+     * @throws VertxException
      */
     public static void validate(JsonObject aServicePlan, DialPlanCache dialPlanCache)
-            throws SxaVertxException{
+            throws VertxException{
         VertxJsonUtils.validateFields(aServicePlan, MANDATORY_FIELDS, OPTIONAL_FIELDS);
 
         for (String fieldName : aServicePlan.getFieldNames()) {
@@ -221,8 +221,8 @@ public class ServicePlan {
                             VOICE_MANDATORY_FIELDS,
                             VOICE_OPTIONAL_FIELDS
                     );
-                } catch (SxaVertxException ex) {
-                    throw new SxaVertxException("Voice Field: " + ex.getMessage());
+                } catch (VertxException ex) {
+                    throw new VertxException("Voice Field: " + ex.getMessage());
                 }
 
                 for (String voiceFieldName : voiceService.getFieldNames()) {
@@ -234,8 +234,8 @@ public class ServicePlan {
                                     VOICE_FAX_T38_MANDATORY_FIELDS,
                                     VOICE_FAX_T38_OPTIONAL_FIELDS
                             );
-                        } catch (SxaVertxException ex) {
-                            throw new SxaVertxException("Voice->FaxT38 : " + ex.getMessage());
+                        } catch (VertxException ex) {
+                            throw new VertxException("Voice->FaxT38 : " + ex.getMessage());
                         }
                     } else if (FIELD_NAME_DIAL_PLAN.equals(voiceFieldName)) {
                         String dialPlanId = voiceService.getString(FIELD_NAME_DIAL_PLAN);
@@ -250,10 +250,10 @@ public class ServicePlan {
                                     VOICE_LINES_MANDATORY_FIELDS,
                                     VOICE_LINES_OPTIONAL_FIELDS
                             );
-                        } catch (SxaVertxException ex) {
+                        } catch (VertxException ex) {
                             String error = ex.getMessage()
                                     .replace("Missing Mandatory Field", "No Configuration Found for Line");
-                            throw new SxaVertxException("Voice->Line : " + error);
+                            throw new VertxException("Voice->Line : " + error);
                         }
 
                         // Validate individual voice line attributes
@@ -265,8 +265,8 @@ public class ServicePlan {
                                         VOICE_LINE_MANDATORY_FIELDS,
                                         VOICE_LINE_OPTIONAL_FIELDS
                                 );
-                            } catch (SxaVertxException ex) {
-                                throw new SxaVertxException(
+                            } catch (VertxException ex) {
+                                throw new VertxException(
                                         "Voice->Line " + lineNumber + ": " + ex.getMessage()
                                 );
                             }
@@ -281,8 +281,8 @@ public class ServicePlan {
                                                     VOICE_LINE_MANDATORY_FIELDS_WHEN_ENABLED,
                                                     VOICE_LINE_OPTIONAL_FIELDS
                                             );
-                                        } catch (SxaVertxException ex) {
-                                            throw new SxaVertxException(
+                                        } catch (VertxException ex) {
+                                            throw new VertxException(
                                                     "Voice->Line " + lineNumber + ": " + ex.getMessage()
                                             );
                                         }
@@ -303,8 +303,8 @@ public class ServicePlan {
                                                 VOICE_LINE_SIP_MANDATORY_FIELDS,
                                                 VOICE_LINE_SIP_OPTIONAL_FIELDS
                                         );
-                                    } catch (SxaVertxException ex) {
-                                        throw new SxaVertxException(
+                                    } catch (VertxException ex) {
+                                        throw new VertxException(
                                                 "Voice->Line " + lineNumber + "->SIP: " + ex.getMessage()
                                         );
                                     }
@@ -316,8 +316,8 @@ public class ServicePlan {
                                                 VOICE_LINE_CALLING_FEATURES_MANDATORY_FIELDS,
                                                 VOICE_LINE_CALLING_FEATURES_OPTIONAL_FIELDS
                                         );
-                                    } catch (SxaVertxException ex) {
-                                        throw new SxaVertxException(
+                                    } catch (VertxException ex) {
+                                        throw new VertxException(
                                                 "Voice->Line " + lineNumber + "->CallingFeatures: "
                                                         + ex.getMessage()
                                         );
@@ -335,7 +335,7 @@ public class ServicePlan {
                                             } else {
                                                 missingParam = "X_000631_DirectConnectTimer";
                                             }
-                                            throw new SxaVertxException(
+                                            throw new VertxException(
                                                     "Voice->Line " + lineNumber + "->CallingFeatures: "
                                                             + missingParam + " must be specified when " +
                                                             "X_000631_DirectConnectEnable is true!");
@@ -349,8 +349,8 @@ public class ServicePlan {
                                                 VOICE_LINE_VOICE_PROCESSING_MANDATORY_FIELDS,
                                                 VOICE_LINE_VOICE_PROCESSING_OPTIONAL_FIELDS
                                         );
-                                    } catch (SxaVertxException ex) {
-                                        throw new SxaVertxException(
+                                    } catch (VertxException ex) {
+                                        throw new VertxException(
                                                 "Voice->Line " + lineNumber + "->VoiceProcessing: "
                                                         + ex.getMessage()
                                         );

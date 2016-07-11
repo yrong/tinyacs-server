@@ -1,1 +1,1 @@
-sftp -b sftp-upload-batchfile.txt -oPort=1035 sxacc-dev@venture-cc.calix.com
+sftp -b sftp-upload-batchfile.txt -oPort=1035 CWMP-dev@venture-cc.calix.com

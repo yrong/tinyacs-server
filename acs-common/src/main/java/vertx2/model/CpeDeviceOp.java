@@ -1,7 +1,7 @@
 package vertx2.model;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxJsonUtils;
+import vertx2.VertxException;
+import vertx2.VertxJsonUtils;
 import vertx2.CcException;
 import vertx2.util.AcsConstants;
 import org.slf4j.Logger;
@@ -192,7 +192,7 @@ public class CpeDeviceOp {
              * Call the common validation method first
              */
             VertxJsonUtils.validateFields(deviceOp, mandatoryFields, optionalFields);
-        } catch (SxaVertxException ex) {
+        } catch (VertxException ex) {
             log.error("Invalid Device Op!\n" + deviceOp.encodePrettily());
             return false;
         }

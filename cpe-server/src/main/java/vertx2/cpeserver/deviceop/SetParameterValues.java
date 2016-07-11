@@ -7,7 +7,7 @@ import vertx2.cwmp.CwmpMessage;
 import vertx2.cwmp.CwmpMessageTypeEnum;
 import vertx2.cwmp.CwmpUtils;
 import vertx2.model.Cpe;
-import vertx2.model.SxaCcTr098ModelExtensions;
+import vertx2.model.CWMPTr098ModelExtensions;
 import vertx2.util.CpeDataModelMgmt;
 import dslforumOrgCwmp12.FaultDocument;
 import dslforumOrgCwmp12.ParameterValueList;
@@ -221,10 +221,10 @@ public class SetParameterValues {
                  */
                 ParameterValueStruct valueStruct = paramList.addNewParameterValueStruct();
 
-                // Check for SXA-CC Extensions in parameter names
+                // Check for cwmp Extensions in parameter names
                 String paramName = prefix + fieldName;
-                if (SxaCcTr098ModelExtensions.containSxaCcAbstractName(paramName)) {
-                    paramName = SxaCcTr098ModelExtensions.convertSxaCcAbstractNameToActualName(cpe, paramName);
+                if (CWMPTr098ModelExtensions.containCWMPAbstractName(paramName)) {
+                    paramName = CWMPTr098ModelExtensions.convertCWMPAbstractNameToActualName(cpe, paramName);
                 }
                 valueStruct.setName(paramName);
 
@@ -233,8 +233,8 @@ public class SetParameterValues {
                 Object rawValue = paramValues.getField(fieldName);
                 if (rawValue != null) {
                     String stringValue = paramValues.getField(fieldName).toString();
-                    if (SxaCcTr098ModelExtensions.containSxaCcAbstractName(stringValue)) {
-                        stringValue = SxaCcTr098ModelExtensions.convertSxaCcAbstractNameToActualName(cpe, stringValue);
+                    if (CWMPTr098ModelExtensions.containCWMPAbstractName(stringValue)) {
+                        stringValue = CWMPTr098ModelExtensions.convertCWMPAbstractNameToActualName(cpe, stringValue);
                     }
                     valueStruct.addNewValue().setStringValue(stringValue);
                 } else {

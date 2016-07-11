@@ -1,8 +1,8 @@
 package vertx2.model;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxJsonUtils;
-import com.calix.sxa.VertxMongoUtils;
+import vertx2.VertxException;
+import vertx2.VertxJsonUtils;
+import vertx2.VertxMongoUtils;
 import vertx2.CcException;
 import vertx2.cache.ConfigurationProfileCache;
 import vertx2.cache.GroupCache;
@@ -17,7 +17,7 @@ import org.vertx.java.core.json.JsonObject;
 import java.util.LinkedList;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * Workflow Struct Model Definition.
  *
@@ -32,7 +32,7 @@ public class Workflow {
     /**
      * MongoDB Collection Name
      */
-    public static final String DB_COLLECTION_NAME = "sxacc-workflows";
+    public static final String DB_COLLECTION_NAME = "CWMP-workflows";
 
     /**
      * Field Names
@@ -150,7 +150,7 @@ public class Workflow {
      * @param jsonObject
      * @throws vertx2.CcException
      */
-    public static Workflow validateJsonObject(JsonObject jsonObject) throws SxaVertxException {
+    public static Workflow validateJsonObject(JsonObject jsonObject) throws VertxException {
         return validateJsonObject(jsonObject, null);
     }
 
@@ -163,7 +163,7 @@ public class Workflow {
     public static Workflow validateJsonObject(
             JsonObject jsonObject,
             ConfigurationProfileCache configurationProfileCache
-    ) throws SxaVertxException {
+    ) throws VertxException {
         /**
          * Call standard field validator util method.
          */
@@ -311,7 +311,7 @@ public class Workflow {
                     ),
                     customHandler
             );
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
         }
 

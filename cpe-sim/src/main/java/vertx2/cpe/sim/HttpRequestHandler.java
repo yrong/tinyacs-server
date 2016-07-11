@@ -1,6 +1,6 @@
 package vertx2.cpe.sim;
 
-import com.calix.sxa.VertxUtils;
+import vertx2.VertxUtils;
 import vertx2.cwmp.CwmpInformEventCodes;
 import vertx2.model.Cpe;
 import io.netty.util.internal.StringUtil;
@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Project:  SXA-CC CPE Simulator
+ * Project:  cwmp CPE Simulator
  *
  * @author: ronyang
  */

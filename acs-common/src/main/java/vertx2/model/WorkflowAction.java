@@ -1,7 +1,7 @@
 package vertx2.model;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxJsonUtils;
+import vertx2.VertxException;
+import vertx2.VertxJsonUtils;
 import vertx2.CcException;
 import vertx2.cache.ConfigurationProfileCache;
 import vertx2.util.AcsApiUtils;
@@ -16,7 +16,7 @@ import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * Workflow Action Struct Model Definition.
  *
@@ -109,9 +109,9 @@ public class WorkflowAction {
      *
      * @param jsonObject
      *
-     * @throws com.calix.sxa.SxaVertxException
+     * @throws vertx2.VertxException
      */
-    public WorkflowAction (JsonObject jsonObject) throws SxaVertxException {
+    public WorkflowAction (JsonObject jsonObject) throws VertxException {
         this(jsonObject, null);
     }
 
@@ -121,12 +121,12 @@ public class WorkflowAction {
      * @param jsonObject
      * @param configurationProfileCache
      *
-     * @throws com.calix.sxa.SxaVertxException
+     * @throws vertx2.VertxException
      */
     public WorkflowAction (
             JsonObject jsonObject,
             ConfigurationProfileCache configurationProfileCache
-    ) throws SxaVertxException {
+    ) throws VertxException {
         this.rawJsonObject = jsonObject;
         
         /**
@@ -390,7 +390,7 @@ public class WorkflowAction {
         WorkflowAction dest = null;
         try {
             dest = new WorkflowAction(rawJsonObject, null);
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
         }
 

@@ -1,8 +1,8 @@
 package vertx2.acs.worker.workflow;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxJsonUtils;
-import com.calix.sxa.VertxMongoUtils;
+import vertx2.VertxException;
+import vertx2.VertxJsonUtils;
+import vertx2.VertxMongoUtils;
 import vertx2.model.*;
 import vertx2.util.AcsConstants;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -19,7 +19,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * This class tracks the workflow progress for a single CPE device.
  *
@@ -173,7 +173,7 @@ public class WorkflowCpeTracker {
                         }
                     }
             );
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
         }
     }

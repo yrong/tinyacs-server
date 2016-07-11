@@ -1,9 +1,9 @@
 package vertx2.acs.nbi.deviceop;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxConstants;
-import com.calix.sxa.VertxMongoUtils;
-import com.calix.sxa.VertxUtils;
+import vertx2.VertxException;
+import vertx2.VertxConstants;
+import vertx2.VertxMongoUtils;
+import vertx2.VertxUtils;
 import vertx2.acs.nbi.AbstractAcNbiCrudService;
 import vertx2.acs.nbi.model.AcsNbiRequest;
 import vertx2.connreq.ConnectionRequestConstants;
@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Project:  SXA-CC ACS API
+ * Project:  cwmp ACS API
  *
  * Device Operation Web Service Implementation.
  *
@@ -145,9 +145,9 @@ public class DeviceOpService extends AbstractAcNbiCrudService {
      * @param crudType      Type of the CRUD operation.
      *
      * @return boolean
-     * @throws com.calix.sxa.SxaVertxException
+     * @throws vertx2.VertxException
      */
-    public boolean validate(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws SxaVertxException {
+    public boolean validate(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws VertxException {
         if (crudType == AcsApiCrudTypeEnum.Create) {
             /**
              * Try to convert to a DeviceOp POJO
@@ -160,10 +160,10 @@ public class DeviceOpService extends AbstractAcNbiCrudService {
                         nbiRequest,
                         internalDeviceOpSn++,
                         internalCallbackUrl);
-            } catch (SxaVertxException ex) {
+            } catch (VertxException ex) {
                 throw ex;
             } catch (Exception ex) {
-                throw new SxaVertxException("JSON Parsing Error!");
+                throw new VertxException("JSON Parsing Error!");
             }
 
             /**
@@ -575,7 +575,7 @@ public class DeviceOpService extends AbstractAcNbiCrudService {
                                 errorString += " This device failed to send the periodical inform(s) for the last "
                                         + timeSinceLastInform/interval + " scheduled interval(s).";
                             }
-                        } catch (SxaVertxException ex) {
+                        } catch (VertxException ex) {
                             log.error("Caught exception " + ex.getMessage() + " while processing "
                                     + "lastInformTime for CPE " + deviceOp.cpeIdString + ": "
                                     + lastInformTimeJsonObj);

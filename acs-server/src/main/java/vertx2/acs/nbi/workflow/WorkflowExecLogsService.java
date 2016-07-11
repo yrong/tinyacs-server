@@ -1,8 +1,8 @@
 package vertx2.acs.nbi.workflow;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxJsonUtils;
-import com.calix.sxa.VertxMongoUtils;
+import vertx2.VertxException;
+import vertx2.VertxJsonUtils;
+import vertx2.VertxMongoUtils;
 import vertx2.acs.nbi.AbstractAcNbiCrudService;
 import vertx2.acs.nbi.model.AcsNbiRequest;
 import vertx2.acs.worker.workflow.WorkflowCpeTracker;
@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * Project:  SXA-CC ACS API
+ * Project:  cwmp ACS API
  *
  * Workflow Execution Logs Web Service Implementation.
  *
@@ -31,10 +31,10 @@ public class WorkflowExecLogsService extends AbstractAcNbiCrudService {
      * Constants
      */
     public static final String FIELD_NAME_WORKFLOW_ID = "workflowId";
-    public static final SxaVertxException CUD_NOT_ALLOWED =
-            new SxaVertxException("Create/Update/Delete Operations are not allowed!");
-    public static final SxaVertxException INVALID_STATE =
-            new SxaVertxException("Invalid Workflow Exec Log State! (must be \"Failed\" or \"In Progress\" or \"Succeeded\")");
+    public static final VertxException CUD_NOT_ALLOWED =
+            new VertxException("Create/Update/Delete Operations are not allowed!");
+    public static final VertxException INVALID_STATE =
+            new VertxException("Invalid Workflow Exec Log State! (must be \"Failed\" or \"In Progress\" or \"Succeeded\")");
 
     /**
      * Allowed Query Parameter Name/Type Pairs
@@ -91,7 +91,7 @@ public class WorkflowExecLogsService extends AbstractAcNbiCrudService {
      * @param crudType      Type of the CRUD operation.
      *
      * @return boolean
-     * @throws com.calix.sxa.SxaVertxException
+     * @throws vertx2.VertxException
      */
     public static final VertxJsonUtils.JsonFieldValidator MANDATORY_FIELDS =
             new VertxJsonUtils.JsonFieldValidator()
@@ -99,7 +99,7 @@ public class WorkflowExecLogsService extends AbstractAcNbiCrudService {
     public static final VertxJsonUtils.JsonFieldValidator OPTIONAL_FIELDS =
             new VertxJsonUtils.JsonFieldValidator()
                     .append(WorkflowCpeTracker.FIELD_NAME_STATE, VertxJsonUtils.JsonFieldType.String);
-    public boolean validate(final AcsNbiRequest nbiRequest, final AcsApiCrudTypeEnum crudType) throws SxaVertxException {
+    public boolean validate(final AcsNbiRequest nbiRequest, final AcsApiCrudTypeEnum crudType) throws VertxException {
         switch (crudType) {
             case Retrieve:
                 VertxJsonUtils.validateFields(nbiRequest.body, MANDATORY_FIELDS, OPTIONAL_FIELDS);
@@ -137,7 +137,7 @@ public class WorkflowExecLogsService extends AbstractAcNbiCrudService {
                                                     nbiRequest.serviceData = workflow;
                                                     // Continue
                                                     postValidation(nbiRequest, crudType);
-                                                } catch (SxaVertxException e) {
+                                                } catch (VertxException e) {
                                                     e.printStackTrace();
                                                     log.error("Failed to convert workflow JSON Object to POJO!\n"
                                                             + result);
@@ -184,7 +184,7 @@ public class WorkflowExecLogsService extends AbstractAcNbiCrudService {
     /**
      * Build MongoDB Matcher for Retrieve
      */
-    public JsonObject buildRetrieveMatcher(AcsNbiRequest nbiRequest) throws SxaVertxException{
+    public JsonObject buildRetrieveMatcher(AcsNbiRequest nbiRequest) throws VertxException{
         /**
          * Get the workflow POJO
          */

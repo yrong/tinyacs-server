@@ -1,6 +1,6 @@
 package vertx2.cpeserver.session;
 
-import com.calix.sxa.VertxUtils;
+import vertx2.VertxUtils;
 import vertx2.cpeserver.CpeServerConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

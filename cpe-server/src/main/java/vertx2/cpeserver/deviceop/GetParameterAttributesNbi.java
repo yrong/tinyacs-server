@@ -5,7 +5,7 @@ import vertx2.cpeserver.session.CwmpSession;
 import vertx2.cwmp.CwmpException;
 import vertx2.cwmp.CwmpMessage;
 import vertx2.model.CpeDeviceOp;
-import com.calix.sxa.VertxJsonUtils;
+import vertx2.VertxJsonUtils;
 import dslforumOrgCwmp12.GetParameterAttributesResponseDocument;
 import dslforumOrgCwmp12.ParameterNames;
 import dslforumOrgCwmp12.ParameterAttributeStruct;
@@ -15,7 +15,7 @@ import org.vertx.java.core.json.JsonArray;
 import org.vertx.java.core.json.JsonObject;
 
 /**
- * Project:  sxa-cc-parent
+ * Project:  cwmp-parent
  *
  * This class extends CpeGetParameterAttributes by posting async result to the provided callback URL
  *

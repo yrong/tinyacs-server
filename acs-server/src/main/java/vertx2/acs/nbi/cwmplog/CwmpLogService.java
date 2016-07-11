@@ -1,7 +1,7 @@
 package vertx2.acs.nbi.cwmplog;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxJsonUtils;
+import vertx2.VertxException;
+import vertx2.VertxJsonUtils;
 import vertx2.acs.nbi.AbstractAcNbiCrudService;
 import vertx2.acs.nbi.model.AcsNbiRequest;
 import vertx2.cwmp.CwmpMessage;
@@ -15,7 +15,7 @@ import org.vertx.java.core.json.JsonObject;
 import java.util.List;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * ACS API CWMP Log Services.
  *
@@ -26,8 +26,8 @@ public class CwmpLogService extends AbstractAcNbiCrudService{
     /**
      * Static Exceptions
      */
-    public static final SxaVertxException CANNOT_CREATE = new SxaVertxException("Cannot create new CWMP Log Entries!");
-    public static final SxaVertxException CANNOT_UPDATE = new SxaVertxException("Cannot modify CWMP Log Entries!");
+    public static final VertxException CANNOT_CREATE = new VertxException("Cannot create new CWMP Log Entries!");
+    public static final VertxException CANNOT_UPDATE = new VertxException("Cannot modify CWMP Log Entries!");
 
     public static final String FIELD_NAME_INCLUDE_XML_TEXT = "includeXmlText";
 
@@ -97,9 +97,9 @@ public class CwmpLogService extends AbstractAcNbiCrudService{
      * @param crudType      Type of the CRUD operation.
      *
      * @return boolean
-     * @throws com.calix.sxa.SxaVertxException
+     * @throws vertx2.VertxException
      */
-    public boolean validate(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws SxaVertxException {
+    public boolean validate(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws VertxException {
         /**
          * Perform basic Validate Mandatory/Optional Field Types
          */
@@ -128,10 +128,10 @@ public class CwmpLogService extends AbstractAcNbiCrudService{
      * @param crudType      Type of the CRUD operation.
      *
      * @return None
-     * @throws com.calix.sxa.SxaVertxException
+     * @throws vertx2.VertxException
      */
     @Override
-    public void preProcess(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws SxaVertxException {
+    public void preProcess(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws VertxException {
         if (crudType.equals(AcsApiCrudTypeEnum.Delete)) {
             nbiRequest.body = convertRequestBodyToMatcher(nbiRequest);
         }
@@ -158,7 +158,7 @@ public class CwmpLogService extends AbstractAcNbiCrudService{
      * Build MongoDB Matcher for Retrieve
      */
     @Override
-    public JsonObject buildRetrieveMatcher(AcsNbiRequest nbiRequest) throws SxaVertxException {
+    public JsonObject buildRetrieveMatcher(AcsNbiRequest nbiRequest) throws VertxException {
         return convertRequestBodyToMatcher(nbiRequest);
     }
 

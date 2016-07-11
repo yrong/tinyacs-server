@@ -1,8 +1,8 @@
 package vertx2.acs.nbi.subscriber;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxJsonUtils;
-import com.calix.sxa.VertxMongoUtils;
+import vertx2.VertxException;
+import vertx2.VertxJsonUtils;
+import vertx2.VertxMongoUtils;
 import vertx2.acs.nbi.AbstractAcNbiCrudService;
 import vertx2.acs.nbi.model.AcsNbiRequest;
 import vertx2.acs.nbi.serviceplan.ServicePlanService;
@@ -20,14 +20,14 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
- * SXA-CC Subscriber Service.
+ * cwmp Subscriber Service.
  *
  * @author: ronyang
  */
 public class SubscriberService extends AbstractAcNbiCrudService {
-    private final SxaVertxException NO_QUERY_FILTER_FOUND = new SxaVertxException("No Query Filter Found!");
+    private final VertxException NO_QUERY_FILTER_FOUND = new VertxException("No Query Filter Found!");
 
     /**
      * Error Constants
@@ -41,13 +41,13 @@ public class SubscriberService extends AbstractAcNbiCrudService {
             "One or more device(s) have already been associated with other Subscriber(s)!";
     public static final JsonObject MULTI_DEVICE_ALREADY_ASSOCIATED  = new JsonObject()
             .putString(AcsConstants.FIELD_NAME_ERROR, ERROR_STRING_MULTI_DEVICE_ALREADY_ASSOCIATED);
-    public static final SxaVertxException INVALID_SERVICE_PREFIX =
-            new SxaVertxException("The max length of \"servicePrefix\" is 20 chars and can only contain letters"
+    public static final VertxException INVALID_SERVICE_PREFIX =
+            new VertxException("The max length of \"servicePrefix\" is 20 chars and can only contain letters"
                     + " and/or digits (0-9) and/or dots (\".\")!");
-    public static final SxaVertxException CANNOT_HAVE_MULTIPLE_PRIMARY_LOCATIONS = new SxaVertxException(
+    public static final VertxException CANNOT_HAVE_MULTIPLE_PRIMARY_LOCATIONS = new VertxException(
             "Cannot have multiple primary locations!"
     );
-    public static final SxaVertxException CANNOT_HAVE_MULTIPLE_PRIMARY_CONTACTS = new SxaVertxException(
+    public static final VertxException CANNOT_HAVE_MULTIPLE_PRIMARY_CONTACTS = new VertxException(
             "Cannot have multiple primary contacts in the same locations!"
     );
     public static final String FAILED_TO_UPDATE_SEARCH_ENGINE_STRING =
@@ -132,10 +132,10 @@ public class SubscriberService extends AbstractAcNbiCrudService {
      * @param crudType      Type of the CRUD operation.
      *
      * @return boolean
-     * @throws com.calix.sxa.SxaVertxException
+     * @throws vertx2.VertxException
      */
     @Override
-    public boolean validate(final AcsNbiRequest nbiRequest, final AcsApiCrudTypeEnum crudType) throws SxaVertxException {
+    public boolean validate(final AcsNbiRequest nbiRequest, final AcsApiCrudTypeEnum crudType) throws VertxException {
         switch (crudType) {
             case Create:
             case Update:
@@ -321,9 +321,9 @@ public class SubscriberService extends AbstractAcNbiCrudService {
      * @param crudType      Type of the CRUD operation.
      *
      * @return None
-     * @throws com.calix.sxa.SxaVertxException
+     * @throws vertx2.VertxException
      */
-    public void preProcess(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws SxaVertxException {
+    public void preProcess(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws VertxException {
         switch (crudType) {
             case Create:
                 // add create time
@@ -342,11 +342,11 @@ public class SubscriberService extends AbstractAcNbiCrudService {
      *
      * @return  The matcher, or null if the service has no index field.
      *
-     * @throws com.calix.sxa.SxaVertxException  if one or more index fields are missing.
+     * @throws vertx2.VertxException  if one or more index fields are missing.
      */
     @Override
     public JsonObject buildIndexMatcher(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType)
-            throws SxaVertxException{
+            throws VertxException{
         String customId = nbiRequest.body.getString(Subscriber.FIELD_NAME_CUSTOM_ID);
         SubscriberRequestTracker reqTracker = nbiRequest.getServiceData();
         String servicePrefix = reqTracker == null? null : reqTracker.servicePrefix;
@@ -464,7 +464,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                                                 }
                                             }
                                     );
-                                } catch (SxaVertxException e) {
+                                } catch (VertxException e) {
                                     e.printStackTrace();
                                 }
 
@@ -536,7 +536,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                         ),
                         null        // null query key means returns everything
                 );
-            } catch (SxaVertxException e) {
+            } catch (VertxException e) {
                 e.printStackTrace();
                 nbiRequest.sendResponse(
                         HttpResponseStatus.BAD_REQUEST,
@@ -609,7 +609,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                                                 }
                                             }
                                     );
-                                } catch (SxaVertxException e) {
+                                } catch (VertxException e) {
                                     e.printStackTrace();
                                     sendUpdateResponse(
                                             nbiRequest,
@@ -758,7 +758,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                                                     ),
                                                     null
                                             );
-                                        } catch (SxaVertxException e) {
+                                        } catch (VertxException e) {
                                             e.printStackTrace();
                                         }
                                     }
@@ -808,7 +808,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                                                 ),
                                         null
                                 );
-                            } catch (SxaVertxException e) {
+                            } catch (VertxException e) {
                                 e.printStackTrace();
                             }
                         }
@@ -983,7 +983,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                             ),
                             REPLACEMENT_QUERY_OLD_DEVICE_KEYS
                     );
-                } catch (SxaVertxException e) {
+                } catch (VertxException e) {
                     e.printStackTrace();
                 }
             }
@@ -1085,7 +1085,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                     ),
                     handler
             );
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
         }
 
@@ -1206,7 +1206,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                                                     ),
                                                     handler
                                             );
-                                        } catch (SxaVertxException e) {
+                                        } catch (VertxException e) {
                                             e.printStackTrace();
                                             handler.handle(0L);
                                         }
@@ -1249,7 +1249,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
      * Build MongoDB Matcher for Retrieve
      */
     @Override
-    public JsonObject buildRetrieveMatcher(AcsNbiRequest nbiRequest) throws SxaVertxException{
+    public JsonObject buildRetrieveMatcher(AcsNbiRequest nbiRequest) throws VertxException{
         // Use "_id" whenever possible
         if (nbiRequest.body.containsField(AcsConstants.FIELD_NAME_ID)) {
             return new JsonObject()
@@ -1329,7 +1329,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
      * @param deviceIdArray
      */
     public JsonObject getDeviceMatcherByDeviceIdArray(String orgId, JsonArray deviceIdArray)
-            throws SxaVertxException {
+            throws VertxException {
         JsonArray allRegIDs = new JsonArray();
         JsonArray allFSANs = new JsonArray();
         JsonArray allInternalIDs = new JsonArray();
@@ -1353,7 +1353,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                     break;
 
                 default:
-                    throw new SxaVertxException("Invalid Device Id String " + deviceId + "!");
+                    throw new VertxException("Invalid Device Id String " + deviceId + "!");
             }
         }
 
@@ -1610,7 +1610,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                         }
                     }
             );
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
         }
     }

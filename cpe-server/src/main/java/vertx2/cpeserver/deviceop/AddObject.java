@@ -7,7 +7,7 @@ import vertx2.cwmp.CwmpMessage;
 import vertx2.cwmp.CwmpMessageTypeEnum;
 import vertx2.cwmp.CwmpUtils;
 import vertx2.model.CpeDeviceOp;
-import vertx2.model.SxaCcTr098ModelExtensions;
+import vertx2.model.CWMPTr098ModelExtensions;
 import dslforumOrgCwmp12.AddObjectDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,8 +82,8 @@ public class AddObject {
                 addObjectMessage.soapEnv.getBody().addNewAddObject();
 
         // Insert the provided parameter names
-        if (SxaCcTr098ModelExtensions.containSxaCcAbstractName(objectName)) {
-            objectName = SxaCcTr098ModelExtensions.convertSxaCcAbstractNameToActualName(session.cpe, objectName);
+        if (CWMPTr098ModelExtensions.containCWMPAbstractName(objectName)) {
+            objectName = CWMPTr098ModelExtensions.convertCWMPAbstractNameToActualName(session.cpe, objectName);
         }
         addObject.setObjectName(objectName);
         addObject.setParameterKey(CwmpUtils.getParameterKey());
@@ -118,8 +118,8 @@ public class AddObject {
             long instanceNumber = responseMessage.soapEnv.getBody().getAddObjectResponse().getInstanceNumber();
 
             String objectCreated = objectName + instanceNumber;
-            if (SxaCcTr098ModelExtensions.containSxaCcAbstractName(objectCreated)) {
-                objectCreated = SxaCcTr098ModelExtensions.convertSxaCcAbstractNameToActualName(
+            if (CWMPTr098ModelExtensions.containCWMPAbstractName(objectCreated)) {
+                objectCreated = CWMPTr098ModelExtensions.convertCWMPAbstractNameToActualName(
                         session.cpe, objectCreated);
             }
             if (responseStatus == 0) {

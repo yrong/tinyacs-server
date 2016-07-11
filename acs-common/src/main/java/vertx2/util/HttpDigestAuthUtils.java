@@ -12,7 +12,7 @@ import org.vertx.java.core.json.impl.Base64;
 import java.security.SecureRandom;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * HTTP Digest Auth Utils (both server and client)
  *
@@ -102,7 +102,7 @@ public class HttpDigestAuthUtils {
      * Get an Auth Challenge String.
      */
     public static String getChallengeString(String nonce, String domain) {
-        return "Digest realm=\"" + AcsConstants.SXA_CC_AUTH_REALM + "\", "
+        return "Digest realm=\"" + AcsConstants.CWMP_AUTH_REALM + "\", "
                 + "domain=\"" + domain + "\", "
                 + "algorithm=MD5, qop=\"auth\", nonce=\"" + nonce + "\", "
                 + "opaque=\"" + DigestUtils.md5Hex(nonce) + "\"";
@@ -169,7 +169,7 @@ public class HttpDigestAuthUtils {
         }
 
         // Validate Realm
-        if (!AcsConstants.SXA_CC_AUTH_REALM.equals(realm)) {
+        if (!AcsConstants.CWMP_AUTH_REALM.equals(realm)) {
             log.error("Invalid realm " + realm + "!");
             return false;
         }
@@ -205,6 +205,6 @@ public class HttpDigestAuthUtils {
      * Generate nonce with orgId.
      */
     public static String getNonceByOrgId(String orgId) {
-        return "SXA-CC~" + orgId;
+        return "cwmp~" + orgId;
     }
 }

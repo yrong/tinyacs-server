@@ -1,6 +1,6 @@
 package vertx2.acs.nbi.event;
 
-import com.calix.sxa.SxaVertxException;
+import vertx2.VertxException;
 import vertx2.acs.nbi.AbstractAcNbiCrudService;
 import vertx2.acs.nbi.model.AcsNbiRequest;
 import vertx2.model.AcsApiCrudTypeEnum;
@@ -11,7 +11,7 @@ import org.vertx.java.core.json.JsonObject;
 import java.util.List;
 
 /**
- * Project:  SXA-CC ACS API
+ * Project:  cwmp ACS API
  *
  * Event Web Service Implementation.
  *
@@ -21,8 +21,8 @@ public class EventService extends AbstractAcNbiCrudService {
     /**
      * Static Exceptions
      */
-    public static final SxaVertxException CANNOT_CREATE = new SxaVertxException("Cannot create new events!");
-    public static final SxaVertxException CANNOT_UPDATE = new SxaVertxException("Cannot modify events!");
+    public static final VertxException CANNOT_CREATE = new VertxException("Cannot create new events!");
+    public static final VertxException CANNOT_UPDATE = new VertxException("Cannot modify events!");
 
     /**
      * Get the name of the service which is to be used to build URL Path Prefix.
@@ -75,7 +75,7 @@ public class EventService extends AbstractAcNbiCrudService {
      *
      * @return boolean
      */
-    public boolean validate(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws SxaVertxException {
+    public boolean validate(AcsNbiRequest nbiRequest, AcsApiCrudTypeEnum crudType) throws VertxException {
         switch (crudType) {
             case Create:
                 throw  CANNOT_CREATE;

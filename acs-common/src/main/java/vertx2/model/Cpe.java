@@ -1,7 +1,7 @@
 package vertx2.model;
 
-import com.calix.sxa.SxaVertxException;
-import com.calix.sxa.VertxMongoUtils;
+import vertx2.VertxException;
+import vertx2.VertxMongoUtils;
 import vertx2.CcException;
 import vertx2.cwmp.CwmpMessageTypeEnum;
 import vertx2.cwmp.CwmpNotificationValues;
@@ -18,7 +18,7 @@ import org.vertx.java.core.eventbus.EventBus;
 import org.vertx.java.core.json.JsonObject;
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * This class defines the CPE Device Objects.
  *
@@ -86,7 +86,7 @@ public class Cpe extends MultiTenantObject{
     /**
      * DB Collection for CPE Devices
      */
-    public static final String CPE_COLLECTION_NAME = "sxacc-devices";
+    public static final String CPE_COLLECTION_NAME = "CWMP-devices";
 
     /**
      * Periodic Inform Constants
@@ -256,7 +256,7 @@ public class Cpe extends MultiTenantObject{
             InformDocument.Inform informRequest,
             EventBus eventBus,
             VertxMongoUtils.FindOneHandler findHandler
-    ) throws SxaVertxException {
+    ) throws VertxException {
         if (informRequest.getDeviceId() == null) {
             informRequest.dump();
             throw new CcException("Inform request has no deviceId element: " + informRequest);
@@ -570,7 +570,7 @@ public class Cpe extends MultiTenantObject{
         log.info("Saving New CPE " + cpeJsonObj.toString());
         try {
             VertxMongoUtils.save(eventBus, CPE_COLLECTION_NAME, cpeJsonObj, null);
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
         }
 
@@ -797,7 +797,7 @@ public class Cpe extends MultiTenantObject{
         if (updates != null && updates.size() > 0) {
             try {
                 VertxMongoUtils.update(eventBus, CPE_COLLECTION_NAME, key, updates, handler);
-            } catch (SxaVertxException e) {
+            } catch (VertxException e) {
                 e.printStackTrace();
             }
 
@@ -842,7 +842,7 @@ public class Cpe extends MultiTenantObject{
                     DELETE_ALL_PARAM_VALUES_AND_ATTRIBUTES,
                     null
             );
-        } catch (SxaVertxException e) {
+        } catch (VertxException e) {
             e.printStackTrace();
         }
     }

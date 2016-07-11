@@ -1,6 +1,6 @@
 package vertx2.connreq;
 
-import com.calix.sxa.VertxRedisUtils;
+import vertx2.VertxRedisUtils;
 import vertx2.model.Cpe;
 import vertx2.util.AcsConstants;
 import io.vertx.java.redis.RedisClient;
@@ -12,7 +12,7 @@ import org.vertx.java.core.json.JsonObject;
 
 
 /**
- * Project:  SXA-CC
+ * Project:  cwmp
  *
  * Connection-Request Related Utils
  *

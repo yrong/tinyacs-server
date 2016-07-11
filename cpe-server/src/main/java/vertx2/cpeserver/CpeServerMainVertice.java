@@ -1,8 +1,8 @@
 package vertx2.cpeserver;
 
-import com.calix.sxa.VertxConstants;
-import com.calix.sxa.VertxDeployUtils;
-import com.calix.sxa.VertxUtils;
+import vertx2.VertxConstants;
+import vertx2.VertxDeployUtils;
+import vertx2.VertxUtils;
 import vertx2.connreq.ConnectionRequestManagerVertice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
