@@ -1,12 +1,30 @@
-ACS CWMP(https://www.broadband-forum.org/cwmp.php) Java Implementation
+---
+layout:     post
+title:      "ACS CWMP Java Implementation"
+subtitle:   "A blazing fast TR-069 auto configuration server (ACS) built with Vertx, Redis, and MongoDB. "
+date:       2016-07-13 15:00:00
+author:     "Ron"
+header-img: "img/post-bg-kuaidi.jpg"
+catalog: true
+tags:
+    - java
+    - vertx
+    - redis
+    - mongodb
+---
+
+[ACS CWMP](https://www.broadband-forum.org/cwmp.php) Java Implementation
 ===============================
-A blazing fast TR-069 auto configuration server (ACS) built with Vertx(http://vertx.io/vertx2/), Redis, and MongoDB. 
+A blazing fast TR-069 auto configuration server (ACS) built with [Vertx](http://vertx.io/vertx2/), Redis, and MongoDB. I've added the source code in [github](https://github.com/yrong/tinyacs) and welcome comments.
 
 ## Installation Requirements
 
-### install vertx(http://vertx.io/vertx2/install.html)
-### install mongodb(https://docs.mongodb.com/manual/installation/)
-### install redis(http://redis.io/topics/quickstart)
+> [vertx](http://vertx.io/vertx2/install.html)
+<br>
+> [mongodb](https://docs.mongodb.com/manual/installation/)
+<br>
+> [redis](http://redis.io/topics/quickstart)
+<br>
 
 
 ## Getting Started
