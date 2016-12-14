@@ -38,7 +38,7 @@ import static net.greghaines.jesque.worker.WorkerEvent.WORKER_STOP;
  *
  * TODO: Add periodical heartbeats.
  *
- * @author: jqin
+ * @author: ronang
  */
 public class SxaTaskWorkerImpl extends WorkerImpl{
     private static Logger log = LoggerFactory.getLogger(SxaTaskWorkerImpl.class);

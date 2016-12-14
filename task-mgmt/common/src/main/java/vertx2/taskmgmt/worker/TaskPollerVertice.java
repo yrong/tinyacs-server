@@ -12,7 +12,7 @@ import java.util.List;
  *
  * Task Poller Verticle which polls new tasks from Redis and forwards them to event bus.
  *
- * @author: jqin
+ * @author: ronang
  */
 public class TaskPollerVertice extends WorkerVertice {
     private Logger log = LoggerFactory.getLogger(TaskPollerVertice.class);

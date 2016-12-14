@@ -23,7 +23,7 @@ import static net.greghaines.jesque.utils.ResqueConstants.QUEUE;
  *
  * Although named as "QueryTaskHandler", this class also handles cancelling/deleting tasks.
  *
- * @author: jqin
+ * @author: ronang
  */
 public class QueryTaskHandler  {
     private static final Logger log = LoggerFactory.getLogger(QueryTaskHandler.class.getName());

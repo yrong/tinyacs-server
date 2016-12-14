@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Project:  SXA Task Management
  *
- * @author: jqin
+ * @author: ronang
  */
 public class WorkerUtils {
     private static Logger log = LoggerFactory.getLogger(WorkerUtils.class);

@@ -6,7 +6,7 @@ import org.vertx.java.core.json.JsonObject;
 /**
  * Project:  cwmp-parent
  *
- * @author: jqin
+ * @author: ronang
  */
 public class TaskMgmtWsUtils {
     /**

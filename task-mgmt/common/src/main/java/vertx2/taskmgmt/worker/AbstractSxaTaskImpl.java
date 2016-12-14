@@ -25,7 +25,7 @@ import java.util.Date;
  *
  * All tasks shall be defined based on this plus their own parameters.
  *
- * @author: jqin
+ * @author: ronang
  */
 public abstract class AbstractSxaTaskImpl extends SxaTaskBase implements WorkerAware, Runnable {
     private Logger log = null;

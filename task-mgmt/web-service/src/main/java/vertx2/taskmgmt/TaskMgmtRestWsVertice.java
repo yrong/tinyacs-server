@@ -18,7 +18,7 @@ import org.vertx.java.platform.Verticle;
  *
  * REST API Verticle for Task CRUD Service
  *
- * @author: jqin
+ * @author: ronang
  */
 public class TaskMgmtRestWsVertice extends Verticle {
     private static final Logger log = LoggerFactory.getLogger(TaskMgmtRestWsVertice.class.getName());

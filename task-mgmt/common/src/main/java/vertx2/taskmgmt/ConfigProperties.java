@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
  *
  * Some defaults are used if failed to read from System environment.
  *
- * @author: jqin
+ * @author: ronang
  */
 public class ConfigProperties {
     private static final Logger log = LoggerFactory.getLogger(ConfigProperties.class.getName());

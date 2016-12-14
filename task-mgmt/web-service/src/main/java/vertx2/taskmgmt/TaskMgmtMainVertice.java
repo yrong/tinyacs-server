@@ -12,7 +12,7 @@ import org.vertx.java.platform.Verticle;
 /**
  * Project:  cwmp-parent
  *
- * @author: jqin
+ * @author: ronang
  */
 public class TaskMgmtMainVertice extends Verticle {
     private static final Logger log = LoggerFactory.getLogger(TaskMgmtMainVertice.class.getName());

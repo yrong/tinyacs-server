@@ -12,7 +12,7 @@ import java.util.Map;
 /**
  * Project:  cwmp-parent
  *
- * @author: jqin
+ * @author: ronang
  */
 public class SxaTaskMapBasedJobFactory extends MapBasedJobFactory {
     private static final Logger log = LoggerFactory.getLogger(SxaTaskMapBasedJobFactory.class.getName());

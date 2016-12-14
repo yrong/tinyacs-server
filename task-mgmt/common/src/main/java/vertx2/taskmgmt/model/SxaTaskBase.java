@@ -15,7 +15,7 @@ import java.util.Date;
  *
  * All tasks shall be defined based on this plus their own parameters.
  *
- * @author: jqin
+ * @author: ronang
  */
 public abstract class SxaTaskBase {
     private static Logger log = LoggerFactory.getLogger(SxaTaskBase.class);

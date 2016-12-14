@@ -15,7 +15,7 @@ import java.util.List;
  *
  * The Worker Verticle.
  *
- * @author: jqin
+ * @author: ronang
  */
 public class WorkerVertice extends Verticle {
     private Logger log = LoggerFactory.getLogger(this.getClass());
