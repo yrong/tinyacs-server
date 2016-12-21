@@ -73,7 +73,7 @@ $ sh restartSim.sh
 
 ### Front end
 
-The front end is built with meteor framework and will talk to Acs-Nbi Server with rest api interface
+The front end is in another [repo](https://github.com/yrong/tinyacs-ui)　built with meteor framework and will talk to Acs-Nbi Server with rest api interface
 
 ``` bash
 git clone https://github.com/yrong/tinyacs-ui tinyacs-ui
