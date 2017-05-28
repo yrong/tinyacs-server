@@ -38,23 +38,8 @@ public class VertxConstants {
      */
     public static final String MOD_MONGO_PERSISTOR = "io.vertx~mod-mongo-persistor~2.1.0";
     public static final JsonObject MOD_MONGO_PERSISTOR_CONFIG = VertxMongoUtils.getModMongoPersistorConfig();
-    public static final JsonObject MOD_MONGO_PERSISTOR_DEPLOYMENT =
-        VertxUtils.buildNewDeployment(
-                MOD_MONGO_PERSISTOR,
-                MOD_MONGO_PERSISTOR_CONFIG,
-                VertxMongoUtils.getNumberOfInstances()
-        );
 
-    /**
-     * Mod-mongo-gridfs
-     */
-    public static final JsonObject MOD_MONGO_GRIDFS_CONFIG = VertxMongoGridFsFile.getModMongoGridFsConfig();
-    public static final JsonObject MOD_MONGO_GRIDFS_DEPLOYMENT =
-            VertxUtils.buildNewDeployment(
-                    VertxMongoGridFsVertice.class.getName(),
-                    MOD_MONGO_GRIDFS_CONFIG,
-                    VertxMongoGridFsFile.getNumberOfInstances()
-            );
+    
 
     /**
      * Mod-redis
@@ -63,10 +48,5 @@ public class VertxConstants {
     public static final JsonObject MOD_REDIS_CONFIG = new JsonObject()
             .put("address", VertxConstants.VERTX_ADDRESS_REDIS)
             .put("host", VertxConfigProperties.redisHost);
-    public static final JsonObject MOD_REDIS_DEPLOYMENT =
-        VertxUtils.buildNewDeployment(
-                MOD_REDIS,
-                MOD_REDIS_CONFIG,
-                VertxRedisUtils.getNumberOfInstances()
-        );
+
 }

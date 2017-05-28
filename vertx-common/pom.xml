@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>vertx2</groupId>
+    <groupId>vertx</groupId>
     <artifactId>vertx-common</artifactId>
-    <version>0.0.24-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
-    <name>SXA Vert.x Common Lib</name>
+    <name>Vert.x Common Lib</name>
     <properties>
         <!--Dependency versions-->
         <vertx.version>3.4.1</vertx.version>
@@ -41,6 +41,11 @@
             <version>${vertx.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.github.st-h</groupId>
+            <artifactId>vertx-mongo-streams</artifactId>
+            <version>1.2.1</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>4.3.5</version>
@@ -54,8 +59,8 @@
                 <version>3.1</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
         </plugins>

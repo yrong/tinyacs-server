@@ -63,7 +63,7 @@ public class VertxJsonUtils {
         }
 
         try {
-            dest.putValue(fieldName, value);
+            dest.put(fieldName, value);
         } catch (io.vertx.core.VertxException ex) {
             log.error(ex.getMessage());
             return null;
@@ -120,7 +120,7 @@ public class VertxJsonUtils {
      */
     public static JsonObject checkAndGetJsonObjectField(JsonObject obj, String fieldName) {
         try {
-            return obj.getObject(fieldName);
+            return obj.getJsonObject(fieldName);
         } catch (Exception ex) {
             return null;
         }
@@ -138,7 +138,7 @@ public class VertxJsonUtils {
      */
     public static JsonArray checkAndGetArrayField(JsonObject obj, String fieldName) {
         try {
-            return obj.getArray(fieldName);
+            return obj.getJsonArray(fieldName);
         } catch (Exception ex) {
             return null;
         }
@@ -156,7 +156,7 @@ public class VertxJsonUtils {
      */
     public static Number checkAndGetNumberField(JsonObject obj, String fieldName) {
         try {
-            return obj.getNumber(fieldName);
+            return obj.getInteger(fieldName);
         } catch (Exception ex) {
             return null;
         }
@@ -187,7 +187,7 @@ public class VertxJsonUtils {
         }
         
         // Get all field names from the target JSON object
-        final Set<String> allFieldNames = obj.getFieldNames();
+        final Set<String> allFieldNames = obj.fieldNames();
         
         // Validate Mandatory Fields
         if (mandatoryFields != null) {
@@ -198,7 +198,7 @@ public class VertxJsonUtils {
                     throw new VertxException("Missing Mandatory Field " + mandatoryFieldName + "!");
                 }
 
-                Object value = obj.getField(mandatoryFieldName);
+                Object value = obj.getValue(mandatoryFieldName);
                 if (!validateFieldType(value, mandatoryFields.get(mandatoryFieldName))) {
                     throw new VertxException("Field Type Mismatch! Filed name: \"" + mandatoryFieldName
                             + "\": expect " + mandatoryFields.get(mandatoryFieldName).name()
@@ -214,7 +214,7 @@ public class VertxJsonUtils {
                     continue;
                 }
 
-                Object value = obj.getField(optionalFieldName);
+                Object value = obj.getValue(optionalFieldName);
                 if (!validateFieldType(value, optionalFields.get(optionalFieldName))) {
                     throw new VertxException("Field Type Mismatch! Filed name: \"" + optionalFieldName
                             + "\": expect " + optionalFields.get(optionalFieldName).name()
@@ -372,13 +372,13 @@ public class VertxJsonUtils {
 
         // Create the object hierarchy
         JsonObject nextJson = dest;
-        String[] subPaths = StringUtil.split(path, '.');
+        String[] subPaths = path.split(".");
         for (int i = 0; i < (subPaths.length - 1); i ++) {
             String subPath = subPaths[i];
-            if (nextJson.getObject(subPath) == null) {
-                nextJson.putObject(subPath, new JsonObject());
+            if (nextJson.getJsonObject(subPath) == null) {
+                nextJson.put(subPath, new JsonObject());
             }
-            nextJson = nextJson.getObject(subPath);
+            nextJson = nextJson.getJsonObject(subPath);
         }
 
         // Append the new field
@@ -399,15 +399,15 @@ public class VertxJsonUtils {
      */
     public static <T> T deepGet(JsonObject jsonObject, String path) {
         JsonObject nextJson = jsonObject;
-        String[] subPaths = StringUtil.split(path, '.');
+        String[] subPaths = path.split(".");
         for (int i = 0; i < (subPaths.length - 1); i ++) {
             String subPath = subPaths[i];
-            nextJson = nextJson.getObject(subPath);
+            nextJson = nextJson.getJsonObject(subPath);
             if (nextJson == null) {
                 return null;
             }
         }
-        return nextJson.getField(subPaths[subPaths.length - 1]);
+        return (T)nextJson.getValue(subPaths[subPaths.length - 1]);
     }
 
     /**
@@ -421,15 +421,15 @@ public class VertxJsonUtils {
      */
     public static void deepRemove(JsonObject jsonObject, String path) {
         JsonObject nextJson = jsonObject;
-        String[] subPaths = StringUtil.split(path, '.');
+        String[] subPaths = path.split(".");
         for (int i = 0; i < (subPaths.length - 1); i ++) {
             String subPath = subPaths[i];
-            nextJson = nextJson.getObject(subPath);
+            nextJson = nextJson.getJsonObject(subPath);
             if (nextJson == null) {
                 return;
             }
         }
-        nextJson.removeField(subPaths[subPaths.length - 1]);
+        nextJson.remove(subPaths[subPaths.length - 1]);
     }
 
     /**
@@ -461,34 +461,34 @@ public class VertxJsonUtils {
      */
     public static void merge(JsonObject dest, JsonObject extra) {
         // Traverse all fields in A
-        String[] oldFieldNames = new String[dest.getFieldNames().size()];
+        String[] oldFieldNames = new String[dest.fieldNames().size()];
         for (int i = 0; i < oldFieldNames.length; i ++) {
-            oldFieldNames[i] = (String)dest.getFieldNames().toArray()[i];
+            oldFieldNames[i] = (String)dest.fieldNames().toArray()[i];
         }
 
         for (String fieldName : oldFieldNames) {
-            if (!extra.containsField(fieldName)) {
+            if (!extra.containsKey(fieldName)) {
                 //log.info(fieldName + " is in dest but missing in extra!");
                 // Keep the existing value
                 continue;
             }
 
             // Get the value from A and B
-            Object valueA = dest.getField(fieldName);
-            Object valueB = extra.getField(fieldName);
+            Object valueA = dest.getValue(fieldName);
+            Object valueB = extra.getValue(fieldName);
 
             // Is the value a JSON Array?
             if (valueA instanceof JsonArray) {
                 if (valueB instanceof JsonArray) {
                     // Merge 2 JSON Arrays
                     for (int i = 0; i < ((JsonArray) valueB).size(); i ++) {
-                        ((JsonArray) valueA).add(((JsonArray) valueB).get(i));
+                        ((JsonArray) valueA).add(((JsonArray) valueB).getValue(i));
                     }
                 } else {
                     // log.info(fieldName + " is a JSON Array in dest but is a " + valueB.getClass().getSimpleName()
                     // + " in extra!");
-                    dest.removeField(fieldName);
-                    append(dest, fieldName, extra.getField(fieldName));
+                    dest.remove(fieldName);
+                    append(dest, fieldName, extra.getValue(fieldName));
                 }
             } else if (valueA instanceof JsonObject) {
                 // Is the value a JSON Object?
@@ -498,7 +498,7 @@ public class VertxJsonUtils {
                     log.info(fieldName + " is a JSON Object in dest but is a " +
                             valueB.getClass().getSimpleName() + " in extra!");
                     // Overwrite the existing value
-                    dest.removeField(fieldName);
+                    dest.remove(fieldName);
                     append(dest, fieldName, valueB);
                 }
             } else {
@@ -506,17 +506,17 @@ public class VertxJsonUtils {
                 if (!valueA.toString().equals(valueB.toString())) {
                     //log.info("Primitive Field " + fieldName + " mismatch! ("
                     //        + valueA.toString() + " vs. " + valueB.toString() + ")");
-                    dest.removeField(fieldName);
-                    append(dest, fieldName, extra.getField(fieldName));
+                    dest.remove(fieldName);
+                    append(dest, fieldName, extra.getValue(fieldName));
                 }
             }
         }
 
         // Traverse all fields in extra
-        for (String fieldName : extra.getFieldNames()) {
-            if (!dest.containsField(fieldName)) {
+        for (String fieldName : extra.fieldNames()) {
+            if (!dest.containsKey(fieldName)) {
                 //log.info(fieldName + " is in objB but missing in objA!");
-                append(dest, fieldName, extra.getField(fieldName));
+                append(dest, fieldName, extra.getValue(fieldName));
             }
         }
 
@@ -528,11 +528,11 @@ public class VertxJsonUtils {
      * @return
      */
     public static void convertFieldToString(JsonObject original, String fieldName) {
-        Object field = original.getField(fieldName);
+        Object field = original.getValue(fieldName);
         if (field != null) {
             String str = field.toString();
-            original.removeField(fieldName);
-            original.putString(fieldName, str);
+            original.remove(fieldName);
+            original.put(fieldName, str);
         }
     }
 
@@ -564,20 +564,20 @@ public class VertxJsonUtils {
             Collection<String> skipFields,
             boolean bPrintMisMatches) {
         // Traverse all fields in A
-        for (String fieldName : objA.getFieldNames()) {
+        for (String fieldName : objA.fieldNames()) {
             if (skipFields.contains(fieldName)) {
                 continue;
             }
 
-            if (!objB.containsField(fieldName)) {
+            if (!objB.containsKey(fieldName)) {
                 if (bPrintMisMatches)
                     log.info(fieldName + " is in objA but missing in objB!");
                 return false;
             }
 
             // Get the value from A and B
-            Object valueA = objA.getField(fieldName);
-            Object valueB = objB.getField(fieldName);
+            Object valueA = objA.getValue(fieldName);
+            Object valueB = objB.getValue(fieldName);
 
             // Is the value a JSON Array?
             if (valueA instanceof JsonArray) {
@@ -621,11 +621,11 @@ public class VertxJsonUtils {
         }
 
         // Traverse all fields in B
-        for (String fieldName : objB.getFieldNames()) {
+        for (String fieldName : objB.fieldNames()) {
             if (skipFields.contains(fieldName)) {
                 continue;
             }
-            if (!objA.containsField(fieldName)) {
+            if (!objA.containsKey(fieldName)) {
                 log.info(fieldName + " is in objB but missing in objA!");
                 return false;
             }
@@ -651,9 +651,9 @@ public class VertxJsonUtils {
      * Convert MongoDB "$date" object to a plain String
      */
     public static void convertMongoDateToString(JsonObject jsonObject, String dateFieldName) {
-        String isoDateString = jsonObject.getObject(dateFieldName).getString(VertxMongoUtils.MOD_MONGO_DATE);
-        jsonObject.removeField(dateFieldName);
-        jsonObject.putString(dateFieldName, isoDateString);
+        String isoDateString = jsonObject.getJsonObject(dateFieldName).getString(VertxMongoUtils.MOD_MONGO_DATE);
+        jsonObject.remove(dateFieldName);
+        jsonObject.put(dateFieldName, isoDateString);
     }
 
     /**
@@ -686,14 +686,14 @@ public class VertxJsonUtils {
      * @param newFieldName
      */
     public static void renameField(JsonObject parentObject, String oldFieldName, String newFieldName) {
-        Object obj = parentObject.getField(oldFieldName);
+        Object obj = parentObject.getValue(oldFieldName);
 
         if (obj == null) {
             return;
         }
 
-        parentObject.putValue(newFieldName, obj);
-        parentObject.removeField(oldFieldName);
+        parentObject.put(newFieldName, obj);
+        parentObject.remove(oldFieldName);
     }
 
     /**
@@ -708,7 +708,7 @@ public class VertxJsonUtils {
             return;
         }
 
-        String[] fieldNames = jsonObject.getFieldNames().toArray(new String[0]);
+        String[] fieldNames = jsonObject.fieldNames().toArray(new String[0]);
         for (String fieldName : fieldNames) {
             if (toMongoDB && fieldName.contains(".")) {
                 renameField(jsonObject, fieldName, fieldName.replace(".", "${DOT}"));
@@ -720,10 +720,10 @@ public class VertxJsonUtils {
                 }
             }
 
-            if (jsonObject.getField(fieldName) instanceof JsonObject) {
-                convertDotInFieldNames(jsonObject.getObject(fieldName), toMongoDB);
-            } else if (jsonObject.getField(fieldName) instanceof JsonArray) {
-                for (Object arrayElement: jsonObject.getArray(fieldName)) {
+            if (jsonObject.getValue(fieldName) instanceof JsonObject) {
+                convertDotInFieldNames(jsonObject.getJsonObject(fieldName), toMongoDB);
+            } else if (jsonObject.getValue(fieldName) instanceof JsonArray) {
+                for (Object arrayElement: jsonObject.getJsonArray(fieldName)) {
                     if (arrayElement instanceof JsonObject) {
                         convertDotInFieldNames((JsonObject)arrayElement, toMongoDB);
                     }
