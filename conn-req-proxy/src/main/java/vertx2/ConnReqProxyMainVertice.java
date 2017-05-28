@@ -1,21 +1,21 @@
-package vertx2;
+package vertx;
 
-import vertx2.VertxConstants;
-import vertx2.VertxDeployUtils;
-import vertx2.VertxUtils;
-import vertx2.connreq.ConnectionRequestManagerVertice;
-import vertx2.util.AcsConstants;
+import vertx.VertxConstants;
+import vertx.VertxDeployUtils;
+import vertx.VertxUtils;
+import vertx.connreq.ConnectionRequestManagerVertice;
+import vertx.util.AcsConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vertx.java.core.AsyncResult;
-import org.vertx.java.core.AsyncResultHandler;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.buffer.Buffer;
-import org.vertx.java.core.eventbus.Message;
-import org.vertx.java.core.http.HttpServer;
-import org.vertx.java.core.http.HttpServerRequest;
-import org.vertx.java.core.json.JsonObject;
-import org.vertx.java.platform.Verticle;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.AsyncResultHandler;
+import io.vertx.core.Handler;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.eventbus.Message;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.json.JsonObject;
+import io.vertx.platform.Verticle;
 
 /**
  * Project:  cwmp

@@ -29,7 +29,7 @@
     with -Dmods.directory=mydir -->
     <mods.directory>target/mods</mods.directory>
     <!--Dependency versions-->
-    <vertx.version>2.1RC2</vertx.version>
+    <vertx.version>3.4.1</vertx.version>
     <vertx.testtools.version>2.0.3-final</vertx.testtools.version>
     <junit.version>4.11</junit.version>
     <!--Plugin versions-->
@@ -76,12 +76,6 @@
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
-      <artifactId>vertx-platform</artifactId>
-      <version>${vertx.version}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
       <artifactId>vertx-hazelcast</artifactId>
       <version>${vertx.version}</version>
       <scope>provided</scope>
@@ -122,11 +116,6 @@
         <dependencies>
           <dependency>
             <groupId>io.vertx</groupId>
-            <artifactId>vertx-platform</artifactId>
-            <version>${vertx.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>io.vertx</groupId>
             <artifactId>vertx-core</artifactId>
             <version>${vertx.version}</version>
           </dependency>
@@ -152,8 +141,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${maven.compiler.plugin.version}</version>
         <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
+          <source>1.8</source>
+          <target>1.8</target>
         </configuration>
       </plugin>
       <plugin>

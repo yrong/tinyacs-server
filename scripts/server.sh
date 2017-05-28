@@ -199,7 +199,7 @@ if [ "$ACTION" = "start" ]; then
      -XX:-UseGCOverheadLimit\
      -XX:+UseConcMarkSweepGC\
      -XX:+HeapDumpOnOutOfMemoryError\
-     -Dorg.vertx.logger-delegate-factory-class-name=org.vertx.java.core.logging.impl.SLF4JLogDelegateFactory\
+     -Dorg.vertx.logger-delegate-factory-class-name=io.vertx.core.logging.impl.SLF4JLogDelegateFactory\
      -Djava.io.tmpdir=$VERTX_RUNTIME_PATH/$MOD_NAME/tmp\
      -DLOG_FILE=$LOG_FILE"
 

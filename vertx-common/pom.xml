@@ -8,11 +8,7 @@
     <name>SXA Vert.x Common Lib</name>
     <properties>
         <!--Dependency versions-->
-        <vertx.version>2.1RC2</vertx.version>
-        <vertx.mod.redis.version>1.1.4</vertx.mod.redis.version>
-        <vertx.testtools.version>2.0.3-final</vertx.testtools.version>
-        <mongo.java.driver.version>2.13.0</mongo.java.driver.version>
-        <vertx.mod.mongo.gridfs.version>1.1.0</vertx.mod.mongo.gridfs.version>
+        <vertx.version>3.4.1</vertx.version>
         <junit.version>4.11</junit.version>
     </properties>
     <dependencies>
@@ -29,9 +25,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.mongodb</groupId>
-            <artifactId>mongo-java-driver</artifactId>
-            <version>${mongo.java.driver.version}</version>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-mongo-client</artifactId>
+            <version>${vertx.version}</version>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
@@ -41,19 +37,8 @@
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
-            <artifactId>vertx-platform</artifactId>
+            <artifactId>vertx-redis-client</artifactId>
             <version>${vertx.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>mod-redis-client</artifactId>
-            <version>${vertx.mod.redis.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.englishtown</groupId>
-            <artifactId>vertx-mod-mongo-gridfs</artifactId>
-            <version>${vertx.mod.mongo.gridfs.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>

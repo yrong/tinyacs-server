@@ -2,6 +2,8 @@ ACS CWMP协议基于异步开源框架vertx的实现
 ===============================
 A blazing fast [TR-069](https://www.broadband-forum.org/cwmp.php) auto configuration server (ACS) built with [Vertx](http://vertx.io/vertx2/), Redis, and MongoDB. 
 
+The project is migrating from vertx 2 to 3 and may be broken temporarily,will fix soon
+
 ## Infrastructure and message flow for nbi request 
 
 ![](/image/cwmp.png)

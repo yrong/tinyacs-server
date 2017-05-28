@@ -1,6 +1,6 @@
-package vertx2;
+package vertx;
 
-import vertx2.VertxUtils;
+import vertx.VertxUtils;
 
 /**
  * Project:  cwmp
