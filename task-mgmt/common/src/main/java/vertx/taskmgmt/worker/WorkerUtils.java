@@ -1,11 +1,9 @@
 package vertx.taskmgmt.worker;
 
-import vertx.VertxUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.platform.Container;
 
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
@@ -28,9 +26,8 @@ public class WorkerUtils {
      *
      * @return  The list, or null.
      */
-    public static List<? extends AbstractSxaTaskImpl> getTaskTypes(Container container) {
-        JsonObject config = container.config();
-        JsonArray classNames = config.getArray(FIELD_NAME_CLASS_NAMES);
+    public static List<? extends AbstractSxaTaskImpl> getTaskTypes(JsonObject config) {
+        JsonArray classNames = config.getJsonArray(FIELD_NAME_CLASS_NAMES);
         if (classNames == null || classNames.size() <= 0) {
             log.error(FIELD_NAME_CLASS_NAMES + " is missing!");
             return null;
@@ -43,7 +40,7 @@ public class WorkerUtils {
         String className = null;
         try {
             for (int i = 0; i < classNames.size(); i ++) {
-                className = classNames.get(i);
+                className = classNames.getString(i);
                 Class<?> clazz = Class.forName(className);
                 Constructor<?> constructor = clazz.getConstructor();
                 array[i] = (AbstractSxaTaskImpl) constructor.newInstance();
@@ -60,11 +57,11 @@ public class WorkerUtils {
     /**
      * Get the max # of outstanding tasks from deployment configuration.
      *
-     * @param container
+     * @param config
      * @return
      */
-    public static int getMaxOutstandingTasks(Container container) {
-        return container.config().getInteger(FIELD_NAME_MAX_OUTSTANDING_TASKS, 1);
+    public static int getMaxOutstandingTasks(JsonObject config) {
+        return config.getInteger(FIELD_NAME_MAX_OUTSTANDING_TASKS, 1);
     }
 
     /**
@@ -75,39 +72,8 @@ public class WorkerUtils {
      * @return
      */
     public static JsonObject buildConfig(String[] classNames, int maxOutstandingTasks) {
-        return new JsonObject().putNumber(FIELD_NAME_MAX_OUTSTANDING_TASKS, maxOutstandingTasks)
-                .putArray(FIELD_NAME_CLASS_NAMES, new JsonArray(classNames));
+        return new JsonObject().put(FIELD_NAME_MAX_OUTSTANDING_TASKS, maxOutstandingTasks)
+                .put(FIELD_NAME_CLASS_NAMES, new JsonArray(Arrays.asList(classNames)));
     }
 
-    /**
-     * Build a WorkerVertice Deployment Object.
-     *
-     * @param classNames
-     * @param maxOutstandingTasks
-     * @return
-     */
-    public static JsonObject buildDeployment(String[] classNames, int maxOutstandingTasks) {
-        return VertxUtils.buildNewDeployment(
-                WorkerVertice.class.getName(),
-                WorkerUtils.buildConfig(classNames, maxOutstandingTasks)
-        );
-    }
-
-    /**
-     * Build a WorkerVertice Deployment Object.
-     *
-     * @param workerVerticeClassName
-     * @param classNames
-     * @param maxOutstandingTasks
-     * @return
-     */
-    public static JsonObject buildDeployment(
-            String workerVerticeClassName,
-            String[] classNames,
-            int maxOutstandingTasks) {
-        return VertxUtils.buildNewDeployment(
-                workerVerticeClassName,
-                WorkerUtils.buildConfig(classNames, maxOutstandingTasks)
-        );
-    }
 }

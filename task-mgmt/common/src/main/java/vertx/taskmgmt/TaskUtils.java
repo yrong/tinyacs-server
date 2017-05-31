@@ -1,8 +1,8 @@
 package vertx.taskmgmt;
 
+import io.vertx.redis.RedisClient;
 import vertx.VertxConfigProperties;
 import vertx.taskmgmt.model.SxaTaskBase;
-import io.vertx.java.redis.RedisClient;
 import net.greghaines.jesque.Config;
 import net.greghaines.jesque.ConfigBuilder;
 import net.greghaines.jesque.utils.JesqueUtils;
@@ -82,7 +82,7 @@ public class TaskUtils {
     public static JsonObject convertRawTaskToJesqueTask(JsonObject rawTask) throws Exception {
         String taskQueue = rawTask.getString("queue");
         String taskType = rawTask.getString("type");
-        JsonObject taskArgs =  rawTask.getObject("args");
+        JsonObject taskArgs =  rawTask.getJsonObject("args");
 
         /**
          * Validate input
@@ -94,7 +94,7 @@ public class TaskUtils {
         /**
          * Set "createTime"
          */
-        taskArgs.putString("createTime", new Date().toString());
+        taskArgs.put("createTime", new Date().toString());
 
         /**
          * Move "producerHost"/"producerApp"/"orgId"/"sn" to args if found at top level
@@ -117,9 +117,9 @@ public class TaskUtils {
          * Build a Jesque Job Json Object
          */
         return new JsonObject()
-                .putString("class", taskType)
-                .putString("_id", taskId)
-                .putArray("args", new JsonArray().add(taskArgs));
+                .put("class", taskType)
+                .put("_id", taskId)
+                .put("args", new JsonArray().add(taskArgs));
     }
 
     /**
@@ -134,12 +134,14 @@ public class TaskUtils {
             String queueName,
             JsonObject task,
             RedisClient redisClient,
-            Handler<Message<JsonObject>> handler) {
-        redisClient.sadd(getJesqueKey(ResqueConstants.QUEUES), queueName);
+            Handler<Long> handler) {
+        redisClient.sadd(getJesqueKey(ResqueConstants.QUEUES), queueName,res->{});
         redisClient.rpush(
                 getJesqueKey(ResqueConstants.QUEUE, queueName),
                 task.toString(),
-                handler);
+                res->{
+                    handler.handle(res.result());
+                });
     }
 
     /**
@@ -156,13 +158,15 @@ public class TaskUtils {
             JsonObject task,
             long delay,
             RedisClient redisClient,
-            Handler<Message<JsonObject>> handler) {
-        redisClient.sadd(getJesqueKey(ResqueConstants.QUEUES), queueName);
+            Handler<Long> handler) {
+        redisClient.sadd(getJesqueKey(ResqueConstants.QUEUES), queueName,res->{});
         redisClient.zadd(
                 getJesqueKey(ResqueConstants.QUEUE, queueName),
                 delay,
                 task.toString(),
-                handler);
+                res->{
+                    handler.handle(res.result());
+                });
     }
 
     /**
@@ -190,8 +194,8 @@ public class TaskUtils {
 
         String value = from.getString(name);
         if (value != null) {
-            from.removeField(name);
-            to.putString(name, value);
+            from.remove(name);
+            to.put(name, value);
         }
     }
 
@@ -207,10 +211,10 @@ public class TaskUtils {
             return;
         }
 
-        Number value = from.getNumber(name);
+        Number value = from.getInteger(name);
         if (value != null) {
-            from.removeField(name);
-            to.putNumber(name, value);
+            from.remove(name);
+            to.put(name, value);
         }
     }
 

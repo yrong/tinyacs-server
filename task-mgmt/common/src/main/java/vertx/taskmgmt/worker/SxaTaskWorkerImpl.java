@@ -1,9 +1,9 @@
 package vertx.taskmgmt.worker;
 
+import io.vertx.redis.RedisClient;
 import vertx.VertxConstants;
 import vertx.taskmgmt.TaskConstants;
 import vertx.taskmgmt.TaskUtils;
-import io.vertx.java.redis.RedisClient;
 import net.greghaines.jesque.Config;
 import net.greghaines.jesque.Job;
 import net.greghaines.jesque.utils.JedisUtils;
@@ -13,14 +13,12 @@ import net.greghaines.jesque.worker.WorkerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.AsyncResultHandler;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.platform.Container;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -177,33 +175,7 @@ public class SxaTaskWorkerImpl extends WorkerImpl{
 
         poll();
     }
-    
-    /**
-     * Redis Async Handler
-     */
-    AsyncResultHandler<String> modRedisDeploymentAsyncHandler = new AsyncResultHandler<String>() {
-        public void handle(AsyncResult<String> asyncResult) {
-            if (asyncResult.succeeded()) {
-                log.info("The Redis verticle has been successfully deployed");
 
-                redisClient =  new RedisClient(vertx.eventBus(), VertxConstants.VERTX_ADDRESS_REDIS);
-            } else {
-                log.error("Failed to deploy the Redis verticle !!!");
-                asyncResult.cause().printStackTrace();
-            }
-        }
-    };
-
-    /**
-     * Initialize Async Redis Client (not the jedis client instance)
-     */
-    public void initRedisClient(Container container) {
-        
-    	container.deployModule(
-                VertxConstants.MOD_REDIS,
-                VertxConstants.MOD_REDIS_CONFIG,
-                modRedisDeploymentAsyncHandler);
-    }
 
     /**
      * Polls the queues for jobs and executes them.
@@ -286,11 +258,11 @@ public class SxaTaskWorkerImpl extends WorkerImpl{
         if (className == null) {
             log.error("No class field found!");
         } else {
-            JsonArray args = jsonObject.getArray("args");
+            JsonArray args = jsonObject.getJsonArray("args");
             if (args == null || args.size() < 1) {
                 log.error("No args found!");
             } else {
-                return new Job(className, args.get(0));
+                return new Job(className, args.getValue(0));
             }
         }
 
@@ -303,7 +275,7 @@ public class SxaTaskWorkerImpl extends WorkerImpl{
      */
     public void handleResult(JsonObject result) {
         boolean succeeded = result.getBoolean("succeeded", true);
-        Job job = getJobFromJsonObject(result.getObject("job"));
+        Job job = getJobFromJsonObject(result.getJsonObject("job"));
         if (succeeded) {
             success(job, null, null, null);
         } else {
@@ -327,15 +299,15 @@ public class SxaTaskWorkerImpl extends WorkerImpl{
         String queue
     ) {
         JsonObject output = new JsonObject();
-        output.putBoolean("succeeded", succeeded);
+        output.put("succeeded", succeeded);
         if (failure != null) {
-            output.putString("failure", failure);
+            output.put("failure", failure);
         }
         if (jobJsonObject != null) {
-            output.putObject("job", jobJsonObject);
+            output.put("job", jobJsonObject);
         }
         if (queue != null) {
-            output.putString("queue", queue);
+            output.put("queue", queue);
         }
 
         return output;

@@ -1,12 +1,13 @@
 package vertx.taskmgmt.worker;
 
+import io.vertx.core.AbstractVerticle;
+import io.vertx.core.DeploymentOptions;
 import vertx.taskmgmt.TaskConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
-import io.vertx.platform.Verticle;
 
 import java.util.List;
 
@@ -17,7 +18,7 @@ import java.util.List;
  *
  * @author: ronang
  */
-public class WorkerVertice extends Verticle {
+public class WorkerVertice extends AbstractVerticle {
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
     /**
@@ -37,12 +38,14 @@ public class WorkerVertice extends Verticle {
          * Deploy a Task Poller vertice
          */
         //container.deployVerticle(TaskPollerVertice.class.getName(), container.config());
+        DeploymentOptions options = new DeploymentOptions().setConfig(config());
+        vertx.deployVerticle(TaskPollerVertice.class.getName(),options);
 
         try {
             /**
              * Extract Vertice Config which contains the list of task queue name(s)
              */
-            List<? extends AbstractSxaTaskImpl> tasks = WorkerUtils.getTaskTypes(container);
+            List<? extends AbstractSxaTaskImpl> tasks = WorkerUtils.getTaskTypes(config());
             if (tasks == null) {
                 try {
                     throw new Exception("Invalid Config Args!");
@@ -56,7 +59,7 @@ public class WorkerVertice extends Verticle {
              * Register event handler for new jobs/tasks
              */
             for (final AbstractSxaTaskImpl task : tasks) {
-                vertx.eventBus().registerLocalHandler(
+                vertx.eventBus().consumer(
                         TaskConstants.VERTX_ADDRESS_NEW_TASKS + "." + task.getTaskQueueName() + "." + task.getTaskName(),
                         new NewJobHandler(task.getTaskQueueName())
                 );
@@ -65,7 +68,7 @@ public class WorkerVertice extends Verticle {
             /**
              * Create a worker POJO for materializing jobs
              */
-            worker = new SxaTaskWorkerImpl(tasks, this, WorkerUtils.getMaxOutstandingTasks(container));
+            worker = new SxaTaskWorkerImpl(tasks, this, WorkerUtils.getMaxOutstandingTasks(config()));
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -133,7 +136,7 @@ public class WorkerVertice extends Verticle {
          * Register event handler for new jobs/tasks
          */
         for (final AbstractSxaTaskImpl task : worker.tasks) {
-            vertx.eventBus().registerHandler(
+            vertx.eventBus().consumer(
                     TaskConstants.VERTX_ADDRESS_NEW_TASKS + "." + task.getTaskQueueName(),
                     new NewJobHandler(task.getTaskQueueName())
             );

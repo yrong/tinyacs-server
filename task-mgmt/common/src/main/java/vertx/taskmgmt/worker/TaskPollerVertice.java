@@ -5,7 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.Handler;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Project:  SXA Task Management
@@ -35,7 +37,7 @@ public class TaskPollerVertice extends WorkerVertice {
         /**
          * Extract Vertice Config which contains the list of task queue name(s)
          */
-        List<? extends AbstractSxaTaskImpl> tasks = WorkerUtils.getTaskTypes(container);
+        List<? extends AbstractSxaTaskImpl> tasks = WorkerUtils.getTaskTypes(config());
         if (tasks == null) {
             try {
                 throw new Exception("Invalid Config Args!");
@@ -53,20 +55,20 @@ public class TaskPollerVertice extends WorkerVertice {
             log.info("queue: " + task.getTaskQueueName() + ", task type: " + task.getTaskName()
                     + ", class: " + task.getClass().getName());
         }
-        log.info("MaxOutstandingTasks: " + WorkerUtils.getMaxOutstandingTasks(container));
+        log.info("MaxOutstandingTasks: " + WorkerUtils.getMaxOutstandingTasks(config()));
 
         try {
             /**
              * Create a poller POJO (as a "worker")
              */
-            poller = new SxaTaskWorkerImpl(tasks, this, WorkerUtils.getMaxOutstandingTasks(container));
+            poller = new SxaTaskWorkerImpl(tasks, this, WorkerUtils.getMaxOutstandingTasks(config()));
 
             /**
              * Register event bus handlers for jobs/tasks processing results
              */
             for (AbstractSxaTaskImpl task : tasks) {
                 log.info("Registering event handler for task queue " + task.getTaskQueueName() + "...");
-                vertx.eventBus().registerLocalHandler(
+                vertx.eventBus().localConsumer(
                         TaskConstants.VERTX_ADDRESS_TASK_RESULTS + "." + task.getTaskQueueName(),
                         poller.jobResultHandler
                 );
@@ -107,14 +109,6 @@ public class TaskPollerVertice extends WorkerVertice {
          * Un-Register event bus handlers for jobs/tasks processing results
          */
         if (poller != null) {
-            if (poller.tasks != null) {
-                for (AbstractSxaTaskImpl task : poller.tasks) {
-                    vertx.eventBus().unregisterHandler(
-                            TaskConstants.VERTX_ADDRESS_TASK_RESULTS + "." + task.getTaskQueueName(),
-                            poller.jobResultHandler
-                    );
-                }
-            }
 
             poller.shutdown();
         }

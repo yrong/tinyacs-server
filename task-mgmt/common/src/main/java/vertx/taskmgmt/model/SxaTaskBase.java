@@ -82,8 +82,8 @@ public abstract class SxaTaskBase {
             String producerHost = taskArgs.getString("producerHost");
             String producerApp = taskArgs.getString("producerApp");
             String createTime = taskArgs.getString("createTime");
-            Number sn = taskArgs.getNumber("sn");
-            Number orgId = taskArgs.getNumber("orgId");
+            Number sn = taskArgs.getInteger("sn");
+            Number orgId = taskArgs.getInteger("orgId");
 
             if (producerHost == null || producerApp == null || createTime == null || orgId == null) {
                 log.error("Failed to construct new task upon these args:\n" + taskArgs.toString());
@@ -92,7 +92,7 @@ public abstract class SxaTaskBase {
                  * Generate a new ID
                  */
                 id = generateTaskId(taskQueue, producerHost, producerApp, createTime, orgId, sn);
-                taskArgs.putString("_id", id);
+                taskArgs.put("_id", id);
             }
         }
 
@@ -116,12 +116,12 @@ public abstract class SxaTaskBase {
          * Build a JSON Object to represent the task
          */
         taskJsonObject = new JsonObject();
-        taskJsonObject.putString("queue", getTaskQueueName());
-        taskJsonObject.putString("type", getTaskName());
-        taskJsonObject.putObject("args", taskArgs);
-        taskJsonObject.putString("startTime", new Date().toString());
-        taskJsonObject.putString("state", TaskConstants.TASK_STATE_IN_PROGRESS);
-        taskJsonObject.putString("_id", id);
+        taskJsonObject.put("queue", getTaskQueueName());
+        taskJsonObject.put("type", getTaskName());
+        taskJsonObject.put("args", taskArgs);
+        taskJsonObject.put("startTime", new Date().toString());
+        taskJsonObject.put("state", TaskConstants.TASK_STATE_IN_PROGRESS);
+        taskJsonObject.put("_id", id);
 
         this.taskArgs = taskArgs;
         taskString = taskJsonObject.toString();
@@ -138,18 +138,18 @@ public abstract class SxaTaskBase {
             Number orgId,
             Number sn) throws Exception {
         this(new JsonObject()
-                .putString("producerHost", producerHost)
-                .putString("producerApp", producerApp)
-                .putString("createTime", createTime)
-                .putNumber("orgId", orgId)
-                .putNumber("sn", sn));
+                .put("producerHost", producerHost)
+                .put("producerApp", producerApp)
+                .put("createTime", createTime)
+                .put("orgId", orgId)
+                .put("sn", sn));
 
         // Set State to Pending
         setState(TaskConstants.TASK_STATE_PENDING);
 
         // Check for optional username
         if (username != null) {
-            taskJsonObject.putString("username", username);
+            taskJsonObject.put("username", username);
         }
     }
 
@@ -158,7 +158,7 @@ public abstract class SxaTaskBase {
      * @param state
      */
     public void setState(String state) {
-        taskJsonObject.putString("state", state);
+        taskJsonObject.put("state", state);
     }
 
     /**
@@ -172,8 +172,8 @@ public abstract class SxaTaskBase {
      * Get the update strings
      */
     public String getUpdatesString() {
-        if (taskJsonObject.getArray("updates") != null) {
-            return taskJsonObject.getArray("updates").toString();
+        if (taskJsonObject.getJsonArray("updates") != null) {
+            return taskJsonObject.getJsonArray("updates").toString();
         } else {
             return "";
         }
@@ -222,8 +222,8 @@ public abstract class SxaTaskBase {
          * Build a JSON Object to represent the task
          */
         return new JsonObject()
-                .putString("queue", taskQueueName)
-                .putString("type", taskName)
-                .putObject("args", taskArgs);
+                .put("queue", taskQueueName)
+                .put("type", taskName)
+                .put("args", taskArgs);
     }
 }

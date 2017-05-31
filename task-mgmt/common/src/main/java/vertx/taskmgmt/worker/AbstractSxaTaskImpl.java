@@ -1,11 +1,11 @@
 package vertx.taskmgmt.worker;
 
+import io.vertx.redis.RedisClient;
 import vertx.VertxConstants;
 import vertx.VertxUtils;
 import vertx.taskmgmt.TaskConstants;
 import vertx.taskmgmt.TaskUtils;
 import vertx.taskmgmt.model.SxaTaskBase;
-import io.vertx.java.redis.RedisClient;
 import net.greghaines.jesque.worker.Worker;
 import net.greghaines.jesque.worker.WorkerAware;
 import org.slf4j.Logger;
@@ -75,8 +75,8 @@ public abstract class AbstractSxaTaskImpl extends SxaTaskBase implements WorkerA
              * Notify parent task worker (if any) that this sub task has been picked up by a sub task worker
              */
             JsonObject event = new JsonObject()
-                    .putString("subTaskId", getId())
-                    .putBoolean("started", true);
+                    .put("subTaskId", getId())
+                    .put("started", true);
 
             // Send the event to event bus
             vertx.eventBus().send(getSubTaskUpdateAddress(parentTask), event);
@@ -90,16 +90,16 @@ public abstract class AbstractSxaTaskImpl extends SxaTaskBase implements WorkerA
     public void addUpdate(String update, Boolean persistNow) {
         log.info(this + " : adding update: " + update);
 
-        JsonArray updates = taskJsonObject.getArray("updates");
+        JsonArray updates = taskJsonObject.getJsonArray("updates");
         if (updates == null) {
             updates = new JsonArray();
-            taskJsonObject.putArray("updates", updates);
+            taskJsonObject.put("updates", updates);
         }
 
         /**
          * TODO: only persist the newly added update.
          */
-        updates.addString(String.valueOf(updates.size()+1) + " " + new Date() + " " + update);
+        updates.add(String.valueOf(updates.size()+1) + " " + new Date() + " " + update);
 
         /**
          * Persist to MongoDB if needed
@@ -127,10 +127,10 @@ public abstract class AbstractSxaTaskImpl extends SxaTaskBase implements WorkerA
      * @return
      */
     public JsonObject getSubTasks() {
-        JsonObject subTasks = taskJsonObject.getObject("subTasks");
+        JsonObject subTasks = taskJsonObject.getJsonObject("subTasks");
         if (subTasks == null) {
             subTasks = new JsonObject();
-            taskJsonObject.putObject("subTasks", subTasks);
+            taskJsonObject.put("subTasks", subTasks);
 
             /**
              * Register a handler for receiving sub-task completion events
@@ -141,7 +141,7 @@ public abstract class AbstractSxaTaskImpl extends SxaTaskBase implements WorkerA
                     updateSubTask(event.body());
                 }
             };
-            vertx.eventBus().registerHandler(getSubTaskUpdateAddress(getId()), subTaskUpdateHandler);
+            vertx.eventBus().consumer(getSubTaskUpdateAddress(getId()), subTaskUpdateHandler);
         }
 
         return subTasks;
@@ -152,18 +152,18 @@ public abstract class AbstractSxaTaskImpl extends SxaTaskBase implements WorkerA
      * @return
      */
     public int getNextSubTaskIndex() {
-        JsonObject subTasks = taskJsonObject.getObject("subTasks");
+        JsonObject subTasks = taskJsonObject.getJsonObject("subTasks");
         if (subTasks == null) {
             return 0;
         }
 
-        return subTasks.getNumber("totalOutStandingSubTasks", 0).intValue();
+        return subTasks.getInteger("totalOutStandingSubTasks", 0).intValue();
     }
     
     /*
      * Default Redis Handler Class for adding a sub task
      */
-    public class DefaultAddSubTaskRedisHandler implements Handler<Message<JsonObject>> {
+    public class DefaultAddSubTaskRedisHandler implements Handler<Long> {
         
     	private String subTaskId;
     	
@@ -177,24 +177,10 @@ public abstract class AbstractSxaTaskImpl extends SxaTaskBase implements WorkerA
     	
     	/**
          * The handler method body.
-         * @param jsonObjectMessage
+         * @param result
          */
         @Override
-        public void handle(Message<JsonObject> jsonObjectMessage) {
-            JsonObject result = jsonObjectMessage.body();
-            if (result == null) {
-            	log.error("The response message is NULL! " + subTaskId);
-            	return;
-            } else {            
-                String status = result.getString("status");
-                if (status  == null) {
-                	log.error("The response message is invalid (no status found)! " + subTaskId);
-                	return;
-                } else if (!status.equals("ok")) {
-                	log.error("The response message has unexpected status " + status + "! " + subTaskId);
-                	return;
-                }
-            }
+        public void handle(Long result) {
             log.info("Successfully added a new sub task to redis! sub task id: " + subTaskId);
         }
     }
@@ -209,7 +195,7 @@ public abstract class AbstractSxaTaskImpl extends SxaTaskBase implements WorkerA
             final AbstractSxaTaskImpl subTask,
             boolean bPersistTask,
             RedisClient redisClient,
-            Handler<Message<JsonObject>> handler
+            Handler<Long> handler
     ) throws Exception {
         /**
          * Get the subTasks object
@@ -220,15 +206,15 @@ public abstract class AbstractSxaTaskImpl extends SxaTaskBase implements WorkerA
          * Add the new sub task to it
          */
         int totalOutStandingSubTasks = subTasks.getInteger("totalOutStandingSubTasks", 0);;
-        subTasks.putObject(subTask.getId(), new JsonObject().putBoolean("completed", false));
-        subTasks.putNumber("totalOutStandingSubTasks", totalOutStandingSubTasks+1);
+        subTasks.put(subTask.getId(), new JsonObject().put("completed", false));
+        subTasks.put("totalOutStandingSubTasks", totalOutStandingSubTasks+1);
 
         /**
          * Set "parentTask" field of the sub task
          */
-        subTask.taskArgs.putString("parentTask", getId());
-        subTask.taskArgs.putString("createTime", new Date().toString());
-        subTask.taskArgs.putString("producerHost", VertxUtils.getLocalHostname());
+        subTask.taskArgs.put("parentTask", getId());
+        subTask.taskArgs.put("createTime", new Date().toString());
+        subTask.taskArgs.put("producerHost", VertxUtils.getLocalHostname());
         
         if(handler == null)
         {
@@ -262,8 +248,8 @@ public abstract class AbstractSxaTaskImpl extends SxaTaskBase implements WorkerA
         String subTaskId = update.getString("subTaskId");
         log.info(this.toString() + ": received update for sub task " + subTaskId + ":\n" + update.encodePrettily());
 
-        JsonObject subTasks = taskJsonObject.getObject("subTasks");
-        subTasks.putObject(subTaskId, update);
+        JsonObject subTasks = taskJsonObject.getJsonObject("subTasks");
+        subTasks.put(subTaskId, update);
 
         /**
          * Update the # of outstanding sub tasks if the sub task is now completed
@@ -277,10 +263,10 @@ public abstract class AbstractSxaTaskImpl extends SxaTaskBase implements WorkerA
             int failedSubTasks = 0;
             if (update.getBoolean("succeeded", false) == true) {
                 succeededSubTasks = subTasks.getInteger("totalSucceededSubTasks", 0);
-                subTasks.putNumber("totalSucceededSubTasks", ++succeededSubTasks);
+                subTasks.put("totalSucceededSubTasks", ++succeededSubTasks);
             } else {
                 failedSubTasks = subTasks.getInteger("totalFailedSubTasks", 0);
-                subTasks.putNumber("totalFailedSubTasks", ++failedSubTasks);
+                subTasks.put("totalFailedSubTasks", ++failedSubTasks);
             }
 
             int totalOutStandingSubTasks = subTasks.getInteger("totalOutStandingSubTasks", 1);
@@ -290,14 +276,14 @@ public abstract class AbstractSxaTaskImpl extends SxaTaskBase implements WorkerA
                 log.error("Invalid totalOutStandingSubTasks " + totalOutStandingSubTasks + "!");
                 totalOutStandingSubTasks = 0;
             }
-            subTasks.putNumber("totalOutStandingSubTasks", totalOutStandingSubTasks);
+            subTasks.put("totalOutStandingSubTasks", totalOutStandingSubTasks);
 
             if (totalOutStandingSubTasks == 0) {
                 /**
                  * All sub tasks are completed
                  */
                 // Un-register the sub-task-update handler
-                vertx.eventBus().unregisterHandler(getSubTaskUpdateAddress(getId()), subTaskUpdateHandler);
+//                vertx.eventBus().unregisterHandler(getSubTaskUpdateAddress(getId()), subTaskUpdateHandler);
 
                 /**
                  * the top level task is considered succeeded only if all sub tasks are succeeded
@@ -321,12 +307,12 @@ public abstract class AbstractSxaTaskImpl extends SxaTaskBase implements WorkerA
      * @return
      */
     public Object getTaskResult() {
-        JsonObject subTasks = taskJsonObject.getObject("subTasks");
+        JsonObject subTasks = taskJsonObject.getJsonObject("subTasks");
         if (subTasks == null) {
             return "Done";
         } else {
-            Number succeeded = subTasks.getNumber("totalSucceededSubTasks", 0);
-            Number failed = subTasks.getNumber("totalFailedSubTasks", 0);
+            Number succeeded = subTasks.getInteger("totalSucceededSubTasks", 0);
+            Number failed = subTasks.getInteger("totalFailedSubTasks", 0);
             int total = succeeded.intValue() + failed.intValue();
             return "All " + total + " sub task(s) are completed with "
                     + succeeded + " succeeded and "
@@ -340,7 +326,7 @@ public abstract class AbstractSxaTaskImpl extends SxaTaskBase implements WorkerA
     @Override
     public void setWorker(Worker worker) {
         workerInstance = (SxaTaskWorkerImpl)worker;
-        taskJsonObject.putString("worker", workerInstance.getName());
+        taskJsonObject.put("worker", workerInstance.getName());
     }
 
     /**
@@ -357,9 +343,9 @@ public abstract class AbstractSxaTaskImpl extends SxaTaskBase implements WorkerA
         vertx.eventBus().send(
                 VertxConstants.VERTX_ADDRESS_MONGODB,
                 new JsonObject()
-                        .putString("action", "save")
-                        .putString("collection", TaskConstants.MONGODB_TASK_COLLECTION)
-                        .putObject("document", taskJsonObject)
+                        .put("action", "save")
+                        .put("collection", TaskConstants.MONGODB_TASK_COLLECTION)
+                        .put("document", taskJsonObject)
         );
     }
 
@@ -380,16 +366,16 @@ public abstract class AbstractSxaTaskImpl extends SxaTaskBase implements WorkerA
         // Add Result
         if (result != null) {
             if (result instanceof String) {
-                taskJsonObject.putString("result", (String)result);
+                taskJsonObject.put("result", (String)result);
             } else if (result instanceof JsonObject) {
-                taskJsonObject.putObject("result", (JsonObject) result);
+                taskJsonObject.put("result", (JsonObject) result);
             }
             log.info(this.toString() + ": Completed with result: " + result.toString());
         }
 
         // Mark the completion time
-        taskJsonObject.putString("completeTime", new Date().toString());
-        taskJsonObject.putString("timeConsumed", TaskUtils.msToString(System.currentTimeMillis() - startTime));
+        taskJsonObject.put("completeTime", new Date().toString());
+        taskJsonObject.put("timeConsumed", TaskUtils.msToString(System.currentTimeMillis() - startTime));
 
         // Persist to MongoDB
         persistTask();
@@ -408,17 +394,17 @@ public abstract class AbstractSxaTaskImpl extends SxaTaskBase implements WorkerA
         /**
          * Also notify parent task if any
          */
-        String parentTask = taskJsonObject.getObject("args").getString("parentTask");
+        String parentTask = taskJsonObject.getJsonObject("args").getString("parentTask");
         if (parentTask != null) {
             JsonObject event = new JsonObject()
-                    .putString("subTaskId", getId())
-                    .putBoolean("completed", true)
-                    .putBoolean("succeeded", succeeded);
+                    .put("subTaskId", getId())
+                    .put("completed", true)
+                    .put("succeeded", succeeded);
             if (result != null) {
                 if (result instanceof String) {
-                    event.putString("result", (String)result);
+                    event.put("result", (String)result);
                 } else if (result instanceof JsonObject) {
-                    event.putObject("result", (JsonObject)result);
+                    event.put("result", (JsonObject)result);
                 }
             }
 
@@ -454,8 +440,8 @@ public abstract class AbstractSxaTaskImpl extends SxaTaskBase implements WorkerA
      */
     public JsonObject getJobJsonObject() {
         return new JsonObject()
-                .putString("class", getTaskQueueName())
-                .putArray("args", new JsonArray().addObject(taskArgs));
+                .put("class", getTaskQueueName())
+                .put("args", new JsonArray().add(taskArgs));
     }
 
     /**
@@ -478,7 +464,7 @@ public abstract class AbstractSxaTaskImpl extends SxaTaskBase implements WorkerA
         vertx.eventBus().send(
                 TaskConstants.VERTX_ADDRESS_TASK_RESULTS + "." + getTaskQueueName(),
                 SxaTaskWorkerImpl.buildJobProcessResult(succeeded, null, getJobJsonObject(), getTaskQueueName())
-                        .putObject("result", result)
+                        .put("result", result)
         );
     }
 }
