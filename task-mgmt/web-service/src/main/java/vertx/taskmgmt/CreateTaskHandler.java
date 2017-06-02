@@ -88,7 +88,7 @@ public class CreateTaskHandler implements Handler<Buffer> {
     /**
      * Async Handler for the async result from mod redis
      */
-    private class asyncEnqueueHandler implements Handler<Message<JsonObject>> {
+    private class asyncEnqueueHandler implements Handler<Long> {
         /**
          * Original HTTP Request
          */
@@ -110,14 +110,7 @@ public class CreateTaskHandler implements Handler<Buffer> {
         }
 
         @Override
-        public void handle(Message<JsonObject> jsonObjectMessage) {
-            JsonObject jsonObject = jsonObjectMessage.body();
-            String error = TaskMgmtWsUtils.checkAsyncResult(request, jsonObject);
-            if (error != null) {
-                log.error(error);
-                return;
-            }
-
+        public void handle(Long val) {
             log.info("Successfully added a new task (id: " + taskId + " into redis.");
             VertxUtils.writeToResponse(request, taskId);
         }

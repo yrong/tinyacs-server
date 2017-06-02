@@ -11,7 +11,6 @@ import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonElement;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Iterator;
@@ -172,8 +171,8 @@ public class QueryTaskHandler  {
          */
         public JsonObject getMongoQueryMessage() {
             JsonObject queryMessage = new JsonObject();
-            queryMessage.putString("action", "find");
-            queryMessage.putString("collection", TaskConstants.MONGODB_TASK_COLLECTION);
+            queryMessage.put("action", "find");
+            queryMessage.put("collection", TaskConstants.MONGODB_TASK_COLLECTION);
 
             /**
              * Setup matcher.
@@ -185,21 +184,21 @@ public class QueryTaskHandler  {
              */
             JsonObject matcher = new JsonObject();
             if (id != null) {
-                matcher.putString("_id", id);
+                matcher.put("_id", id);
             } else {
-                matcher.putString("queue", filters.queueName);
+                matcher.put("queue", filters.queueName);
                 if (taskType != null) {
-                    matcher.putString("type", taskType);
+                    matcher.put("type", taskType);
                 }
             }
-            queryMessage.putObject("matcher", matcher);
+            queryMessage.put("matcher", matcher);
 
             if (brief) {
                 // The "updates" element shall not be included in brief report
-                queryMessage.putObject(
+                queryMessage.put(
                         "keys",
                         new JsonObject()
-                                .putNumber("updates", 0)
+                                .put("updates", 0)
                 );
             }
             log.info("MongoDB Query Message: " + queryMessage.toString());
@@ -212,28 +211,28 @@ public class QueryTaskHandler  {
          * @return
          */
         boolean match(JsonObject task) {
-            JsonElement taskArgElement = task.getElement("args");
+            Object taskArgElement = task.getValue("args");
             if (taskArgElement == null) {
                 log.error("Unable to find \"args\" element in task " + task.toString());
                 return false;
             }
 
             JsonObject taskArgs = null;
-            if (taskArgElement.isArray()) {
+            if (taskArgElement instanceof JsonArray) {
                 //Redis
-                taskArgs = task.getArray("args").get(0);
+                taskArgs = task.getJsonArray("args").getJsonObject(0);
                 // Replace the taskArgs array with the external format
-                task.removeField("args");
+                task.remove("args");
                 String taskType = task.getString("class");
-                task.removeField("class");
-                task.putString("type", taskType);
-                task.putObject("args", taskArgs);
-                task.putString("_id", taskArgs.getString("_id"));
-                taskArgs.removeField("_id");
-                task.putString("state", TaskConstants.TASK_STATE_PENDING);
+                task.remove("class");
+                task.put("type", taskType);
+                task.put("args", taskArgs);
+                task.put("_id", taskArgs.getString("_id"));
+                taskArgs.remove("_id");
+                task.put("state", TaskConstants.TASK_STATE_PENDING);
             } else {
                 // MongoDB
-                taskArgs = taskArgElement.asObject();
+                taskArgs = (JsonObject)taskArgElement;
             }
 
             /**
@@ -281,17 +280,18 @@ public class QueryTaskHandler  {
                     TaskUtils.getJesqueKey(QUEUE, filters.queueName),
                     0,
                     Integer.MAX_VALUE,
-                    new CommonAsyncHandler(filters, result, Stage.Redis, Stage.MongoDB, eventBus)
+//                    new CommonAsyncHandler(filters, result, Stage.Redis, Stage.MongoDB, eventBus)
+                    (res)->{}
             );
         } else {
             /**
              * Skip Redis and query MongoDB directly
              */
-            eventBus.send(
-                    VertxConstants.VERTX_ADDRESS_MONGODB,
-                    filters.getMongoQueryMessage(),
-                    new CommonAsyncHandler(filters, result, Stage.MongoDB, Stage.Done, eventBus)
-            );
+//            eventBus.send(
+//                    VertxConstants.VERTX_ADDRESS_MONGODB,
+//                    filters.getMongoQueryMessage(),
+//                    new CommonAsyncHandler(filters, result, Stage.MongoDB, Stage.Done, eventBus)
+//            );
         }
     }
 
@@ -370,12 +370,12 @@ public class QueryTaskHandler  {
             /**
              * Extract tasks from the raw result
              */
-            JsonElement tasks = jsonObject.getElement(elementName);
+            Object tasks = jsonObject.getValue(elementName);
             Iterator taskIterator = null;
-            if (tasks.isArray()) {
-                taskIterator = tasks.asArray().iterator();
-            } else if (tasks.isObject()) {
-                log.error(tasks.asObject().toString());
+            if (tasks instanceof JsonArray) {
+                taskIterator = ((JsonArray) tasks).iterator();
+            } else if (tasks instanceof JsonObject) {
+                log.error(tasks.toString());
             }
 
             /**
@@ -408,13 +408,13 @@ public class QueryTaskHandler  {
                      * Found a match.
                      */
                     if (filters.brief) {
-                        task.removeField("updates");
+                        task.remove("updates");
                     }
 
                     /**
                      * Move "producerHost"/"producerApp"/"orgId"/"sn" from args to top level
                      */
-                    JsonObject taskArgs = task.getObject("args");
+                    JsonObject taskArgs = task.getJsonObject("args");
                     TaskUtils.moveJsonStringElement("parentTask", taskArgs, task);
                     TaskUtils.moveJsonStringElement("producerHost", taskArgs, task);
                     TaskUtils.moveJsonStringElement("producerApp", taskArgs, task);
@@ -426,7 +426,7 @@ public class QueryTaskHandler  {
                      * Add task queue name for pending tasks
                      */
                     if (TaskConstants.TASK_STATE_PENDING.equals(task.getString("state"))) {
-                        task.putString("queue", filters.queueName);
+                        task.put("queue", filters.queueName);
                     }
 
                     /**
@@ -439,22 +439,23 @@ public class QueryTaskHandler  {
                         TaskMgmtRestWsVertice.redisClient.lrem(
                                 TaskUtils.getJesqueKey(QUEUE, filters.queueName),
                                 -1,
-                                taskObject.toString()
+                                taskObject.toString(),
+                                (res)->{}
                         );
 
                         /**
                          * Update result
                          */
-                        task.putString("queue", filters.queueName);
-                        task.putString("state", TaskConstants.TASK_STATE_CANCELLED);
+                        task.put("queue", filters.queueName);
+                        task.put("state", TaskConstants.TASK_STATE_CANCELLED);
 
                         /**
                          * Store the cancelled task into MongoD
                          */
                         JsonObject mongoMessage = new JsonObject()
-                                .putString("action", "save")
-                                .putString("collection", TaskConstants.MONGODB_TASK_COLLECTION)
-                                .putObject("document", task);
+                                .put("action", "save")
+                                .put("collection", TaskConstants.MONGODB_TASK_COLLECTION)
+                                .put("document", task);
                         eventBus.send(VertxConstants.VERTX_ADDRESS_MONGODB, mongoMessage);
                     }
 
@@ -472,7 +473,7 @@ public class QueryTaskHandler  {
                             /**
                              * Update result
                              */
-                            task.putString("state", "in-progress (failed to delete)");
+                            task.put("state", "in-progress (failed to delete)");
                         } else {
                             if (stage == Stage.Redis) {
                                 /**
@@ -481,24 +482,24 @@ public class QueryTaskHandler  {
                                 TaskMgmtRestWsVertice.redisClient.lrem(
                                         TaskUtils.getJesqueKey(QUEUE, filters.queueName),
                                         -1,
-                                        taskObject.toString()
+                                        taskObject.toString(),(res)->{}
                                 );
                             } else {
                                 /**
                                  * Delete this completed task from MongoDB
                                  */
                                 JsonObject mongoMessage = new JsonObject()
-                                        .putString("action", "delete")
-                                        .putString("collection", TaskConstants.MONGODB_TASK_COLLECTION)
-                                        .putObject("matcher",
-                                            new JsonObject().putString("_id", task.getString("_id")));
+                                        .put("action", "delete")
+                                        .put("collection", TaskConstants.MONGODB_TASK_COLLECTION)
+                                        .put("matcher",
+                                            new JsonObject().put("_id", task.getString("_id")));
                                 eventBus.send(VertxConstants.VERTX_ADDRESS_MONGODB, mongoMessage);
                             }
 
                             /**
                              * Update result
                              */
-                            task.putString("state", "deleted");
+                            task.put("state", "deleted");
                         }
                     }
 
@@ -513,11 +514,11 @@ public class QueryTaskHandler  {
                 case Redis:
                     break;
                 case MongoDB:
-                    eventBus.send(
-                            VertxConstants.VERTX_ADDRESS_MONGODB,
-                            filters.getMongoQueryMessage(),
-                            new CommonAsyncHandler(filters, result, Stage.MongoDB, Stage.Done, eventBus)
-                    );
+//                    eventBus.send(
+//                            VertxConstants.VERTX_ADDRESS_MONGODB,
+//                            filters.getMongoQueryMessage(),
+//                            new CommonAsyncHandler(filters, result, Stage.MongoDB, Stage.Done, eventBus)
+//                    );
                     break;
                 case Done:
                     // We are done

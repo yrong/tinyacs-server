@@ -3,11 +3,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>vertx2</groupId>
+  <groupId>vertx</groupId>
   <artifactId>task-mgmt-ws-vertice</artifactId>
   <packaging>jar</packaging>
-  <version>0.0.24-SNAPSHOT</version>
-  <name>SXA Task Management Web Service</name>
+  <version>1.0.0</version>
+  <name>Task Management Web Service</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -29,7 +29,7 @@
     <mods.directory>target/mods</mods.directory>
 
     <!--Dependency versions-->
-    <vertx.version>2.1RC2</vertx.version>
+    <vertx.version>3.4.1</vertx.version>
     <vertx.testtools.version>2.0.3-final</vertx.testtools.version>
     <junit.version>4.11</junit.version>
 
@@ -37,7 +37,7 @@
     <maven.compiler.plugin.version>3.0</maven.compiler.plugin.version>
     <maven.resources.plugin.version>2.6</maven.resources.plugin.version>
     <maven.clean.plugin.version>2.5</maven.clean.plugin.version>
-    <maven.vertx.plugin.version>2.0.5-final</maven.vertx.plugin.version>
+    <maven.vertx.plugin.version>3.4.1</maven.vertx.plugin.version>
     <maven.surefire.plugin.version>2.14</maven.surefire.plugin.version>
     <maven.failsafe.plugin.version>2.14</maven.failsafe.plugin.version>
     <maven.surefire.report.plugin.version>2.14</maven.surefire.report.plugin.version>
@@ -55,20 +55,14 @@
   <dependencies>
     <!--Calix provided dependencies-->
     <dependency>
-      <groupId>vertx2</groupId>
+      <groupId>vertx</groupId>
       <artifactId>task-mgmt-common</artifactId>
-      <version>0.0.24-SNAPSHOT</version>
+      <version>1.0.0</version>
     </dependency>
     <!--Vertx provided dependencies-->
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-core</artifactId>
-      <version>${vertx.version}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-platform</artifactId>
       <version>${vertx.version}</version>
       <scope>provided</scope>
     </dependency>
@@ -119,25 +113,12 @@
       </plugin>
 
       <!-- The vert.x Maven plugin -->
+      <!--
       <plugin>
         <groupId>io.vertx</groupId>
         <artifactId>vertx-maven-plugin</artifactId>
         <version>${maven.vertx.plugin.version}</version>
-        <!--
-        You can specify extra config to the plugin as required here
-        <configuration>
-           <configFile>/path/to/MyVerticle.conf</configFile>
-           <instances>1</instances>
-           <classpath>src/main/resources/:src/test/resources/:target/classes/:target/test-classes/</classpath>
-        </configuration>
-        -->
-        <!-- Make sure that the plugin uses the vert.x versions from this pom.xml not from its own pom.xml -->
         <dependencies>
-          <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-platform</artifactId>
-            <version>${vertx.version}</version>
-          </dependency>
           <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-core</artifactId>
@@ -159,15 +140,15 @@
           </execution>
         </executions>
       </plugin>
-
+      -->
       <!-- Other plugins required by the build -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${maven.compiler.plugin.version}</version>
         <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
+          <source>1.8</source>
+          <target>1.8</target>
         </configuration>
       </plugin>
       <plugin>
@@ -301,14 +282,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-report-plugin</artifactId>
         <version>${maven.surefire.report.plugin.version}</version>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>${maven.javadoc.plugin.version}</version>
-        <configuration>
-          <aggregate>true</aggregate>
-        </configuration>
       </plugin>
     </plugins>
   </reporting>

@@ -1,17 +1,18 @@
 package vertx.taskmgmt;
 
+import io.vertx.core.AbstractVerticle;
+import io.vertx.redis.RedisClient;
+import io.vertx.redis.RedisOptions;
 import vertx.VertxConfigProperties;
 import vertx.VertxConstants;
 import vertx.VertxUtils;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.java.redis.RedisClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerRequest;
-import io.vertx.platform.Verticle;
 
 /**
  * Project:  cwmp-parent
@@ -20,7 +21,7 @@ import io.vertx.platform.Verticle;
  *
  * @author: ronang
  */
-public class TaskMgmtRestWsVertice extends Verticle {
+public class TaskMgmtRestWsVertice extends AbstractVerticle {
     private static final Logger log = LoggerFactory.getLogger(TaskMgmtRestWsVertice.class.getName());
 
     /**
@@ -50,7 +51,8 @@ public class TaskMgmtRestWsVertice extends Verticle {
         /**
          * Init Async Redis Client
          */
-        redisClient = new RedisClient(vertx.eventBus(), VertxConstants.VERTX_ADDRESS_REDIS);
+        RedisOptions config = new RedisOptions().setHost(VertxConfigProperties.redisHost).setPort(VertxConfigProperties.redisPort);
+        redisClient = RedisClient.create(vertx, config);
 
         log.info("\nStarting SXA Task Mgmt REST Web Service Verticle on port # " + servicePort + "...\n");
         /**

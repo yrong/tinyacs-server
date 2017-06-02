@@ -1,20 +1,17 @@
 package vertx.taskmgmt;
 
-import vertx.VertxConfigProperties;
+import io.vertx.core.AbstractVerticle;
 import vertx.VertxConstants;
 import vertx.VertxUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.AsyncResultHandler;
-import io.vertx.platform.Verticle;
 
 /**
  * Project:  cwmp-parent
  *
  * @author: ronang
  */
-public class TaskMgmtMainVertice extends Verticle {
+public class TaskMgmtMainVertice extends AbstractVerticle {
     private static final Logger log = LoggerFactory.getLogger(TaskMgmtMainVertice.class.getName());
 
     /**
@@ -22,75 +19,9 @@ public class TaskMgmtMainVertice extends Verticle {
      */
     public void start() {
         log.info("\nTask Mgmt Server Instance " + VertxUtils.getLocalHostname() + " is starting up..\n");
-
-        /**
-         * Configure and Deploy VERT.X Mongo Persistor module
-         */
-        container.deployModule(
-                VertxConstants.MOD_MONGO_PERSISTOR,
-                VertxConstants.MOD_MONGO_PERSISTOR_CONFIG,
-                mongodbDeploymentAsyncHandler
-        );
+        vertx.deployVerticle(TaskMgmtRestWsVertice.class.getName());
     }
 
-    /**
-     * Async Result Handler for deploying MongoDB Persistor
-     */
-    AsyncResultHandler<String> mongodbDeploymentAsyncHandler = new AsyncResultHandler<String>() {
-        public void handle(AsyncResult<String> asyncResult) {
-            if (asyncResult.succeeded()) {
-                log.info("The MongoDB verticle has been successfully deployed");
-                log.info("Deploying Redis Verticle... (redis server is @ " +
-                        VertxConfigProperties.redisHost + ":" + VertxConfigProperties.redisPort + ")");
-
-                /**
-                 * Create a Redis client and Deploy Redis Module
-                 *
-                 * The Jesque Worker Verticle(s) are deployed after the Redis Module is successfully deployed.
-                 */
-                container.deployModule(
-                        VertxConstants.MOD_REDIS,
-                        VertxConstants.MOD_REDIS_CONFIG,
-                        modRedisDeploymentAsyncHandler
-                );
-            } else {
-                log.error("Failed to deploy the MongoDB verticle !!!");
-                asyncResult.cause().printStackTrace();
-
-                /**
-                 * Publish Server Startup Failure Event
-                 */
-                vertx.eventBus().publish(VertxConstants.VERTX_ADDRESS_SERVER_EVENTS,
-                        "Task Mgmt Server Instance " + VertxUtils.getLocalHostname() + " failed to start up!");
-            }
-        }
-    };
-
-    /**
-     * Async Result Handler for deploying Redis Module
-     */
-    AsyncResultHandler<String> modRedisDeploymentAsyncHandler = new AsyncResultHandler<String>() {
-        public void handle(AsyncResult<String> asyncResult) {
-            if (asyncResult.succeeded()) {
-                log.info("The Redis verticle has been successfully deployed");
-
-                /**
-                 * Start Task Queue REST API Service
-                 */
-                log.info("Deploying Task Mgmt Server Verticle(s)...");
-                container.deployVerticle(TaskMgmtRestWsVertice.class.getName());
-            } else {
-                log.error("Failed to deploy the Redis verticle !!!");
-                asyncResult.cause().printStackTrace();
-
-                /**
-                 * Publish Server Startup Failure Event
-                 */
-                vertx.eventBus().publish(VertxConstants.VERTX_ADDRESS_SERVER_EVENTS,
-                        "Task Mgmt Server Instance " + VertxUtils.getLocalHostname() + " failed to start up!");
-            }
-        }
-    };
 
     public void stop() {
         /**
