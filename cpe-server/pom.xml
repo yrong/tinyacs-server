@@ -52,9 +52,9 @@
   <dependencies>
     <!--Calix provided dependencies-->
     <dependency>
-      <groupId>vertx2</groupId>
+      <groupId>vertx</groupId>
       <artifactId>acs-common</artifactId>
-      <version>0.0.24-SNAPSHOT</version>
+      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>com.googlecode.json-simple</groupId>

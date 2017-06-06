@@ -99,15 +99,15 @@ public class ConfigurationProfile {
         JsonObject paramValues = new JsonObject();
         JsonArray services = new JsonArray();
         JsonArray dynamicObjects = new JsonArray();
-        JsonArray configurations = profile.getArray(FIELD_NAME_CONFIGURATIONS);
+        JsonArray configurations = profile.getJsonArray(FIELD_NAME_CONFIGURATIONS);
         HashMap<Number, String> vlanToServiceNameMap = new HashMap<>();
 
         // Traverse all categories in this profile
         for (int i = 0; i < configurations.size(); i ++) {
-            JsonObject aCategory = configurations.get(i);
+            JsonObject aCategory = configurations.getJsonObject(i);
 
             String categoryName = aCategory.getString(FIELD_NAME_CATEGORY);
-            JsonObject rawPerCategoryParamValues = aCategory.getObject(FIELD_NAME_PARAMETER_VALUES);
+            JsonObject rawPerCategoryParamValues = aCategory.getJsonObject(FIELD_NAME_PARAMETER_VALUES);
 
             // Get the Configuration Category from cache
             JsonObject categoryDef = (JsonObject) categoryCache.hashMap.get(categoryName);
@@ -117,7 +117,7 @@ public class ConfigurationProfile {
             }
 
             // Parameters for this category
-            JsonArray categoryParameters = categoryDef.getArray(ConfigurationCategory.FIELD_NAME_PARAMETERS);
+            JsonArray categoryParameters = categoryDef.getJsonArray(ConfigurationCategory.FIELD_NAME_PARAMETERS);
 
             // Extract TR098 Path Prefix (default to "")
             String tr098PathPrefix = categoryDef.getString(ConfigurationCategory.FIELD_NAME_TR098_PATH_PREFIX, "");
@@ -127,8 +127,8 @@ public class ConfigurationProfile {
                         tr098PathPrefix.indexOf("${") + 2,
                         tr098PathPrefix.lastIndexOf("}")
                 );
-                if (rawPerCategoryParamValues.containsField(indexParamName)) {
-                    String index = rawPerCategoryParamValues.getField(indexParamName).toString();
+                if (rawPerCategoryParamValues.containsKey(indexParamName)) {
+                    String index = rawPerCategoryParamValues.getValue(indexParamName).toString();
                     tr098PathPrefix = tr098PathPrefix.replace("${" + indexParamName + "}", index);
                 } else {
                     throw new VertxException(
@@ -139,10 +139,10 @@ public class ConfigurationProfile {
 
             // Process all raw parameters in this category
             JsonObject perCategoryParamValues = new JsonObject();
-            for (String paramName : rawPerCategoryParamValues.getFieldNames().toArray(new String[0])) {
+            for (String paramName : rawPerCategoryParamValues.fieldNames().toArray(new String[0])) {
                 JsonObject paramDef = null;
                 for (int j =0; j < categoryParameters.size(); j ++) {
-                    paramDef = categoryParameters.get(j);
+                    paramDef = categoryParameters.getJsonObject(j);
                     if (paramName.equals(paramDef.getString(AcsConstants.FIELD_NAME_NAME))) {
                         break;
                     } else {
@@ -160,10 +160,10 @@ public class ConfigurationProfile {
                     continue;
                 }
 
-                if (paramDef.containsField(ConfigurationCategory.FIELD_NAME_PARAMETER_TR_098_PATH_OVERRIDE)) {
+                if (paramDef.containsKey(ConfigurationCategory.FIELD_NAME_PARAMETER_TR_098_PATH_OVERRIDE)) {
                     JsonArray tr098Names;
 
-                    Object tr098Override = paramDef.getField(
+                    Object tr098Override = paramDef.getValue(
                             ConfigurationCategory.FIELD_NAME_PARAMETER_TR_098_PATH_OVERRIDE);
                     if (tr098Override instanceof String) {
                         tr098Names = new JsonArray().add(tr098Override);
@@ -173,7 +173,7 @@ public class ConfigurationProfile {
                     for (int k = 0; k < tr098Names.size(); k ++) {
                         VertxJsonUtils.deepAdd(
                                 perCategoryParamValues,
-                                (String) tr098Names.get(k),
+                                (String) tr098Names.getValue(k),
                                 rawPerCategoryParamValues.getValue(paramName)
                         );
                     }
@@ -201,7 +201,7 @@ public class ConfigurationProfile {
             // WAN Service?
             String serviceType = categoryDef.getString(ConfigurationCategory.FIELD_NAME_SERVICE_TYPE);
             if (serviceType != null) {
-                JsonObject serviceValues = categoryDef.getObject(ConfigurationCategory.FIELD_NAME_SERVICE_VALUES);
+                JsonObject serviceValues = categoryDef.getJsonObject(ConfigurationCategory.FIELD_NAME_SERVICE_VALUES);
                 String serviceName = serviceValues.getString("Name");
 
                 try {
@@ -228,7 +228,7 @@ public class ConfigurationProfile {
                  */
                 VertxJsonUtils.merge(
                         perCategoryParamValues,
-                        categoryDef.getObject(ConfigurationCategory.FIELD_NAME_SERVICE_VALUES));
+                        categoryDef.getJsonObject(ConfigurationCategory.FIELD_NAME_SERVICE_VALUES));
 
                 services.add(perCategoryParamValues);
             } else if (tr098PathPrefix.contains("{i}")) {
@@ -236,14 +236,14 @@ public class ConfigurationProfile {
                  * Dynamic  Objects
                  */
                 // Add the "keyParameter" field (if any) into the "parameterValues" struct
-                if (categoryDef.containsField(ConfigurationCategory.FIELD_NAME_KEY_PARAMETER)) {
-                    perCategoryParamValues.putObject(
+                if (categoryDef.containsKey(ConfigurationCategory.FIELD_NAME_KEY_PARAMETER)) {
+                    perCategoryParamValues.put(
                             ConfigurationCategory.FIELD_NAME_KEY_PARAMETER,
-                            categoryDef.getObject(ConfigurationCategory.FIELD_NAME_KEY_PARAMETER)
+                            categoryDef.getJsonObject(ConfigurationCategory.FIELD_NAME_KEY_PARAMETER)
                     );
                 }
                 // Add the TR098 Path Prefix
-                perCategoryParamValues.putString(
+                perCategoryParamValues.put(
                         ConfigurationCategory.FIELD_NAME_TR098_PATH_PREFIX,
                         categoryDef.getString(ConfigurationCategory.FIELD_NAME_TR098_PATH_PREFIX)
                 );
@@ -257,7 +257,7 @@ public class ConfigurationProfile {
         }
 
         if (paramValues.size() > 0) {
-            profile.putObject(ConfigurationProfile.FIELD_NAME_PARAMETER_VALUES, paramValues);
+            profile.put(ConfigurationProfile.FIELD_NAME_PARAMETER_VALUES, paramValues);
         }
 
         if (services.size() > 0) {
@@ -268,11 +268,11 @@ public class ConfigurationProfile {
 
             }
 
-            profile.putArray(ConfigurationProfile.FIELD_NAME_SERVICES, services);
+            profile.put(ConfigurationProfile.FIELD_NAME_SERVICES, services);
         }
 
         if (dynamicObjects.size() > 0) {
-            profile.putArray(ConfigurationProfile.FIELD_NAME_DYNAMIC_OBJECTS, dynamicObjects);
+            profile.put(ConfigurationProfile.FIELD_NAME_DYNAMIC_OBJECTS, dynamicObjects);
         }
     }
 }

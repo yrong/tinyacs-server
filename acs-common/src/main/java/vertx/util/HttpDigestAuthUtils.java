@@ -7,9 +7,9 @@ import org.apache.http.auth.AUTH;
 import org.apache.http.message.BasicHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.vertx.core.json.impl.Base64;
 
 import java.security.SecureRandom;
+import java.util.Base64;
 
 /**
  * Project:  cwmp
@@ -79,7 +79,7 @@ public class HttpDigestAuthUtils {
         final SecureRandom rnd = new SecureRandom();
         final byte[] tmp = new byte[8];
         rnd.nextBytes(tmp);
-        return Base64.encodeBytes(tmp);
+        return Base64.getEncoder().encodeToString(tmp);
     }
 
     /**

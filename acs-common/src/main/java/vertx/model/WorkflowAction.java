@@ -143,7 +143,7 @@ public class WorkflowAction {
                 throw INVALID_ACTION_TYPE;
 
             case SET_PARAMETER_VALUES:
-                paramValues = jsonObject.getObject(FIELD_NAME_PARAMETER_VALUES);
+                paramValues = jsonObject.getJsonObject(FIELD_NAME_PARAMETER_VALUES);
                 if (paramValues == null) {
                     log.error("Missing " + FIELD_NAME_PARAMETER_VALUES + "!");
                     throw MISSING_ACTION_PARAM;
@@ -151,8 +151,8 @@ public class WorkflowAction {
                 break;
 
             case GET_PARAMETER_VALUES:
-                paramNames = jsonObject.getArray(FIELD_NAME_PARAMETER_NAMES);
-                expectedParamValues = jsonObject.getObject(FIELD_NAME_EXPECTED_PARAMETER_VALUES);
+                paramNames = jsonObject.getJsonArray(FIELD_NAME_PARAMETER_NAMES);
+                expectedParamValues = jsonObject.getJsonObject(FIELD_NAME_EXPECTED_PARAMETER_VALUES);
                 if (paramNames == null || expectedParamValues == null) {
 
                     log.error("Missing " + FIELD_NAME_PARAMETER_NAMES + " or "
@@ -168,7 +168,7 @@ public class WorkflowAction {
                     log.error("Missing " + FIELD_NAME_FILE_ID + "!");
                     throw MISSING_ACTION_PARAM;
                 }
-                file = jsonObject.getObject(FIELD_NAME_FILE_STRUCT);
+                file = jsonObject.getJsonObject(FIELD_NAME_FILE_STRUCT);
                 break;
 
             case DELAY:
@@ -198,14 +198,14 @@ public class WorkflowAction {
                     JsonObject profile = (JsonObject) configurationProfileCache.hashMap.get(profileId);
                     if (profile != null) {
                         profileName = profile.getString(AcsConstants.FIELD_NAME_NAME);
-                        jsonObject.putString(FIELD_NAME_PROFILE_NAME, profileName);
+                        jsonObject.put(FIELD_NAME_PROFILE_NAME, profileName);
                     }
                 }
 
                 /**
                  * Traditional Parameter Values
                  */
-                paramValues = jsonObject.getObject(FIELD_NAME_PARAMETER_VALUES);
+                paramValues = jsonObject.getJsonObject(FIELD_NAME_PARAMETER_VALUES);
                 if (paramValues == null && configurationProfileCache != null) {
                     JsonObject profile = (JsonObject) configurationProfileCache.hashMap.get(profileId);
                     if (profile == null) {
@@ -213,16 +213,16 @@ public class WorkflowAction {
                         throw INVALID_PROFILE_ID;
                     }
 
-                    paramValues = profile.getObject(ConfigurationProfile.FIELD_NAME_PARAMETER_VALUES);
+                    paramValues = profile.getJsonObject(ConfigurationProfile.FIELD_NAME_PARAMETER_VALUES);
                     if (paramValues != null) {
-                        jsonObject.putObject(FIELD_NAME_PARAMETER_VALUES, paramValues);
+                        jsonObject.put(FIELD_NAME_PARAMETER_VALUES, paramValues);
                     }
                 }
 
                 /**
                  * Services
                  */
-                services = jsonObject.getArray(FIELD_NAME_SERVICES);
+                services = jsonObject.getJsonArray(FIELD_NAME_SERVICES);
                 if (services == null && configurationProfileCache != null) {
                     JsonObject profile = (JsonObject) configurationProfileCache.hashMap.get(profileId);
                     if (profile == null) {
@@ -230,16 +230,16 @@ public class WorkflowAction {
                         throw INVALID_PROFILE_ID;
                     }
 
-                    services = profile.getArray(ConfigurationProfile.FIELD_NAME_SERVICES);
+                    services = profile.getJsonArray(ConfigurationProfile.FIELD_NAME_SERVICES);
                     if (services != null) {
-                        jsonObject.putArray(FIELD_NAME_SERVICES, services);
+                        jsonObject.put(FIELD_NAME_SERVICES, services);
                     }
                 }
 
                 /**
                  * Dynamic Objects (for example "DNS Host Mapping" objects)
                  */
-                dynamicObjects = jsonObject.getArray(FIELD_NAME_DYNAMIC_OBJECTS);
+                dynamicObjects = jsonObject.getJsonArray(FIELD_NAME_DYNAMIC_OBJECTS);
                 if (dynamicObjects == null && configurationProfileCache != null) {
                     JsonObject profile = (JsonObject) configurationProfileCache.hashMap.get(profileId);
                     if (profile == null) {
@@ -247,9 +247,9 @@ public class WorkflowAction {
                         throw INVALID_PROFILE_ID;
                     }
 
-                    dynamicObjects = profile.getArray(ConfigurationProfile.FIELD_NAME_DYNAMIC_OBJECTS);
+                    dynamicObjects = profile.getJsonArray(ConfigurationProfile.FIELD_NAME_DYNAMIC_OBJECTS);
                     if (dynamicObjects != null) {
-                        jsonObject.putArray(FIELD_NAME_DYNAMIC_OBJECTS, dynamicObjects);
+                        jsonObject.put(FIELD_NAME_DYNAMIC_OBJECTS, dynamicObjects);
                     }
                 }
                 break;
@@ -266,7 +266,7 @@ public class WorkflowAction {
      * For GetParameterValues Action, always get the live data
      */
     public static final JsonObject GET_LIVE_DATA =
-            new JsonObject().putBoolean(CpeDeviceOp.FIELD_NAME_GET_OPTIONS_LIVE, true);
+            new JsonObject().put(CpeDeviceOp.FIELD_NAME_GET_OPTIONS_LIVE, true);
 
     /**
      * Convert this action into a device-op API request, send the request to ACS API
@@ -281,7 +281,7 @@ public class WorkflowAction {
      * @param resultHandler
      */
     private static final JsonObject EXEC_POLICY_DOWNLOAD_TIMEOUT =
-            new JsonObject().putNumber(ExecPolicy.FIELD_NAME_TIMEOUT,
+            new JsonObject().put(ExecPolicy.FIELD_NAME_TIMEOUT,
                     ExecPolicy.DEFAULT_DOWNLOAD_TIMEOUT);
     public static void doAction(
             Vertx vertx,
@@ -295,31 +295,31 @@ public class WorkflowAction {
         /**
          * Convert action into API request
          */
-        JsonObject requestBody = new JsonObject().putObject(CpeDeviceOp.FIELD_NAME_CPE_DB_OBJECT, cpeDbObject);
+        JsonObject requestBody = new JsonObject().put(CpeDeviceOp.FIELD_NAME_CPE_DB_OBJECT, cpeDbObject);
 
         if (correlationId != null) {
-            requestBody.putString(CpeDeviceOp.FIELD_NAME_CORRELATION_ID, correlationId);
+            requestBody.put(CpeDeviceOp.FIELD_NAME_CORRELATION_ID, correlationId);
         }
         switch (action.actionEnum) {
             case APPLY_CONFIG_PROFILE:
             case SET_PARAMETER_VALUES:
                 if (action.paramValues != null) {
-                    requestBody.putObject(CpeDeviceOp.FIELD_NAME_PARAM_VALUES, action.paramValues);
+                    requestBody.put(CpeDeviceOp.FIELD_NAME_PARAM_VALUES, action.paramValues);
                 }
                 if (action.services != null) {
-                    requestBody.putArray(CpeDeviceOp.FIELD_NAME_SERVICES, action.services);
+                    requestBody.put(CpeDeviceOp.FIELD_NAME_SERVICES, action.services);
                 }
                 if (action.dynamicObjects != null) {
-                    requestBody.putArray(CpeDeviceOp.FIELD_NAME_DYNAMIC_OBJECTS, action.dynamicObjects);
+                    requestBody.put(CpeDeviceOp.FIELD_NAME_DYNAMIC_OBJECTS, action.dynamicObjects);
                 }
-                requestBody.putString(CpeDeviceOp.FIELD_NAME_OPERATION,
+                requestBody.put(CpeDeviceOp.FIELD_NAME_OPERATION,
                         CpeDeviceOpTypeEnum.SetParameterValues.name());
                 break;
 
             case GET_PARAMETER_VALUES:
-                requestBody.putArray(CpeDeviceOp.FIELD_NAME_PARAM_NAMES, action.paramNames);
-                requestBody.putObject(CpeDeviceOp.FIELD_NAME_GET_OPTIONS, GET_LIVE_DATA);
-                requestBody.putString(CpeDeviceOp.FIELD_NAME_OPERATION,
+                requestBody.put(CpeDeviceOp.FIELD_NAME_PARAM_NAMES, action.paramNames);
+                requestBody.put(CpeDeviceOp.FIELD_NAME_GET_OPTIONS, GET_LIVE_DATA);
+                requestBody.put(CpeDeviceOp.FIELD_NAME_OPERATION,
                         CpeDeviceOpTypeEnum.GetParameterValues.name());
                 break;
 
@@ -339,23 +339,23 @@ public class WorkflowAction {
             case DOWNLOAD_CONFIG_FILE:
                 if (action.file == null) {
                     log.error("Action " + action.actionEnum.name() + " had no file struct!");
-                    requestBody.putString(CpeDeviceOp.FIELD_NAME_ID, action.fileId);
+                    requestBody.put(CpeDeviceOp.FIELD_NAME_ID, action.fileId);
                 } else {
                     // Add the entire File Struct
-                    requestBody.putObject(CpeDeviceOp.FIELD_NAME_FILE_STRUCT, action.file);
+                    requestBody.put(CpeDeviceOp.FIELD_NAME_FILE_STRUCT, action.file);
 
                     if (AcsFileType.ConfigFile.typeString.equals(action.file.getString(AcsFile.FIELD_NAME_TYPE))) {
                         // Indicate this is a golden config file
-                        requestBody.putBoolean(CpeDeviceOp.FIELD_NAME_GOLDEN_CONFIG_FILE, true);
+                        requestBody.put(CpeDeviceOp.FIELD_NAME_GOLDEN_CONFIG_FILE, true);
                     }
                 }
 
                 // Timeout
                 timeout = ExecPolicy.DEFAULT_DOWNLOAD_TIMEOUT;
-                requestBody.putObject(CpeDeviceOp.FIELD_NAME_EXEC_POLICY, EXEC_POLICY_DOWNLOAD_TIMEOUT);
+                requestBody.put(CpeDeviceOp.FIELD_NAME_EXEC_POLICY, EXEC_POLICY_DOWNLOAD_TIMEOUT);
 
                 // Send the request either way
-                requestBody.putString(CpeDeviceOp.FIELD_NAME_OPERATION, CpeDeviceOpTypeEnum.Download.name());
+                requestBody.put(CpeDeviceOp.FIELD_NAME_OPERATION, CpeDeviceOpTypeEnum.Download.name());
                 break;
 
             case APPLY_PERFORMANCE_PROFILE:

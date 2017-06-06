@@ -2,8 +2,8 @@ package vertx.util;
 
 import vertx.model.Cpe;
 import org.apache.commons.codec.digest.DigestUtils;
-import io.vertx.core.json.impl.Base64;
 
+import java.util.Base64;
 import java.util.Random;
 
 /**
@@ -52,7 +52,7 @@ public class AcsMiscUtils {
      */
     public static String getHttpBasicAuthString(String username, String password) {
         String authString = username + ":" + password;
-        return "Basic " + Base64.encodeBytes(authString.getBytes());
+        return "Basic " + Base64.getEncoder().encodeToString(authString.getBytes());
     }
 
     /**

@@ -145,9 +145,9 @@ public class ConfigurationCategory {
         VertxJsonUtils.validateFields(configCategory, MANDATORY_FIELDS, OPTIONAL_FIELDS);
 
         // Validate All Parameters
-        JsonArray parameters = configCategory.getArray(FIELD_NAME_PARAMETERS);
+        JsonArray parameters = configCategory.getJsonArray(FIELD_NAME_PARAMETERS);
         for (int i = 0; i < parameters.size(); i ++) {
-            JsonObject aParameter = parameters.get(i);
+            JsonObject aParameter = parameters.getJsonObject(i);
 
             // Validate A Parameter
             try {
@@ -168,10 +168,10 @@ public class ConfigurationCategory {
             /**
              * Convert all the "requires" field to String from JSON Object so we can store special operators like "$in"
              */
-            JsonObject requires = aParameter.getObject(FIELD_NAME_PARAMETER_REQUIRES);
+            JsonObject requires = aParameter.getJsonObject(FIELD_NAME_PARAMETER_REQUIRES);
             if (requires != null) {
-                aParameter.removeField(FIELD_NAME_PARAMETER_REQUIRES);
-                aParameter.putString(FIELD_NAME_PARAMETER_REQUIRES, requires.encode());
+                aParameter.remove(FIELD_NAME_PARAMETER_REQUIRES);
+                aParameter.put(FIELD_NAME_PARAMETER_REQUIRES, requires.encode());
             }
         }
     }
@@ -185,22 +185,22 @@ public class ConfigurationCategory {
      * @return
      */
     public static JsonObject convertRawDbObject(JsonObject dbObject) {
-        JsonArray parameters = dbObject.getArray(FIELD_NAME_PARAMETERS);
+        JsonArray parameters = dbObject.getJsonArray(FIELD_NAME_PARAMETERS);
         JsonArray newParameters = new JsonArray();
         for (int i = 0; i < parameters.size(); i ++) {
-            JsonObject aParameter = parameters.get(i);
+            JsonObject aParameter = parameters.getJsonObject(i);
 
-            Object requires = aParameter.getField(FIELD_NAME_PARAMETER_REQUIRES);
+            Object requires = aParameter.getValue(FIELD_NAME_PARAMETER_REQUIRES);
 
             if (requires != null && (requires instanceof  String)) {
-                aParameter.removeField(FIELD_NAME_PARAMETER_REQUIRES);
-                aParameter.putObject(FIELD_NAME_PARAMETER_REQUIRES, new JsonObject((String)requires));
+                aParameter.remove(FIELD_NAME_PARAMETER_REQUIRES);
+                aParameter.put(FIELD_NAME_PARAMETER_REQUIRES, new JsonObject((String)requires));
             }
             newParameters.add(aParameter);
         }
 
-        dbObject.removeField(FIELD_NAME_PARAMETERS);
-        dbObject.putArray(FIELD_NAME_PARAMETERS, newParameters);
+        dbObject.remove(FIELD_NAME_PARAMETERS);
+        dbObject.put(FIELD_NAME_PARAMETERS, newParameters);
         return dbObject;
     }
 }

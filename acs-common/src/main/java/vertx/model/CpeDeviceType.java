@@ -1,5 +1,6 @@
 package vertx.model;
 
+import io.vertx.ext.mongo.MongoClient;
 import vertx.VertxException;
 import vertx.VertxMongoUtils;
 import org.slf4j.Logger;
@@ -124,13 +125,13 @@ public class CpeDeviceType extends MultiTenantObject {
      */
     public JsonObject toDeviceTypeObject(){
         JsonObject deviceTypeJsonObject = new JsonObject()
-                .putString(FIELD_NAME_ORG_ID, orgId)
-                .putString(FIELD_NAME_MANUFACTURER, manufacturer)
-                .putString(FIELD_NAME_OUI, oui)
-                .putString(FIELD_NAME_PRODUCT_CLASS, productClass)
-                .putString(FIELD_NAME_MODEL_NAME, modelName)
-                .putString(FIELD_NAME_HW_VER, hwVersion)
-                .putString(FIELD_NAME_SW_VER, swVersion);
+                .put(FIELD_NAME_ORG_ID, orgId)
+                .put(FIELD_NAME_MANUFACTURER, manufacturer)
+                .put(FIELD_NAME_OUI, oui)
+                .put(FIELD_NAME_PRODUCT_CLASS, productClass)
+                .put(FIELD_NAME_MODEL_NAME, modelName)
+                .put(FIELD_NAME_HW_VER, hwVersion)
+                .put(FIELD_NAME_SW_VER, swVersion);
 
         return deviceTypeJsonObject;
     }
@@ -140,7 +141,7 @@ public class CpeDeviceType extends MultiTenantObject {
      */
     public JsonObject toJsonObject(){
         JsonObject jsonObject = toDeviceTypeObject();
-        jsonObject.removeField(FIELD_NAME_ORG_ID);
+        jsonObject.remove(FIELD_NAME_ORG_ID);
         return jsonObject;
     }
 
@@ -213,12 +214,12 @@ public class CpeDeviceType extends MultiTenantObject {
      *
      * If not, increase the CPE count.
      *
-     * @param eventBus
+     * @param mongoClient
      */
-    public static void addIfNew(final EventBus eventBus, final JsonObject deviceTypeJsonObject) {
+    public static void addIfNew(MongoClient mongoClient, final JsonObject deviceTypeJsonObject) {
         try {
             VertxMongoUtils.count(
-                    eventBus,
+                    mongoClient,
                     DB_COLLECTION_NAME,
                     deviceTypeJsonObject,
                     new Handler<Long>() {
@@ -231,7 +232,7 @@ public class CpeDeviceType extends MultiTenantObject {
                                 log.info("Device Type " + toString() + " is new to the system, saving to DB...");
                                 try {
                                     VertxMongoUtils.save(
-                                            eventBus,
+                                            mongoClient,
                                             DB_COLLECTION_NAME,
                                             deviceTypeJsonObject,
                                             null

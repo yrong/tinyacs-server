@@ -47,6 +47,7 @@ public class VertxConstants {
     public static final String MOD_REDIS = "io.vertx~mod-redis~1.1.4";
     public static final JsonObject MOD_REDIS_CONFIG = new JsonObject()
             .put("address", VertxConstants.VERTX_ADDRESS_REDIS)
-            .put("host", VertxConfigProperties.redisHost);
+            .put("host", VertxConfigProperties.redisHost)
+            .put("port",VertxConfigProperties.redisPort);
 
 }

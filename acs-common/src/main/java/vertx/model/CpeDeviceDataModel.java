@@ -2,12 +2,12 @@ package vertx.model;
 
 
 import broadbandForumOrgCwmpDatamodel14.DocumentDocument;
+import io.vertx.core.Handler;
 import vertx.VertxUtils;
 import org.apache.xmlbeans.XmlException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.AsyncResultHandler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 
@@ -66,7 +66,7 @@ public class CpeDeviceDataModel extends MultiTenantObject {
          */
         vertx.fileSystem().readFile(
                 xmlFilePath,
-                new AsyncResultHandler<Buffer>() {
+                new Handler<AsyncResult<Buffer>>() {
                     public void handle(AsyncResult<Buffer> ar) {
                         if (ar.succeeded()) {
                             try {

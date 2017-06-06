@@ -252,7 +252,7 @@ public class CpeDeviceOp {
          */
         if (argNames != null) {
             for (String arg : argNames) {
-                if (!deviceOpJsonObject.containsField(arg)) {
+                if (!deviceOpJsonObject.containsKey(arg)) {
                     throw new CcException("Missing mandatory field " + arg + "!");
                 }
             }
@@ -271,15 +271,15 @@ public class CpeDeviceOp {
             dest = new JsonArray();
         }
 
-        for (String fieldName : src.getFieldNames()) {
-            if (src.getField(fieldName) instanceof JsonObject) {
+        for (String fieldName : src.fieldNames()) {
+            if (src.getValue(fieldName) instanceof JsonObject) {
                 // The field is a JSON Object, dig in
-                jsonObjToArray(src.getObject(fieldName), dest, newFieldName);
+                jsonObjToArray(src.getJsonObject(fieldName), dest, newFieldName);
             } else {
                 // The field is a parameter value or attribute
-                dest.addObject(new JsonObject()
-                        .putString("name", fieldName)
-                        .putString(newFieldName, src.getField(fieldName).toString())
+                dest.add(new JsonObject()
+                        .put("name", fieldName)
+                        .put(newFieldName, src.getValue(fieldName).toString())
                 );
             }
         }
@@ -297,8 +297,8 @@ public class CpeDeviceOp {
     public static void persistDeviceOp(EventBus eventBus, JsonObject deviceOp, String state, JsonObject result) {
         persistDeviceOp(
                 eventBus,
-                deviceOp.putString(FIELD_NAME_STATE, state)
-                        .putObject(FIELD_NAME_RESULT, result)
+                deviceOp.put(FIELD_NAME_STATE, state)
+                        .put(FIELD_NAME_RESULT, result)
         );
     }
 
@@ -334,7 +334,7 @@ public class CpeDeviceOp {
      * @return
      */
     public static int getTimeout(JsonObject deviceOp) {
-        JsonObject execPolicyJsonObject = deviceOp.getObject(FIELD_NAME_EXEC_POLICY);
+        JsonObject execPolicyJsonObject = deviceOp.getJsonObject(FIELD_NAME_EXEC_POLICY);
         if (execPolicyJsonObject != null) {
             return execPolicyJsonObject.getInteger(ExecPolicy.FIELD_NAME_TIMEOUT, ExecPolicy.DEFAULT_DEVICE_OP_TIMEOUT);
         } else {

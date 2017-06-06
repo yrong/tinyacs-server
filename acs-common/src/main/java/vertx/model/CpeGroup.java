@@ -119,7 +119,7 @@ public class CpeGroup extends MultiTenantObject {
      */
     public static boolean match(JsonObject cpeJsonObject, JsonObject filter) {
         boolean isOr = false;
-        if (filter.getFieldNames().size() == 1 && filter.containsField(OPERATOR_OR))
+        if (filter.fieldNames().size() == 1 && filter.containsKey(OPERATOR_OR))
             isOr = true;
 
         return recursiveMatch(cpeJsonObject, filter, isOr);
@@ -138,15 +138,15 @@ public class CpeGroup extends MultiTenantObject {
         boolean result = !isOr;
         boolean inner_result = false;
 
-        for (String fieldName : filter.getFieldNames()) {
-            valueFilter = filter.getField(fieldName);
+        for (String fieldName : filter.fieldNames()) {
+            valueFilter = filter.getValue(fieldName);
             if(fieldName.startsWith(OPERATOR_OR)&&valueFilter instanceof  JsonArray){
                 for( Object value : (JsonArray)valueFilter) {
                     result = recursiveMatch(deviceId, (JsonObject)value,true);
                 }
             }
             else {
-                valueCpe = deviceId.getField(fieldName);
+                valueCpe = deviceId.getValue(fieldName);
                 inner_result = basicMatch(valueFilter, valueCpe);
                 if(!isOr) {
                     if (!inner_result) {
@@ -182,8 +182,8 @@ public class CpeGroup extends MultiTenantObject {
             cpeValue = "";
 
         if (filterValue instanceof JsonObject) {
-            for (String operator : ((JsonObject) filterValue).getFieldNames()) {
-                Object subFilterValue = ((JsonObject) filterValue).getField(operator);
+            for (String operator : ((JsonObject) filterValue).fieldNames()) {
+                Object subFilterValue = ((JsonObject) filterValue).getValue(operator);
 
                 //log.debug("operator " + operator + ", sub filter value: " + subFilterValue);
 
@@ -270,7 +270,7 @@ public class CpeGroup extends MultiTenantObject {
      * @param bImplicitly   Consider match if the group filter does not contain any models
      */
     public boolean bGroupMatchOnModel(String model, boolean bImplicitly) {
-        if (!cpeFilter.containsField(CpeDeviceType.FIELD_NAME_MODEL_NAME)) {
+        if (!cpeFilter.containsKey(CpeDeviceType.FIELD_NAME_MODEL_NAME)) {
             // No model matcher
             if (bImplicitly)
                 return true;
@@ -278,7 +278,7 @@ public class CpeGroup extends MultiTenantObject {
                 return false;
         } else {
             // Has model matcher
-            Object modelMatcher = cpeFilter.getField(CpeDeviceType.FIELD_NAME_MODEL_NAME);
+            Object modelMatcher = cpeFilter.getValue(CpeDeviceType.FIELD_NAME_MODEL_NAME);
             return basicMatch(modelMatcher, model);
         }
     }

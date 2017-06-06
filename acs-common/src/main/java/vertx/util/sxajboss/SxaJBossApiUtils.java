@@ -65,9 +65,8 @@ public class SxaJBossApiUtils {
                         + AcsConfigProperties.CWMP_JBOSS_API_HOST + ":" + AcsConfigProperties.CWMP_JBOSS_API_PORT));
 
         // Create a new HTTP Client
-        jbossApiHttpClient = vertx.createHttpClient()
-                .setHost(AcsConfigProperties.CWMP_JBOSS_API_HOST)
-                .setPort(AcsConfigProperties.CWMP_JBOSS_API_PORT);
+        jbossApiHttpClient = VertxHttpClientUtils.createHttpClient(vertx,AcsConfigProperties.CWMP_JBOSS_API_HOST,AcsConfigProperties.CWMP_JBOSS_API_PORT);
+
 
         // Init Broker Base URL
         CWMP_BROKER_BASE_URL = "http://" + AcsConfigProperties.CWMP_JBOSS_API_HOST + ":"
@@ -125,7 +124,7 @@ public class SxaJBossApiUtils {
                             VertxHttpClientUtils.sendHttpRequest(
                                     moduleBaseUrl + urlPath,
                                     jbossApiHttpClient,
-                                    method,
+                                    io.vertx.core.http.HttpMethod.valueOf(method.name()),
                                     username,
                                     password,
                                     payload,
@@ -154,7 +153,7 @@ public class SxaJBossApiUtils {
         VertxHttpClientUtils.sendHttpRequest(
                 CWMP_BROKER_BASE_URL + moduleName,
                 jbossApiHttpClient,
-                HttpMethod.GET,
+                io.vertx.core.http.HttpMethod.GET,
                 null,
                 null,
                 null,

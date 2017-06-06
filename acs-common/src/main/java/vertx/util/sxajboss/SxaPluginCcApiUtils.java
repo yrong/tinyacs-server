@@ -36,18 +36,18 @@ public class SxaPluginCcApiUtils extends SxaJBossApiUtils{
          * Build request payload
          */
         JsonObject payload = new JsonObject();
-        payload.putString("id", cpe.getCpeKey());
-        payload.putString("ip", cpe.deviceId.ipAddress == null? "" : cpe.deviceId.ipAddress);
-        payload.putString("mac", cpe.deviceId.macAddress == null? "" : cpe.deviceId.macAddress);
-        payload.putString("ser-no", cpe.deviceId.sn);
-        payload.putString("model", cpe.deviceId.modelName == null? "" : cpe.deviceId.modelName);
-        payload.putString("mfr", cpe.deviceId.manufacturer);
-        payload.putString("sw-ver", cpe.deviceId.swVersion == null? "" : cpe.deviceId.swVersion);
-        payload.putString("reg-id", cpe.deviceId.registrationId == null? "" : cpe.deviceId.registrationId);
-        payload.putString("prod-class", cpe.deviceId.productClass == null? "" : cpe.deviceId.productClass);
-        payload.putString("prov-code", cpe.getParamValue("InternetGatewayDevice.DeviceInfo.ProvisioningCode"));
-        payload.putString("persistent-data", cpe.getParamValue("InternetGatewayDevice.DeviceConfig.PersistentData"));
-        payload.putNumber("last-comm-time", cpe.informTime / 1000);
+        payload.put("id", cpe.getCpeKey());
+        payload.put("ip", cpe.deviceId.ipAddress == null? "" : cpe.deviceId.ipAddress);
+        payload.put("mac", cpe.deviceId.macAddress == null? "" : cpe.deviceId.macAddress);
+        payload.put("ser-no", cpe.deviceId.sn);
+        payload.put("model", cpe.deviceId.modelName == null? "" : cpe.deviceId.modelName);
+        payload.put("mfr", cpe.deviceId.manufacturer);
+        payload.put("sw-ver", cpe.deviceId.swVersion == null? "" : cpe.deviceId.swVersion);
+        payload.put("reg-id", cpe.deviceId.registrationId == null? "" : cpe.deviceId.registrationId);
+        payload.put("prod-class", cpe.deviceId.productClass == null? "" : cpe.deviceId.productClass);
+        payload.put("prov-code", cpe.getParamValue("InternetGatewayDevice.DeviceInfo.ProvisioningCode"));
+        payload.put("persistent-data", cpe.getParamValue("InternetGatewayDevice.DeviceConfig.PersistentData"));
+        payload.put("last-comm-time", cpe.informTime / 1000);
 
         // Send it
         sendRequest(

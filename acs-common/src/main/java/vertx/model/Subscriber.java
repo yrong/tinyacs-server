@@ -1,5 +1,6 @@
 package vertx.model;
 
+import io.vertx.ext.mongo.MongoClient;
 import vertx.VertxException;
 import vertx.VertxJsonUtils;
 import vertx.VertxMongoUtils;
@@ -123,10 +124,10 @@ public class Subscriber {
         // Validate the request by simply instantiate a new Subscriber POJO
         VertxJsonUtils.validateFields(subscriber, MANDATORY_FIELDS, OPTIONAL_FIELDS);
 
-        JsonArray locations = subscriber.getArray(Subscriber.FIELD_NAME_LOCATIONS);
+        JsonArray locations = subscriber.getJsonArray(Subscriber.FIELD_NAME_LOCATIONS);
         if (locations != null) {
             for (int i = 0; i < locations.size(); i ++) {
-                JsonObject aLocation = locations.get(i);
+                JsonObject aLocation = locations.getJsonObject(i);
                 VertxJsonUtils.validateFields(aLocation, LOCATIONS_MANDATORY_FIELDS, LOCATIONS_OPTIONAL_FIELDS);
             }
         }
@@ -143,12 +144,12 @@ public class Subscriber {
             return null;
         }
 
-        JsonObject allAppData = subscriber.getObject(FIELD_NAME_APP_DATA);
+        JsonObject allAppData = subscriber.getJsonObject(FIELD_NAME_APP_DATA);
         if (allAppData == null) {
             return null;
         }
 
-        return allAppData.getObject(appName);
+        return allAppData.getJsonObject(appName);
     }
 
     /**
@@ -166,7 +167,7 @@ public class Subscriber {
             return null;
         }
 
-        return appData.getValue(fieldName);
+        return (T)appData.getValue(fieldName);
     }
 
     /**
@@ -230,13 +231,13 @@ public class Subscriber {
         JsonObject matcher = new JsonObject();
         switch (getDeviceIdStringType(orgId, deviceId)) {
             case REG_ID:
-                matcher.putString(Cpe.DB_FIELD_NAME_REGISTRATION_ID, deviceId);
+                matcher.put(Cpe.DB_FIELD_NAME_REGISTRATION_ID, deviceId);
                 break;
             case FSAN:
-                matcher.putString(Cpe.DB_FIELD_NAME_SN, deviceId);
+                matcher.put(Cpe.DB_FIELD_NAME_SN, deviceId);
                 break;
             case INTERNAL_ID:
-                matcher.putString(AcsConstants.FIELD_NAME_ID, deviceId);
+                matcher.put(AcsConstants.FIELD_NAME_ID, deviceId);
                 break;
             default:
                 log.error("found invalid device id " + deviceId + "!");;
@@ -275,14 +276,14 @@ public class Subscriber {
     public static JsonObject getDeviceMatcherByDeviceIdArray(String orgId, JsonArray deviceIdArray) {
         // element match on "locations.devices"
         return new JsonObject()
-                .putString(AcsConstants.FIELD_NAME_ORG_ID, orgId)
-                .putObject(
+                .put(AcsConstants.FIELD_NAME_ORG_ID, orgId)
+                .put(
                         Subscriber.FIELD_NAME_LOCATIONS,
-                        new JsonObject().putObject(
+                        new JsonObject().put(
                                 VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_ELEM_MATCH,
-                                new JsonObject().putObject(
+                                new JsonObject().put(
                                         Subscriber.FIELD_NAME_LOCATIONS_DEVICES,
-                                        new JsonObject().putArray(
+                                        new JsonObject().put(
                                                 VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_IN,
                                                 deviceIdArray
                                         )
@@ -300,18 +301,18 @@ public class Subscriber {
     public static JsonArray getAllDeviceIdStrings(JsonObject subscriber) {
         final JsonArray allDeviceIdStrings = new JsonArray();
 
-        JsonArray locations = subscriber.getArray(Subscriber.FIELD_NAME_LOCATIONS);
+        JsonArray locations = subscriber.getJsonArray(Subscriber.FIELD_NAME_LOCATIONS);
         if (locations != null) {
             for (int i = 0; i < locations.size(); i++) {
-                JsonObject aLocation = locations.get(i);
+                JsonObject aLocation = locations.getJsonObject(i);
 
                 // Add the associated devices to Array
-                JsonArray deviceIdArray = aLocation.getArray(
+                JsonArray deviceIdArray = aLocation.getJsonArray(
                         Subscriber.FIELD_NAME_LOCATIONS_DEVICES
                 );
                 if (deviceIdArray != null) {
                     for (int j = 0; j < deviceIdArray.size(); j++) {
-                        allDeviceIdStrings.add(deviceIdArray.get(j));
+                        allDeviceIdStrings.add(deviceIdArray.getValue(j));
                     }
                 }
             }
@@ -323,20 +324,20 @@ public class Subscriber {
     /**
      * Query the Subscriber Data.
      *
-     * @param eventBus
+     * @param mongoClient
      * @param deviceData
      * @param handler
      */
     public static void querySubscriberData(
-            EventBus eventBus,
+            MongoClient mongoClient,
             final JsonObject deviceData,
             Handler<JsonObject> handler) {
         try {
             VertxMongoUtils.findOne(
-                    eventBus,
+                    mongoClient,
                     Subscriber.DB_COLLECTION_NAME,
                     Subscriber.getDeviceMatcherByDeviceData(deviceData),
-                    new VertxMongoUtils.FindOneHandler(handler),
+                    handler,
                     null
             );
         } catch (VertxException e) {

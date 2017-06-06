@@ -120,7 +120,7 @@ public class CwmpUtils {
     public static JsonObject cwmpFaultToJsonObject(FaultDocument.Fault cwmpFault) {
         String faultString = "Received TR-069/CWMP Fault from Device: "
                 + cwmpFault.getFaultCode() + " " + cwmpFault.getFaultString();
-        return new JsonObject().putString(CpeDeviceOp.FIELD_NAME_ERROR, faultString);
+        return new JsonObject().put(CpeDeviceOp.FIELD_NAME_ERROR, faultString);
         /*
         JsonObject newFault = new JsonObject()
                 .putNumber(CpeDeviceOp.FIELD_NAME_FAULT_CODE, cwmpFault.getFaultCode())

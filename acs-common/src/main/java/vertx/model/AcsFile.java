@@ -1,5 +1,6 @@
 package vertx.model;
 
+import io.vertx.ext.mongo.MongoClient;
 import vertx.VertxException;
 import vertx.VertxJsonUtils;
 import vertx.VertxMongoUtils;
@@ -7,11 +8,9 @@ import vertx.CcException;
 import vertx.util.AcsConfigProperties;
 import vertx.util.AcsConstants;
 import vertx.util.AcsMiscUtils;
-import io.netty.util.internal.StringUtil;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
 
 import java.net.MalformedURLException;
@@ -321,7 +320,7 @@ public class AcsFile {
                 break;
 
             case ConfigFile:
-                if (!fileJsonObject.containsField(AcsConstants.FIELD_NAME_CPE_ID)) {
+                if (!fileJsonObject.containsKey(AcsConstants.FIELD_NAME_CPE_ID)) {
                     folder = "/golden-config-files/";
                 } else {
                     folder = "/config-file-backups/";
@@ -375,16 +374,16 @@ public class AcsFile {
      * @return  The matcher.
      */
     public static JsonObject getMatcherByFilePath(String path) {
-        String[] segments = StringUtil.split(path, '/');
+        String[] segments = path.split("/");
         if (segments.length != 4) {
             log.error("Invalid file path! " + path);
             return null;
         }
 
         return new JsonObject()
-                .putString(AcsConstants.FIELD_NAME_ORG_ID, segments[1])
-                .putString(FIELD_NAME_TYPE, AcsFileType.getAcsFileTypeString(segments[2]))
-                .putString(AcsConstants.FIELD_NAME_NAME, segments[3]);
+                .put(AcsConstants.FIELD_NAME_ORG_ID, segments[1])
+                .put(FIELD_NAME_TYPE, AcsFileType.getAcsFileTypeString(segments[2]))
+                .put(AcsConstants.FIELD_NAME_NAME, segments[3]);
     }
 
     /**
@@ -423,18 +422,18 @@ public class AcsFile {
     /**
      * Cleanup in-complete upload files from DB by CPE SN.
      *
-     * @param eventBus
+     * @param mongoClient
      * @param cpeSn
      */
-    public static void cleanupIncompleteUploads(EventBus eventBus, String cpeSn) {
+    public static void cleanupIncompleteUploads(MongoClient mongoClient, String cpeSn) {
         log.info(cpeSn + ": Cleaning up incomplete upload file(s)...");
         try {
             VertxMongoUtils.deleteWithMatcher(
-                    eventBus,
+                    mongoClient,
                     AcsFile.DB_COLLECTION_NAME,
                     new JsonObject()
-                        .putString(AcsConstants.FIELD_NAME_CPE_ID + "." + Cpe.DB_FIELD_NAME_SN, cpeSn)
-                        .putNumber(AcsFile.FIELD_NAME_SIZE, 0),
+                        .put(AcsConstants.FIELD_NAME_CPE_ID + "." + Cpe.DB_FIELD_NAME_SN, cpeSn)
+                        .put(AcsFile.FIELD_NAME_SIZE, 0),
                     null
             );
         } catch (VertxException e) {
@@ -502,7 +501,7 @@ public class AcsFile {
      * @return true if yes; or false if not.
      */
     public static boolean isAutoBackup(JsonObject fileStruct) {
-        if (!fileStruct.containsField(AcsConstants.FIELD_NAME_CPE_ID)) {
+        if (!fileStruct.containsKey(AcsConstants.FIELD_NAME_CPE_ID)) {
             return false;
         }
 
@@ -525,18 +524,18 @@ public class AcsFile {
      */
     public static JsonObject buildAutoBackupFileRecord(String cpeKey) {
         return new JsonObject()
-                .putString(AcsConstants.FIELD_NAME_ID, getAutoBackupConfigFileId(cpeKey))
-                .putString(AcsConstants.FIELD_NAME_ORG_ID, Cpe.getOrgIdByCpeKey(cpeKey))
-                .putString(FIELD_NAME_TYPE, AcsFileType.ConfigFile.typeString)
-                .putString(FIELD_NAME_CSR_USERNAME, "n/a (System Performed Auto Backup)")
-                .putString(FIELD_NAME_USERNAME, cpeKey)
-                .putString(FIELD_NAME_PASSWORD, AUTO_BACKUP_CONFIG_FILE_PASSWORD)
-                .putString(AcsConstants.FIELD_NAME_NAME, AUTO_BACKUP_CONFIG_FILE_NAME)
-                .putObject(
+                .put(AcsConstants.FIELD_NAME_ID, getAutoBackupConfigFileId(cpeKey))
+                .put(AcsConstants.FIELD_NAME_ORG_ID, Cpe.getOrgIdByCpeKey(cpeKey))
+                .put(FIELD_NAME_TYPE, AcsFileType.ConfigFile.typeString)
+                .put(FIELD_NAME_CSR_USERNAME, "n/a (System Performed Auto Backup)")
+                .put(FIELD_NAME_USERNAME, cpeKey)
+                .put(FIELD_NAME_PASSWORD, AUTO_BACKUP_CONFIG_FILE_PASSWORD)
+                .put(AcsConstants.FIELD_NAME_NAME, AUTO_BACKUP_CONFIG_FILE_NAME)
+                .put(
                         AcsConstants.FIELD_NAME_CPE_ID,
                         new JsonObject()
-                                .putString(CpeIdentifier.FIELD_NAME_OUI, Cpe.getOuiByCpeKey(cpeKey))
-                                .putString(CpeIdentifier.FIELD_NAME_SN, Cpe.getSnByCpeKey(cpeKey))
+                                .put(CpeIdentifier.FIELD_NAME_OUI, Cpe.getOuiByCpeKey(cpeKey))
+                                .put(CpeIdentifier.FIELD_NAME_SN, Cpe.getSnByCpeKey(cpeKey))
                 );
     }
 
@@ -548,7 +547,7 @@ public class AcsFile {
      */
     public static JsonObject buildAutoBackupFileRecordWithUploadURL(String cpeKey) {
         return buildAutoBackupFileRecord(cpeKey)
-                .putString(
+                .put(
                         FIELD_NAME_UPLOAD_URL,
                         getDownloadUrl(AUTO_BACKUP_CONFIG_FILE_ID_PREFIX + cpeKey)
                 );

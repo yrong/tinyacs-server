@@ -1,5 +1,6 @@
 package vertx.util.sxajboss;
 
+import io.vertx.ext.mongo.MongoClient;
 import vertx.VertxMongoUtils;
 import vertx.model.Cpe;
 import vertx.model.CpeDeviceType;
@@ -32,7 +33,7 @@ public class SxaStagerApiUtils extends SxaJBossApiUtils{
     public static final String CWMP_DEVICE_URL_PATH = "/sxa-device/";
     public static final String USERNAME = "admin@calix.com";
     public static final String PASSWORD = "cwmp";
-    public static final JsonObject SUBSCRIBER_QUERY_TIMED_OUT = new JsonObject().putString(
+    public static final JsonObject SUBSCRIBER_QUERY_TIMED_OUT = new JsonObject().put(
             AcsConstants.FIELD_NAME_ERROR,
             "DB Timed Out when Querying Subscriber Data"
     );
@@ -41,7 +42,7 @@ public class SxaStagerApiUtils extends SxaJBossApiUtils{
      * Static Error Objects
      */
     public static final JsonObject FAILED_TO_UPDATED_SEARCH_ENGINE = new JsonObject()
-            .putString(AcsConstants.FIELD_NAME_ERROR, "Internal Error ! (Failed to updated search engine)");
+            .put(AcsConstants.FIELD_NAME_ERROR, "Internal Error ! (Failed to updated search engine)");
 
     /**
      * Notify SXA Stager that a new subscriber has been discovered or updating an existing subscriber.
@@ -135,26 +136,26 @@ public class SxaStagerApiUtils extends SxaJBossApiUtils{
      * Notify SXA Stager that a new CPE has been discovered or an existing device has been updated.
      * @param cpe
      */
-    public static void deviceDiscoveryAndUpdate(EventBus eventBus, final Cpe cpe) {
+    public static void deviceDiscoveryAndUpdate(MongoClient mongoClient, final Cpe cpe) {
         /**
          * Build request payload
          */
         JsonObject deviceData = new JsonObject()
-                .putString(AcsConstants.FIELD_NAME_ID, cpe.key)
-                .putString(AcsConstants.FIELD_NAME_ORG_ID, cpe.deviceId.orgId)
-                .putString(Cpe.DB_FIELD_NAME_SN, cpe.deviceId.sn)
-                .putString(Cpe.DB_FIELD_NAME_REGISTRATION_ID, cpe.deviceId.registrationId)
-                .putString(CpeDeviceType.FIELD_NAME_HW_VER, cpe.deviceId.hwVersion)
-                .putString(CpeDeviceType.FIELD_NAME_SW_VER, cpe.deviceId.swVersion)
-                .putString(CpeDeviceType.FIELD_NAME_OUI, cpe.deviceId.oui)
-                .putString(CpeDeviceType.FIELD_NAME_MODEL_NAME, cpe.deviceId.modelName)
-                .putString(Cpe.DB_FIELD_NAME_MAC_ADDRESS, cpe.deviceId.macAddress)
-                .putString(Cpe.DB_FIELD_NAME_IP_ADDRESS, cpe.deviceId.ipAddress);
-        final JsonObject payload = new JsonObject().putObject("device", deviceData);
+                .put(AcsConstants.FIELD_NAME_ID, cpe.key)
+                .put(AcsConstants.FIELD_NAME_ORG_ID, cpe.deviceId.orgId)
+                .put(Cpe.DB_FIELD_NAME_SN, cpe.deviceId.sn)
+                .put(Cpe.DB_FIELD_NAME_REGISTRATION_ID, cpe.deviceId.registrationId)
+                .put(CpeDeviceType.FIELD_NAME_HW_VER, cpe.deviceId.hwVersion)
+                .put(CpeDeviceType.FIELD_NAME_SW_VER, cpe.deviceId.swVersion)
+                .put(CpeDeviceType.FIELD_NAME_OUI, cpe.deviceId.oui)
+                .put(CpeDeviceType.FIELD_NAME_MODEL_NAME, cpe.deviceId.modelName)
+                .put(Cpe.DB_FIELD_NAME_MAC_ADDRESS, cpe.deviceId.macAddress)
+                .put(Cpe.DB_FIELD_NAME_IP_ADDRESS, cpe.deviceId.ipAddress);
+        final JsonObject payload = new JsonObject().put("device", deviceData);
 
         // Query Subscriber
         Subscriber.querySubscriberData(
-                eventBus,
+                mongoClient,
                 cpe.cpeJsonObj,
                 new Handler<JsonObject>() {
                     @Override
@@ -166,8 +167,8 @@ public class SxaStagerApiUtils extends SxaJBossApiUtils{
 
                         if (subscriberData != null) {
                             // Add subscriber data if not null
-                            subscriberData.removeField(AcsConstants.FIELD_NAME_CREATE_TIME);
-                            payload.putObject("subscriber", subscriberData);
+                            subscriberData.remove(AcsConstants.FIELD_NAME_CREATE_TIME);
+                            payload.put("subscriber", subscriberData);
                         }
 
                         // Send API request to JBoss
@@ -220,7 +221,7 @@ public class SxaStagerApiUtils extends SxaJBossApiUtils{
             final Handler<JsonObject> handler) {
         final String cpeKey = deviceData.getString(AcsConstants.FIELD_NAME_ID);
         // Build payload
-        final JsonObject payload = new JsonObject().putString(
+        final JsonObject payload = new JsonObject().put(
                 "orgId",
                 deviceData.getString(AcsConstants.FIELD_NAME_ORG_ID)
         );
@@ -229,8 +230,8 @@ public class SxaStagerApiUtils extends SxaJBossApiUtils{
             /**
              * Found the subscriber that this device is associated with
              */
-            subscriberData.removeField(AcsConstants.FIELD_NAME_CREATE_TIME);
-            payload.putObject("subscriber", subscriberData);
+            subscriberData.remove(AcsConstants.FIELD_NAME_CREATE_TIME);
+            payload.put("subscriber", subscriberData);
         }
 
         // Send API request to JBoss
@@ -256,7 +257,7 @@ public class SxaStagerApiUtils extends SxaJBossApiUtils{
                                     + "SXA Stager! HTTP Status " + response.statusCode() + " "
                                     + response.statusMessage());
                             handler.handle(
-                                    payload.putString(
+                                    payload.put(
                                             AcsConstants.FIELD_NAME_ERROR,
                                             "Internal Error! (Failed to Update Search Engine)"
                                     )
@@ -271,7 +272,7 @@ public class SxaStagerApiUtils extends SxaJBossApiUtils{
                                 "SXA Stager due to " + exception
                                 + exception.getMessage() + "!");
                         handler.handle(
-                                payload.putString(
+                                payload.put(
                                         AcsConstants.FIELD_NAME_ERROR,
                                         "Internal Error! (Failed to Update Search Engine)"
                                 )

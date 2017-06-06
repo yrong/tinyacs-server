@@ -1,9 +1,9 @@
 package vertx.connreq;
 
+import io.vertx.redis.RedisClient;
 import vertx.VertxRedisUtils;
 import vertx.model.Cpe;
 import vertx.util.AcsConstants;
-import io.vertx.java.redis.RedisClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.Handler;
@@ -62,10 +62,10 @@ public class ConnectionRequestUtils {
         String password = cpeJsonObject.getString(Cpe.DB_FIELD_NAME_CONNREQ_PASSWORD);
         String connReqUrl = cpeJsonObject.getString(Cpe.DB_FIELD_NAME_CONNREQ_URL);
         JsonObject connReqRequest = new JsonObject()
-                .putString(ConnectionRequestConstants.CPE_ID, cpeJsonObject.getString(AcsConstants.FIELD_NAME_ID))
-                .putString(ConnectionRequestConstants.URL, connReqUrl)
-                .putString(ConnectionRequestConstants.USERNAME, username)
-                .putString(ConnectionRequestConstants.PASSWORD, password);
+                .put(ConnectionRequestConstants.CPE_ID, cpeJsonObject.getString(AcsConstants.FIELD_NAME_ID))
+                .put(ConnectionRequestConstants.URL, connReqUrl)
+                .put(ConnectionRequestConstants.USERNAME, username)
+                .put(ConnectionRequestConstants.PASSWORD, password);
 
         vertx.eventBus().send(
                 AcsConstants.VERTX_ADDRESS_ACS_CONNECTION_REQUEST,

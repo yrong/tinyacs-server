@@ -74,17 +74,17 @@ public class ServicePlan {
      * A Static Service Plan that disables everything
      */
     public static final JsonObject DISABLE_VOICE_LINE = new JsonObject()
-            .putString(FIELD_NAME_ENABLE, "disabled");
+            .put(FIELD_NAME_ENABLE, "disabled");
     public static final JsonObject SERVICE_PLAN_ALL_DISABLED = new JsonObject()
-            .putObject(FIELD_NAME_DATA, new JsonObject().putBoolean(FIELD_NAME_ENABLE, false))
-            .putObject(FIELD_NAME_VIDEO, new JsonObject().putBoolean(FIELD_NAME_ENABLE, false))
-            .putObject(
+            .put(FIELD_NAME_DATA, new JsonObject().put(FIELD_NAME_ENABLE, false))
+            .put(FIELD_NAME_VIDEO, new JsonObject().put(FIELD_NAME_ENABLE, false))
+            .put(
                     FIELD_NAME_VOICE,
-                    new JsonObject().putObject(
+                    new JsonObject().put(
                             FIELD_NAME_LINES,
                             new JsonObject()
-                                    .putObject("1", DISABLE_VOICE_LINE)
-                                    .putObject("2", DISABLE_VOICE_LINE)
+                                    .put("1", DISABLE_VOICE_LINE)
+                                    .put("2", DISABLE_VOICE_LINE)
                     )
             );
 
@@ -182,17 +182,17 @@ public class ServicePlan {
      */
     public static JsonObject buildDeviceIdMatcher(Cpe cpe) {
         JsonArray matcherArray = new JsonArray()
-                .addString(cpe.deviceId.sn)
-                .addString(cpe.key);
+                .add(cpe.deviceId.sn)
+                .add(cpe.key);
         if (cpe.deviceId.registrationId != null) {
             matcherArray.add(cpe.deviceId.registrationId);
         }
         JsonObject matcher = new JsonObject()
-                .putObject(
+                .put(
                         FIELD_NAME_DEVICE_ID,
-                        new JsonObject().putArray(VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_IN, matcherArray)
+                        new JsonObject().put(VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_IN, matcherArray)
                 )
-                .putString(AcsConstants.FIELD_NAME_ORG_ID, cpe.orgId);
+                .put(AcsConstants.FIELD_NAME_ORG_ID, cpe.orgId);
         return matcher;
     }
 
@@ -206,15 +206,15 @@ public class ServicePlan {
             throws VertxException{
         VertxJsonUtils.validateFields(aServicePlan, MANDATORY_FIELDS, OPTIONAL_FIELDS);
 
-        for (String fieldName : aServicePlan.getFieldNames()) {
+        for (String fieldName : aServicePlan.fieldNames()) {
             if (fieldName.equals(FIELD_NAME_DATA) || fieldName.equals(FIELD_NAME_VIDEO)) {
                 VertxJsonUtils.validateFields(
-                        aServicePlan.getObject(fieldName),
+                        aServicePlan.getJsonObject(fieldName),
                         VIDEO_DATA_MANDATORY_FIELDS,
                         VIDEO_DATA_OPTIONAL_FIELDS
                 );
             } else if (fieldName.equals(FIELD_NAME_VOICE)) {
-                JsonObject voiceService = aServicePlan.getObject(fieldName);
+                JsonObject voiceService = aServicePlan.getJsonObject(fieldName);
                 try {
                     VertxJsonUtils.validateFields(
                             voiceService,
@@ -225,12 +225,12 @@ public class ServicePlan {
                     throw new VertxException("Voice Field: " + ex.getMessage());
                 }
 
-                for (String voiceFieldName : voiceService.getFieldNames()) {
+                for (String voiceFieldName : voiceService.fieldNames()) {
                     log.debug("Processing voice field " + voiceFieldName);
                     if (voiceFieldName.equals(FIELD_NAME_FAX_T38)) {
                         try {
                             VertxJsonUtils.validateFields(
-                                    voiceService.getObject(FIELD_NAME_FAX_T38),
+                                    voiceService.getJsonObject(FIELD_NAME_FAX_T38),
                                     VOICE_FAX_T38_MANDATORY_FIELDS,
                                     VOICE_FAX_T38_OPTIONAL_FIELDS
                             );
@@ -243,7 +243,7 @@ public class ServicePlan {
                             throw INVALID_DIAL_PLAN_ID;
                         }
                     } else if (FIELD_NAME_LINES.equals(voiceFieldName)) {
-                        JsonObject lines = voiceService.getObject(FIELD_NAME_LINES);
+                        JsonObject lines = voiceService.getJsonObject(FIELD_NAME_LINES);
                         try {
                             VertxJsonUtils.validateFields(
                                     lines,
@@ -257,8 +257,8 @@ public class ServicePlan {
                         }
 
                         // Validate individual voice line attributes
-                        for (String lineNumber : lines.getFieldNames()) {
-                            JsonObject aLine = lines.getObject(lineNumber);
+                        for (String lineNumber : lines.fieldNames()) {
+                            JsonObject aLine = lines.getJsonObject(lineNumber);
                             try {
                                 VertxJsonUtils.validateFields(
                                         aLine,
@@ -271,7 +271,7 @@ public class ServicePlan {
                                 );
                             }
 
-                            for (String voiceLineFieldName : aLine.getFieldNames()) {
+                            for (String voiceLineFieldName : aLine.fieldNames()) {
                                 if (FIELD_NAME_ENABLE.equals(voiceLineFieldName)) {
                                     String enable = aLine.getString(FIELD_NAME_ENABLE);
                                     if ("Enabled".equals(enable)) {
@@ -299,7 +299,7 @@ public class ServicePlan {
                                 } else if (FIELD_NAME_SIP.equals(voiceLineFieldName)) {
                                     try {
                                         VertxJsonUtils.validateFields(
-                                                aLine.getObject(FIELD_NAME_SIP),
+                                                aLine.getJsonObject(FIELD_NAME_SIP),
                                                 VOICE_LINE_SIP_MANDATORY_FIELDS,
                                                 VOICE_LINE_SIP_OPTIONAL_FIELDS
                                         );
@@ -309,7 +309,7 @@ public class ServicePlan {
                                         );
                                     }
                                 } else if (FIELD_NAME_CALLING_FEATURES.equals(voiceLineFieldName)) {
-                                    JsonObject callingFeatures = aLine.getObject(FIELD_NAME_CALLING_FEATURES);
+                                    JsonObject callingFeatures = aLine.getJsonObject(FIELD_NAME_CALLING_FEATURES);
                                     try {
                                         VertxJsonUtils.validateFields(
                                                 callingFeatures,
@@ -327,10 +327,10 @@ public class ServicePlan {
                                         /**
                                          * Direct Connect Number/Timer are mandatory when direct connect is enabled
                                          */
-                                        if (!callingFeatures.containsField("X_000631_DirectConnectNumber") ||
-                                                !callingFeatures.containsField("X_000631_DirectConnectTimer")) {
+                                        if (!callingFeatures.containsKey("X_000631_DirectConnectNumber") ||
+                                                !callingFeatures.containsKey("X_000631_DirectConnectTimer")) {
                                             String missingParam;
-                                            if (!callingFeatures.containsField("X_000631_DirectConnectNumber")) {
+                                            if (!callingFeatures.containsKey("X_000631_DirectConnectNumber")) {
                                                 missingParam = "X_000631_DirectConnectNumber";
                                             } else {
                                                 missingParam = "X_000631_DirectConnectTimer";
@@ -342,7 +342,7 @@ public class ServicePlan {
                                         }
                                     }
                                 } else if (FIELD_NAME_VOICE_PROCESSING.equals(voiceLineFieldName)) {
-                                    JsonObject voiceProcessing = aLine.getObject(FIELD_NAME_VOICE_PROCESSING);
+                                    JsonObject voiceProcessing = aLine.getJsonObject(FIELD_NAME_VOICE_PROCESSING);
                                     try {
                                         VertxJsonUtils.validateFields(
                                                 voiceProcessing,

@@ -149,7 +149,7 @@ public class Organization {
         apiClientUsername = jsonObject.getString(FIELD_NAME_API_CLIENT_USERNAME);
         apiClientPassword = jsonObject.getString(FIELD_NAME_API_CLIENT_PASSWORD);
 
-        JsonObject extServer = jsonObject.getObject(FIELD_NAME_EXTERNAL_IMAGE_SERVER);
+        JsonObject extServer = jsonObject.getJsonObject(FIELD_NAME_EXTERNAL_IMAGE_SERVER);
         if (extServer != null) {
             try {
                 extImageServer = new ExternalFileServer(extServer);

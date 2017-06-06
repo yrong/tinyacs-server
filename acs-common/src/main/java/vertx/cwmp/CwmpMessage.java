@@ -20,6 +20,7 @@
  */
 package vertx.cwmp;
 
+import io.vertx.ext.mongo.MongoClient;
 import vertx.VertxException;
 import vertx.VertxJsonUtils;
 import vertx.VertxMongoUtils;
@@ -33,7 +34,6 @@ import org.apache.xmlbeans.XmlObject;
 import org.apache.xmlbeans.XmlOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.xmlsoap.schemas.soap.envelope.*;
@@ -380,11 +380,11 @@ public class CwmpMessage {
     /**
      * Persist this message into MongoDB.
      *
-     * @param eventBus
+     * @param mongoClient
      * @param cpe
      * @param informEventCodes
      */
-    public void persist(EventBus eventBus, Cpe cpe, String[] informEventCodes) {
+    public void persist(MongoClient mongoClient, Cpe cpe, String[] informEventCodes) {
         if (bPersisted == true) {
             return;
         }
@@ -395,9 +395,9 @@ public class CwmpMessage {
         }
 
         JsonObject jsonObject = new JsonObject()
-                .putString(AcsConstants.FIELD_NAME_ORG_ID, cpe.orgId)
-                .putObject(AcsConstants.FIELD_NAME_CPE_ID, cpe.getCpeIdentifier())
-                .putObject(DB_FIELD_NAME_TIMESTAMP, VertxMongoUtils.getDateObject());
+                .put(AcsConstants.FIELD_NAME_ORG_ID, cpe.orgId)
+                .put(AcsConstants.FIELD_NAME_CPE_ID, cpe.getCpeIdentifier())
+                .put(DB_FIELD_NAME_TIMESTAMP, VertxMongoUtils.getDateObject());
 
         // Continue the process based on message type
         Body body = soapEnv.getBody();
@@ -424,12 +424,12 @@ public class CwmpMessage {
                 JsonArray eventCodes = new JsonArray();
                 for (String eventCode : informEventCodes) {
                     if (body.isSetInform()) {
-                        eventCodes.addString(eventCode);
+                        eventCodes.add(eventCode);
                     }
                 }
 
                 if (body.isSetInform()) {
-                    summary.putArray("eventCodes", eventCodes);
+                    summary.put("eventCodes", eventCodes);
                 }
             }
         } else if (body.isSetAddObject()) {
@@ -438,7 +438,7 @@ public class CwmpMessage {
              */
             type = AddObjectDocument.AddObject.class.getSimpleName();
             xmlObject = body.getAddObject();
-            summary = new JsonObject().putString("ObjectName", body.getAddObject().getObjectName());
+            summary = new JsonObject().put("ObjectName", body.getAddObject().getObjectName());
         } else if (body.isSetAddObjectResponse()) {
             /**
              * "AddObjectResponse"
@@ -446,22 +446,22 @@ public class CwmpMessage {
             type = AddObjectResponseDocument.AddObjectResponse.class.getSimpleName();
             xmlObject = body.getAddObjectResponse();
             summary = new JsonObject()
-                    .putNumber("InstanceNumber", body.getAddObjectResponse().getInstanceNumber())
-                    .putNumber("Status", body.getAddObjectResponse().getStatus());
+                    .put("InstanceNumber", body.getAddObjectResponse().getInstanceNumber())
+                    .put("Status", body.getAddObjectResponse().getStatus());
         } else if (body.isSetDeleteObject()) {
             /**
              * "DeleteObject"
              */
             type = DeleteObjectDocument.DeleteObject.class.getSimpleName();
             xmlObject = body.getDeleteObject();
-            summary = new JsonObject().putString("ObjectName", body.getDeleteObject().getObjectName());
+            summary = new JsonObject().put("ObjectName", body.getDeleteObject().getObjectName());
         } else if (body.isSetDeleteObjectResponse()) {
             /**
              * "DeleteObjectResponse"
              */
             type = DeleteObjectResponseDocument.DeleteObjectResponse.class.getSimpleName();
             xmlObject = body.getDeleteObjectResponse();
-            summary = new JsonObject().putNumber("Status", body.getDeleteObjectResponse().getStatus());
+            summary = new JsonObject().put("Status", body.getDeleteObjectResponse().getStatus());
         } else if (body.isSetSetParameterValues()) {
             /**
              * "SetParameterValues"
@@ -480,7 +480,7 @@ public class CwmpMessage {
                 String value = firstParameterValueStruct.getValue().getStringValue();
                 if (nbrOfParams > 1) {
                     value = value + " ( and " + (nbrOfParams - 1) + " more parameters)";
-                    summary.putString(
+                    summary.put(
                             firstParameterValueStruct.getName(),
                             value
                     );
@@ -494,7 +494,7 @@ public class CwmpMessage {
             type = SetParameterValuesResponseDocument.SetParameterValuesResponse.class.getSimpleName();
             xmlObject = body.getSetParameterValuesResponse();
             summary = new JsonObject()
-                    .putNumber("Status", body.getSetParameterValuesResponse().getStatus());
+                    .put("Status", body.getSetParameterValuesResponse().getStatus());
         } else if (body.isSetGetParameterValues()) {
             /**
              * "GetParameterValues"
@@ -510,7 +510,7 @@ public class CwmpMessage {
                 paramNames += " and " + (body.getGetParameterValues().getParameterNames().sizeOfStringArray() - 1)
                         + " more";
             }
-            summary = new JsonObject().putString("Parameter Name(s)", paramNames);
+            summary = new JsonObject().put("Parameter Name(s)", paramNames);
         } else if (body.isSetGetParameterValuesResponse()) {
             /**
              * "GetParameterValuesResponse"
@@ -532,7 +532,7 @@ public class CwmpMessage {
                             String value = firstParameterValueStruct.getValue().getStringValue();
                             if (nbrOfParams > 1) {
                                 value = value + " ( and " + (nbrOfParams - 1) + " more parameters)";
-                                summary.putString(
+                                summary.put(
                                         firstParameterValueStruct.getName(),
                                         value
                                 );
@@ -575,14 +575,14 @@ public class CwmpMessage {
             type = DownloadDocument.Download.class.getSimpleName();
             xmlObject = body.getDownload();
             summary = new JsonObject()
-                    .putString("FileType", body.getDownload().getFileType())
-                    .putString("URL", body.getDownload().getURL());
+                    .put("FileType", body.getDownload().getFileType())
+                    .put("URL", body.getDownload().getURL());
 
             // Add Username?Password if any
             if (body.getDownload().getUsername() != null) {
-                summary.putString("Username", body.getDownload().getUsername());
+                summary.put("Username", body.getDownload().getUsername());
                 if (body.getDownload().getPassword() != null) {
-                    summary.putString("Password", body.getDownload().getPassword());
+                    summary.put("Password", body.getDownload().getPassword());
                 }
             }
         } else if (body.isSetDownloadResponse()) {
@@ -592,12 +592,12 @@ public class CwmpMessage {
             type = DownloadResponseDocument.DownloadResponse.class.getSimpleName();
             xmlObject = body.getDownloadResponse();
             if (xmlObject != null) {
-                summary = new JsonObject().putNumber("Status", body.getDownloadResponse().getStatus());
+                summary = new JsonObject().put("Status", body.getDownloadResponse().getStatus());
                 if (body.getDownloadResponse().getStartTime() != null) {
-                    summary.putString("StartTime", body.getDownloadResponse().getStartTime().toString());
+                    summary.put("StartTime", body.getDownloadResponse().getStartTime().toString());
                 }
                 if (body.getDownloadResponse().getCompleteTime() != null) {
-                    summary.putString("CompleteTime", body.getDownloadResponse().getCompleteTime().toString());
+                    summary.put("CompleteTime", body.getDownloadResponse().getCompleteTime().toString());
                 }
             }
         } else if (body.isSetUpload()) {
@@ -607,8 +607,8 @@ public class CwmpMessage {
             type = UploadDocument.Upload.class.getSimpleName();
             xmlObject = body.getUpload();
             summary = new JsonObject()
-                    .putString("FileType", body.getUpload().getFileType())
-                    .putString("URL", body.getUpload().getURL());
+                    .put("FileType", body.getUpload().getFileType())
+                    .put("URL", body.getUpload().getURL());
         } else if (body.isSetUploadResponse()) {
             /**
              * "UploadResponse"
@@ -616,9 +616,9 @@ public class CwmpMessage {
             type = UploadResponseDocument.UploadResponse.class.getSimpleName();
             xmlObject = body.getUploadResponse();
             summary = new JsonObject()
-                    .putNumber("Status", body.getUploadResponse().getStatus())
-                    .putString("StartTime", body.getUploadResponse().getStartTime().toString())
-                    .putString("CompleteTime", body.getUploadResponse().getCompleteTime().toString());
+                    .put("Status", body.getUploadResponse().getStatus())
+                    .put("StartTime", body.getUploadResponse().getStartTime().toString())
+                    .put("CompleteTime", body.getUploadResponse().getCompleteTime().toString());
         } else if (body.isSetReboot()) {
             /**
              * "Reboot"
@@ -657,14 +657,14 @@ public class CwmpMessage {
             dslforumOrgCwmp12.TransferCompleteFaultStruct fault = body.getTransferComplete().getFaultStruct();
             if (fault != null && fault.getFaultCode() != 0) {
                 // Save fault code/string
-                summary.putNumber("FaultCode", fault.getFaultCode());
-                summary.putString("FaultString", fault.getFaultString());
+                summary.put("FaultCode", fault.getFaultCode());
+                summary.put("FaultString", fault.getFaultString());
             }
             if (body.getTransferComplete().getStartTime() != null) {
-                summary.putString("StartTime", body.getTransferComplete().getStartTime().toString());
+                summary.put("StartTime", body.getTransferComplete().getStartTime().toString());
             }
             if (body.getTransferComplete().getCompleteTime() != null) {
-                summary.putString("CompleteTime", body.getTransferComplete().getCompleteTime().toString());
+                summary.put("CompleteTime", body.getTransferComplete().getCompleteTime().toString());
             }
         } else if (body.isSetTransferCompleteResponse()) {
             /**
@@ -694,8 +694,8 @@ public class CwmpMessage {
             if (detail != null) {
                 FaultDocument.Fault fault = detail.getFault();
                 summary = new JsonObject()
-                        .putNumber("FaultCode", fault.getFaultCode())
-                        .putString("FaultString", fault.getFaultString());
+                        .put("FaultCode", fault.getFaultCode())
+                        .put("FaultString", fault.getFaultString());
 
                 if (fault.getSetParameterValuesFaultArray() != null) {
                     JsonArray setParameterValuesFaultArray = new JsonArray();
@@ -708,34 +708,34 @@ public class CwmpMessage {
                                 + "parameter name: " + setParameterValuesFault.getParameterName()
                         );
                     }
-                    summary.putArray("setParameterValuesFaults", setParameterValuesFaultArray);
+                    summary.put("setParameterValuesFaults", setParameterValuesFaultArray);
                 }
             } else {
                 summary = new JsonObject()
-                        .putString("FaultCode", body.getFault().getFaultcode().toString())
-                        .putString("FaultString", body.getFault().getFaultstring());
+                        .put("FaultCode", body.getFault().getFaultcode().toString())
+                        .put("FaultString", body.getFault().getFaultstring());
             }
         }
 
         // Finalize the JSON Object
-        jsonObject.putString(DB_FIELD_NAME_TYPE, type);
+        jsonObject.put(DB_FIELD_NAME_TYPE, type);
         if (xmlObject != null) {
-            jsonObject.putString(DB_FIELD_NAME_XML_TEXT, xmlObject.xmlText(SOAP_ENV_REGULAR_PRINT_XML_OPTIONS));
+            jsonObject.put(DB_FIELD_NAME_XML_TEXT, xmlObject.xmlText(SOAP_ENV_REGULAR_PRINT_XML_OPTIONS));
         }
         if (summary != null) {
-            jsonObject.putObject(DB_FIELD_NAME_SUMMARY, summary);
+            jsonObject.put(DB_FIELD_NAME_SUMMARY, summary);
         }
-        jsonObject.putObject(
+        jsonObject.put(
                 DB_FIELD_NAME_EXPIRE_AT,
                 VertxMongoUtils.getDateObject(System.currentTimeMillis() + DEFAULT_TTL)
         );
-        jsonObject.putNumber(DB_FIELD_NAME_SN, nextSn.getAndIncrement());
+        jsonObject.put(DB_FIELD_NAME_SN, nextSn.getAndIncrement());
 
         // Persist it
         //log.debug("Persisting a " + type + " ...");
         try {
             VertxMongoUtils.save(
-                    eventBus,
+                    mongoClient,
                     DB_COLLECTION_NAME,
                     jsonObject,
                     null

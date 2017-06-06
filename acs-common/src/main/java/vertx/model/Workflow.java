@@ -1,5 +1,6 @@
 package vertx.model;
 
+import io.vertx.ext.mongo.MongoClient;
 import vertx.VertxException;
 import vertx.VertxJsonUtils;
 import vertx.VertxMongoUtils;
@@ -189,13 +190,13 @@ public class Workflow {
         /**
          * Check Action Chain
          */
-        JsonArray actionArray = jsonObject.getArray(FIELD_NAME_ACTIONS);
+        JsonArray actionArray = jsonObject.getJsonArray(FIELD_NAME_ACTIONS);
         if (actionArray.size() == 0) {
             log.error("No action specified!");
             throw INVALID_PARAM;
         }
         for (int i = 0; i < actionArray.size(); i ++) {
-            WorkflowAction anAction = new WorkflowAction(actionArray.<JsonObject>get(i), configurationProfileCache);
+            WorkflowAction anAction = new WorkflowAction(actionArray.<JsonObject>getJsonObject(i), configurationProfileCache);
             workflow.actionChain.add(anAction);
         }
         //log.debug("Action chain contains " + actionArray.size() + " action(s).");
@@ -203,7 +204,7 @@ public class Workflow {
         /**
          * Check Exec Policy
          */
-        workflow.execPolicy = new ExecPolicy(jsonObject.getObject(FIELD_NAME_EXEC_POLICY));
+        workflow.execPolicy = new ExecPolicy(jsonObject.getJsonObject(FIELD_NAME_EXEC_POLICY));
 
         /**
          * Check Initial Trigger
@@ -224,13 +225,13 @@ public class Workflow {
         }
 
         // Retrieve CPE Matcher if any
-        if (jsonObject.containsField(FIELD_NAME_CPE_MATCHER)) {
+        if (jsonObject.containsKey(FIELD_NAME_CPE_MATCHER)) {
             workflow.cpeMatcher = new JsonObject(jsonObject.getString(FIELD_NAME_CPE_MATCHER));
         }
         // Retrieve CPE ID Strings if any
-        workflow.cpeIdStrings = jsonObject.getArray(FIELD_NAME_CPES);
+        workflow.cpeIdStrings = jsonObject.getJsonArray(FIELD_NAME_CPES);
         // Retrieve Group ID Strings if any
-        workflow.groupIdStrings = jsonObject.getArray(FIELD_NAME_GROUPS);
+        workflow.groupIdStrings = jsonObject.getJsonArray(FIELD_NAME_GROUPS);
         if (workflow.cpeIdStrings == null && workflow.groupIdStrings == null) {
             log.error("Both " + FIELD_NAME_CPES + " and " + FIELD_NAME_GROUPS + " are missing!");
             throw MISSING_PARAM;
@@ -280,30 +281,30 @@ public class Workflow {
      * @param id
      */
     public void setId(String id) {
-        rawJsonObject.putString(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID, id);
+        rawJsonObject.put(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID, id);
         this.id = id;
     }
 
     /**
      * Update workflow state.
      *
-     * @param vertx
+     * @param mongoClient
      * @param id
      * @param newState
      * @param customHandler
      */
     public static void changeState(
-            Vertx vertx,
+            MongoClient mongoClient,
             String id,
             String newState,
             Handler<Long> customHandler) {
         try {
             VertxMongoUtils.update(
-                    vertx.eventBus(),
+                    mongoClient,
                     Workflow.DB_COLLECTION_NAME,
                     id,
                     VertxMongoUtils.getUpdatesObject(
-                            new JsonObject().putString(Workflow.FIELD_NAME_STATE, newState),
+                            new JsonObject().put(Workflow.FIELD_NAME_STATE, newState),
                             null,
                             null,
                             null,
@@ -328,13 +329,13 @@ public class Workflow {
             boolean bPendingOnly) {
         if (cpeMatcher == null) {
             // Build a matcher for all CPEs that this workflow will be executed against
-            cpeMatcher = new JsonObject().putString(AcsConstants.FIELD_NAME_ORG_ID, orgId);
+            cpeMatcher = new JsonObject().put(AcsConstants.FIELD_NAME_ORG_ID, orgId);
             JsonArray or = new JsonArray();
             if (cpeIdStrings != null && cpeIdStrings.size() > 0) {
                 or.add(
-                        new JsonObject().putObject(
+                        new JsonObject().put(
                                 AcsConstants.FIELD_NAME_ID,
-                                new JsonObject().putArray(
+                                new JsonObject().put(
                                         VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_IN,
                                         cpeIdStrings
                                 )
@@ -343,11 +344,11 @@ public class Workflow {
             }
             if (groupIdStrings != null) {
                 for (int i = 0; i < groupIdStrings.size(); i++) {
-                    CpeGroup group = groupCache.get((String)groupIdStrings.get(i));
+                    CpeGroup group = groupCache.get((String)groupIdStrings.getValue(i));
                     if (group != null) {
                         or.add(group.cpeFilter);
                     } else {
-                        log.error("Unable to find group " + groupIdStrings.get(i) + "!");
+                        log.error("Unable to find group " + groupIdStrings.getValue(i) + "!");
                     }
                 }
             }
@@ -357,13 +358,13 @@ public class Workflow {
                 return null;
             }
 
-            cpeMatcher.putArray(VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_OR, or);
+            cpeMatcher.put(VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_OR, or);
         }
 
         // Pending only (execution not yet started)?
         if (bPendingOnly) {
             JsonObject pendingMatcher = cpeMatcher.copy();
-            pendingMatcher.putObject(
+            pendingMatcher.put(
                     Cpe.DB_FIELD_NAME_WORKFLOW_EXEC + "." + id + "." + Workflow.FIELD_NAME_STATE,
                     VertxMongoUtils.EXISTS_FALSE
             );
@@ -371,12 +372,12 @@ public class Workflow {
             if (!isActive()) {
                 // For passive workflows, CPE device is only considered pending if discovered after
                 // the workflow was created
-                pendingMatcher.putObject(
+                pendingMatcher.put(
                         Cpe.DB_FIELD_NAME_LAST_DISCOVER_TIME,
                         new JsonObject()
-                                .putObject(
+                                .put(
                                         VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_GREATER_THAN,
-                                        rawJsonObject.getObject(AcsConstants.FIELD_NAME_CREATE_TIME)
+                                        rawJsonObject.getJsonObject(AcsConstants.FIELD_NAME_CREATE_TIME)
                                 )
                 );
             }
@@ -393,7 +394,7 @@ public class Workflow {
      * @return
      */
     public JsonObject getMatcherByState(String state) {
-        return new JsonObject().putString(
+        return new JsonObject().put(
                 Cpe.DB_FIELD_NAME_WORKFLOW_EXEC + "." + id + "." + Workflow.FIELD_NAME_STATE,
                 state
         );
@@ -404,13 +405,13 @@ public class Workflow {
      */
     public boolean matchCpe(JsonObject cpe) {
         // Try to match the CPE against the CPE matcher of this workflow
-        JsonArray subMatcherArray = cpeMatcher.getArray(VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_OR);
+        JsonArray subMatcherArray = cpeMatcher.getJsonArray(VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_OR);
         boolean bMatched = false;
         for (int i =0; i < subMatcherArray.size(); i ++) {
-            JsonObject subMatcher = subMatcherArray.get(i);
-            if (subMatcher.containsField(AcsConstants.FIELD_NAME_ID)) {
+            JsonObject subMatcher = subMatcherArray.getJsonObject(i);
+            if (subMatcher.containsKey(AcsConstants.FIELD_NAME_ID)) {
                 // List of CPE ID Strings
-                bMatched = subMatcher.getArray(AcsConstants.FIELD_NAME_ID)
+                bMatched = subMatcher.getJsonArray(AcsConstants.FIELD_NAME_ID)
                         .contains(cpe.getString(AcsConstants.FIELD_NAME_ID));
             } else {
                 // Group Matcher

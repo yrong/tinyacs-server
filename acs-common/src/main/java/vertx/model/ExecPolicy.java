@@ -56,9 +56,9 @@ public class ExecPolicy {
      * Static Constants
      */
     public static final JsonObject EXEC_POLICY_WITH_DEFAULT_TIMEOUT = new JsonObject()
-            .putNumber(FIELD_NAME_TIMEOUT, DEFAULT_DEVICE_OP_TIMEOUT);
+            .put(FIELD_NAME_TIMEOUT, DEFAULT_DEVICE_OP_TIMEOUT);
     public static final JsonObject EXEC_POLICY_WITH_DOWNLOAD_TIMEOUT = new JsonObject()
-            .putNumber(FIELD_NAME_TIMEOUT, DEFAULT_DOWNLOAD_TIMEOUT);
+            .put(FIELD_NAME_TIMEOUT, DEFAULT_DOWNLOAD_TIMEOUT);
 
     /**
      * Local Variables
@@ -93,12 +93,12 @@ public class ExecPolicy {
         timeout = execPolicyJsonObject.getInteger(FIELD_NAME_TIMEOUT, DEFAULT_DEVICE_OP_TIMEOUT);
         maxConcurrentDevices = execPolicyJsonObject.getInteger(FIELD_NAME_MAX_CONCURRENT_DEVICES, DEFAULT_MAX_CONCURRENT_DEVICE);
 
-        if (execPolicyJsonObject.containsField(FIELD_NAME_WINDOW)) {
-            maintenanceWindow = new MaintenanceWindow(execPolicyJsonObject.getObject(FIELD_NAME_WINDOW));
+        if (execPolicyJsonObject.containsKey(FIELD_NAME_WINDOW)) {
+            maintenanceWindow = new MaintenanceWindow(execPolicyJsonObject.getJsonObject(FIELD_NAME_WINDOW));
         }
 
-        if (execPolicyJsonObject.containsField(FIELD_NAME_INITIAL_TRIGGER)) {
-            initialTrigger = new WorkflowTrigger(execPolicyJsonObject.getObject(FIELD_NAME_INITIAL_TRIGGER));
+        if (execPolicyJsonObject.containsKey(FIELD_NAME_INITIAL_TRIGGER)) {
+            initialTrigger = new WorkflowTrigger(execPolicyJsonObject.getJsonObject(FIELD_NAME_INITIAL_TRIGGER));
         }
     }
 }

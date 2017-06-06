@@ -1,8 +1,8 @@
 package vertx.util;
 
+import io.vertx.redis.RedisClient;
 import vertx.VertxRedisUtils;
 import vertx.model.Cpe;
-import io.vertx.java.redis.RedisClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.Handler;

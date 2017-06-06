@@ -1,5 +1,6 @@
 package vertx.fileserver;
 
+import io.vertx.ext.mongo.MongoClient;
 import vertx.*;
 import vertx.cache.OrganizationCache;
 import vertx.model.AcsFile;
@@ -24,10 +25,10 @@ import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.json.impl.Base64;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Base64;
 
 /**
  * Project:  cwmp
@@ -47,11 +48,15 @@ public class FileServerRequestHandler implements Handler<HttpServerRequest> {
      */
     public OrganizationCache organizationCache;
 
+    public MongoClient mongoClient;
+
     /**
      * Constructor
      */
     public FileServerRequestHandler(Vertx vertx) {
         this.vertx = vertx;
+
+        mongoClient = MongoClient.createShared(vertx, VertxMongoUtils.getModMongoPersistorConfig());
 
         /**
          * Initialize Organization Cache
@@ -68,8 +73,8 @@ public class FileServerRequestHandler implements Handler<HttpServerRequest> {
      * Query Key that excludes file content
      */
     public static final JsonObject QUERY_KEY_NO_CONTENT = new JsonObject()
-            .putNumber(AcsFile.FIELD_NAME_TEXT_CONTENT, 0)
-            .putNumber(AcsFile.FIELD_NAME_BINARY_CONTENT, 0);
+            .put(AcsFile.FIELD_NAME_TEXT_CONTENT, 0)
+            .put(AcsFile.FIELD_NAME_BINARY_CONTENT, 0);
 
     /**
      * HTTP Method Strings
@@ -117,7 +122,7 @@ public class FileServerRequestHandler implements Handler<HttpServerRequest> {
             return;
         }
 
-        final JsonObject matcher = new JsonObject().putString(AcsConstants.FIELD_NAME_ID, id);
+        final JsonObject matcher = new JsonObject().put(AcsConstants.FIELD_NAME_ID, id);
 
         /**
          * Pause for now until the file is found
@@ -131,7 +136,7 @@ public class FileServerRequestHandler implements Handler<HttpServerRequest> {
             /**
              * MongoDB FindOne Handler
              */
-            VertxMongoUtils.FindOneHandler findOneHandler = new VertxMongoUtils.FindOneHandler(new Handler<JsonObject>() {
+            Handler findOneHandler = new Handler<JsonObject>() {
                 @Override
                 public void handle(final JsonObject aFileRecord) {
                     /**
@@ -141,13 +146,13 @@ public class FileServerRequestHandler implements Handler<HttpServerRequest> {
 
                     serveRequestWithFileRecord(aFileRecord, req, id, matcher, bIsDownload);
                 }
-            });
+            };
 
             /**
              * Find existing file record by "_id"
              */
             VertxMongoUtils.findOne(
-                    vertx.eventBus(),
+                    mongoClient,
                     AcsFile.DB_COLLECTION_NAME,
                     matcher,
                     findOneHandler,
@@ -196,7 +201,7 @@ public class FileServerRequestHandler implements Handler<HttpServerRequest> {
         /**
          * Verify Username/Password if any
          */
-        if (aFileRecord.containsField(AcsFile.FIELD_NAME_USERNAME)) {
+        if (aFileRecord.containsKey(AcsFile.FIELD_NAME_USERNAME)) {
             String authHeader = req.headers().get(AUTH.WWW_AUTH_RESP);
             if (authHeader != null) {
                 log.debug("Received " + AUTH.WWW_AUTH_RESP + ": " + authHeader);
@@ -237,13 +242,8 @@ public class FileServerRequestHandler implements Handler<HttpServerRequest> {
                         return;
                     } else {
                         log.debug(filename + ": Downloading from GridFS...");
-                        VertxMongoGridFsFile.serveHttpDownRequest(
-                                vertx.eventBus(),
-                                filename,
-                                id,
-                                fileSize,
-                                req
-                        );
+
+                        /*todo*/
                     }
                     break;
 
@@ -253,7 +253,7 @@ public class FileServerRequestHandler implements Handler<HttpServerRequest> {
                         return;
                     }
 
-                    Buffer buffer = new Buffer(aFileRecord.getBinary(AcsFile.FIELD_NAME_BINARY_CONTENT));
+                    Buffer buffer = Buffer.buffer(aFileRecord.getBinary(AcsFile.FIELD_NAME_BINARY_CONTENT));
 
                     /**
                      * Add file name to header
@@ -298,16 +298,16 @@ public class FileServerRequestHandler implements Handler<HttpServerRequest> {
 
                 case ConfigFile:
                 case SipConfigFile:
-                    if (aFileRecord.containsField(AcsFile.FIELD_NAME_TEXT_CONTENT)) {
+                    if (aFileRecord.containsKey(AcsFile.FIELD_NAME_TEXT_CONTENT)) {
                         /**
                          * Serve the download request with embedded text content
                          */
                         req.response().end(aFileRecord.getString(AcsFile.FIELD_NAME_TEXT_CONTENT));
-                    } else if (aFileRecord.containsField(AcsFile.FIELD_NAME_BINARY_CONTENT)) {
+                    } else if (aFileRecord.containsKey(AcsFile.FIELD_NAME_BINARY_CONTENT)) {
                         /**
                          * Serve the download request with embedded binary content
                          */
-                        req.response().end(new Buffer(aFileRecord.getBinary(AcsFile.FIELD_NAME_BINARY_CONTENT)));
+                        req.response().end(Buffer.buffer(aFileRecord.getBinary(AcsFile.FIELD_NAME_BINARY_CONTENT)));
                     } else {
                         /**
                          * Serve the download request with a pump from a local file
@@ -335,11 +335,11 @@ public class FileServerRequestHandler implements Handler<HttpServerRequest> {
              * Increase download count for this file
              */
             JsonObject inc = new JsonObject()
-                    .putNumber(AcsFile.FIELD_NAME_NUMBER_OF_DOWNLOADS, 1);
-            JsonObject update = new JsonObject().putObject("$inc", inc);
+                    .put(AcsFile.FIELD_NAME_NUMBER_OF_DOWNLOADS, 1);
+            JsonObject update = new JsonObject().put("$inc", inc);
             try {
                 VertxMongoUtils.updateWithMatcher(
-                        vertx.eventBus(),
+                        mongoClient,
                         AcsFile.DB_COLLECTION_NAME,
                         matcher,
                         update,
@@ -473,7 +473,7 @@ public class FileServerRequestHandler implements Handler<HttpServerRequest> {
                                         matcher,
                                         dbUpdates,
                                         VertxMongoUtils.getUpdatesObject(
-                                                new JsonObject().putBinary(
+                                                new JsonObject().put(
                                                         AcsFile.FIELD_NAME_BINARY_CONTENT, buffer.getBytes()
                                                 ),
                                                 null,
@@ -488,14 +488,14 @@ public class FileServerRequestHandler implements Handler<HttpServerRequest> {
                                  */
                                 // Add file content/size and upload time
                                 aFileRecord
-                                        .putBinary(AcsFile.FIELD_NAME_BINARY_CONTENT, buffer.getBytes())
-                                        .putNumber(AcsFile.FIELD_NAME_SIZE, buffer.length())
-                                        .putObject(AcsFile.FIELD_NAME_UPLOAD_TIME, VertxMongoUtils.getDateObject());
+                                        .put(AcsFile.FIELD_NAME_BINARY_CONTENT, buffer.getBytes())
+                                        .put(AcsFile.FIELD_NAME_SIZE, buffer.length())
+                                        .put(AcsFile.FIELD_NAME_UPLOAD_TIME, VertxMongoUtils.getDateObject());
 
                                 // Save it (may overwrite existing record which is ok)
                                 try {
                                     VertxMongoUtils.save(
-                                            vertx.eventBus(),
+                                            mongoClient,
                                             AcsFile.DB_COLLECTION_NAME,
                                             aFileRecord,
                                             new Handler<Message<JsonObject>>() {
@@ -541,7 +541,7 @@ public class FileServerRequestHandler implements Handler<HttpServerRequest> {
             final JsonObject binaryContent) {
         try {
             VertxMongoUtils.updateWithMatcher(
-                    vertx.eventBus(),
+                    mongoClient,
                     AcsFile.DB_COLLECTION_NAME,
                     matcher,
                     update,
@@ -578,7 +578,7 @@ public class FileServerRequestHandler implements Handler<HttpServerRequest> {
     public void endRequestWithError(final HttpServerRequest req, String filename, String error) {
         log.error(filename + ": " + error);
         VertxUtils.setResponseStatus(req, HttpResponseStatus.INTERNAL_SERVER_ERROR);
-        req.response().end(new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR, error).encode());
+        req.response().end(new JsonObject().put(AcsConstants.FIELD_NAME_ERROR, error).encode());
     }
 
     /**
@@ -619,22 +619,19 @@ public class FileServerRequestHandler implements Handler<HttpServerRequest> {
 
         // Get URL POJO Instance
         URL url;
+        HttpClient httpClient;
         try {
             url = new URL(extServer.baseUrl);
+            httpClient = VertxHttpClientUtils.createHttpClient(vertx,url.getHost(),url.getPort());
         } catch (MalformedURLException e) {
             // This should never happen though
             log.error("Invalid External File Server URL " + extServer.baseUrl + "!");
             return;
         }
 
-        // Get HTTP Client Instance
-        HttpClient httpClient = vertx.createHttpClient()
-                .setHost(url.getHost())
-                .setPort(url.getPort());
-
         // Build HTTP Client Request Instance
         final HttpClientRequest clientRequest = httpClient.request(
-                HTTP_METHOD_POST,
+                io.vertx.core.http.HttpMethod.POST,
                 url.getPath(),
                 responseHandler
         );
@@ -662,7 +659,7 @@ public class FileServerRequestHandler implements Handler<HttpServerRequest> {
             String credentials = extServer.username + ":" + extServer.password;
             clientRequest.headers().set(
                     AUTH.WWW_AUTH_RESP,
-                    "Basic " + Base64.encodeBytes(credentials.getBytes())
+                    "Basic " + Base64.getEncoder().encodeToString(credentials.getBytes())
             );
         }
 
@@ -742,53 +739,6 @@ public class FileServerRequestHandler implements Handler<HttpServerRequest> {
         /**
          * Save Image into GridFS
          */
-        Handler<JsonObject> gridfsSaveResultHandler = new Handler<JsonObject>() {
-            @Override
-            public void handle(JsonObject result) {
-                String status = "null";
-                if (result != null) {
-                    status = result.getString(VertxMongoGridFsVertice.FIELD_NAME_STATUS);
-                }
-                if (VertxMongoGridFsVertice.FIELD_NAME_STATUS_VALUE_OK.equals(status)) {
-                    log.info(filename + ": Successfully saved into GridFS.");
-
-                    /**
-                     * Last Step is to update File Record (in "CWMP-files" collection)
-                     */
-                    updateFileRecord(
-                            req,
-                            filename,
-                            matcher,
-                            dbUpdate,
-                            null
-                    );
-                } else {
-                    String error = status;
-                    if (result != null) {
-                        error = result.getString(
-                                VertxMongoGridFsVertice.FIELD_NAME_ERROR,
-                                status
-                        );
-                    }
-                    endRequestWithError(req, filename, error);
-                }
-            }
-        };
-        new VertxMongoGridFsFile(
-                vertx.eventBus(),
-                matcher.getString(AcsConstants.FIELD_NAME_ID),
-                filename,
-                // Store opgId in GridFS Metadata
-                new JsonObject()
-                        .putString(
-                                AcsConstants.FIELD_NAME_ORG_ID,
-                                aFileRecord.getString(AcsConstants.FIELD_NAME_ORG_ID)
-                        ),
-                buffer.length()
-        ).saveFile(
-                aFileRecord.containsField(AcsFile.FIELD_NAME_SIZE), // reUpload?
-                buffer,
-                gridfsSaveResultHandler
-        );
+        /*todo*/
     }
 }

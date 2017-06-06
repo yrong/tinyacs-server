@@ -20,7 +20,7 @@ public class VertxConfigProperties {
      */
     public static final String defaultMongoHost = "localhost";
     public static final int defaultMongoPort = 27017;
-    public static final String defaultMongoDbName = "sxa";
+    public static final String defaultMongoDbName = "cwmp";
     public static final String defaultMongoSeeds = null;
 
     /**

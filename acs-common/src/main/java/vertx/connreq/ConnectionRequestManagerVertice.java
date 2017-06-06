@@ -1,12 +1,12 @@
 package vertx.connreq;
 
 import io.vertx.core.AbstractVerticle;
+import io.vertx.redis.RedisClient;
+import io.vertx.redis.RedisOptions;
 import vertx.VertxConfigProperties;
-import vertx.VertxConstants;
 import vertx.VertxHttpClientUtils;
 import vertx.VertxRedisUtils;
 import vertx.util.AcsConstants;
-import io.vertx.java.redis.RedisClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.Handler;
@@ -80,9 +80,7 @@ public class ConnectionRequestManagerVertice extends AbstractVerticle {
             if (proxy == null) {
                 httpClient = VertxHttpClientUtils.createHttpClient(vertx, url);
             } else {
-                httpClient = vertx.createHttpClient()
-                        .setHost(proxy)
-                        .setPort(ConnectionRequestConstants.INTERNAL_PROXY_PORT);
+                httpClient = VertxHttpClientUtils.createHttpClient(vertx, proxy,ConnectionRequestConstants.INTERNAL_PROXY_PORT);
             }
         } catch (MalformedURLException e) {
             reqMessage.reply(MALFORMED_URL);
@@ -175,12 +173,14 @@ public class ConnectionRequestManagerVertice extends AbstractVerticle {
         /**
          * Create Redis Client
          */
-        redisClient = new RedisClient(vertx.eventBus(), VertxConstants.VERTX_ADDRESS_REDIS);
+        RedisOptions config = new RedisOptions()
+                .setHost(VertxConfigProperties.redisHost).setPort(VertxConfigProperties.redisPort);
+        redisClient = RedisClient.create(vertx, config);
 
         /**
          * Register Connection-Request Request Handler
          */
-        vertx.eventBus().registerHandler(
+        vertx.eventBus().consumer(
                 AcsConstants.VERTX_ADDRESS_ACS_CONNECTION_REQUEST,
                 newReqHandler
         );
@@ -195,13 +195,6 @@ public class ConnectionRequestManagerVertice extends AbstractVerticle {
     public void stop() {
         log.info("ConnectionRequest Worker Vertice is shutting down...\n");
 
-        /**
-         * Un-Register Connection-Request Request Handler
-         */
-        vertx.eventBus().unregisterHandler(
-                AcsConstants.VERTX_ADDRESS_ACS_CONNECTION_REQUEST,
-                newReqHandler
-        );
 
         /**
          * Clean up all redis keys via Jedis (as Vertx mod redis is no longer available to us)

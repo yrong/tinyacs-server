@@ -1,5 +1,6 @@
 package vertx.model;
 
+import io.vertx.ext.mongo.MongoClient;
 import vertx.VertxException;
 import vertx.VertxMongoUtils;
 import vertx.CcException;
@@ -10,11 +11,9 @@ import vertx.util.AcsMiscUtils;
 import vertx.util.CpeDataModelMgmt;
 import vertx.util.GigaCenter;
 import dslforumOrgCwmp12.*;
-import io.netty.util.internal.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.Handler;
-import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -246,7 +245,7 @@ public class Cpe extends MultiTenantObject{
      *
      * @param orgId
      * @param informRequest
-     * @param eventBus
+     * @param mongoClient
      * @param findHandler
      * @return
      * @throws CcException
@@ -254,8 +253,8 @@ public class Cpe extends MultiTenantObject{
     public static void getCpeByInform(
             String orgId,
             InformDocument.Inform informRequest,
-            EventBus eventBus,
-            VertxMongoUtils.FindOneHandler findHandler
+            MongoClient mongoClient,
+            Handler findHandler
     ) throws VertxException {
         if (informRequest.getDeviceId() == null) {
             informRequest.dump();
@@ -293,10 +292,10 @@ public class Cpe extends MultiTenantObject{
          * Lookup existing CPE from DB first
          */
         VertxMongoUtils.findOne(
-                eventBus,
+                mongoClient,
                 CPE_COLLECTION_NAME,
                 // Matcher which contains the CPE Key as the id
-                new JsonObject().putString(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID, key),
+                new JsonObject().put(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID, key),
                 // Async FindOne Result Handler
                 findHandler,
                 // Keys
@@ -383,20 +382,20 @@ public class Cpe extends MultiTenantObject{
          */
         public JsonObject toJsonObject(){
             JsonObject jsonObject = super.toJsonObject()
-                    .putString(DB_FIELD_NAME_SN, sn)
-                    .putString(Cpe.DB_FIELD_NAME_REGISTRATION_ID, registrationId)
-                    .putString(DB_FIELD_NAME_ADDITIONAL_HW_VER, additionalHwVersion)
-                    .putString(DB_FIELD_NAME_IP_ADDRESS, ipAddress)
-                    .putString(DB_FIELD_NAME_MAC_ADDRESS, macAddress)
-                    .putString(DB_FIELD_NAME_WAN_CONNECTION_PATH, wanIpConnectionPath)
-                    .putString(DB_FIELD_NAME_CONNREQ_URL, connRequestUrl)
-                    .putString(DB_FIELD_NAME_CONNREQ_USERNAME, connRequestUsername)
-                    .putString(DB_FIELD_NAME_CONNREQ_PASSWORD, connRequestPassword)
-                    .putNumber(DB_FIELD_NAME_PERIODIC_INFORM_INTERVAL, informInterval)
-                    .putBoolean(DB_FIELD_NAME_PERIODIC_INFORM_ENABLE, bPeriodicInformEnabled);
+                    .put(DB_FIELD_NAME_SN, sn)
+                    .put(Cpe.DB_FIELD_NAME_REGISTRATION_ID, registrationId)
+                    .put(DB_FIELD_NAME_ADDITIONAL_HW_VER, additionalHwVersion)
+                    .put(DB_FIELD_NAME_IP_ADDRESS, ipAddress)
+                    .put(DB_FIELD_NAME_MAC_ADDRESS, macAddress)
+                    .put(DB_FIELD_NAME_WAN_CONNECTION_PATH, wanIpConnectionPath)
+                    .put(DB_FIELD_NAME_CONNREQ_URL, connRequestUrl)
+                    .put(DB_FIELD_NAME_CONNREQ_USERNAME, connRequestUsername)
+                    .put(DB_FIELD_NAME_CONNREQ_PASSWORD, connRequestPassword)
+                    .put(DB_FIELD_NAME_PERIODIC_INFORM_INTERVAL, informInterval)
+                    .put(DB_FIELD_NAME_PERIODIC_INFORM_ENABLE, bPeriodicInformEnabled);
 
             if (changeCounter != null) {
-                jsonObject.putNumber(DB_FIELD_NAME_CHANGE_COUNTER, changeCounter);
+                jsonObject.put(DB_FIELD_NAME_CHANGE_COUNTER, changeCounter);
             }
 
             return jsonObject;
@@ -412,26 +411,26 @@ public class Cpe extends MultiTenantObject{
             }
 
             parentCpe
-                    .putString(FIELD_NAME_ORG_ID, orgId)
-                    .putString(FIELD_NAME_MANUFACTURER, manufacturer)
-                    .putString(FIELD_NAME_OUI, oui)
-                    .putString(FIELD_NAME_PRODUCT_CLASS, productClass)
-                    .putString(FIELD_NAME_MODEL_NAME, modelName)
-                    .putString(FIELD_NAME_HW_VER, hwVersion)
-                    .putString(FIELD_NAME_SW_VER, swVersion)
-                    .putString(DB_FIELD_NAME_SN, sn)
-                    .putString(DB_FIELD_NAME_REGISTRATION_ID, registrationId)
-                    .putString(DB_FIELD_NAME_ADDITIONAL_HW_VER, additionalHwVersion)
-                    .putString(DB_FIELD_NAME_IP_ADDRESS, ipAddress)
-                    .putString(DB_FIELD_NAME_WAN_CONNECTION_PATH, wanIpConnectionPath)
-                    .putString(DB_FIELD_NAME_CONNREQ_URL, connRequestUrl)
-                    .putString(DB_FIELD_NAME_CONNREQ_USERNAME, connRequestUsername)
-                    .putString(DB_FIELD_NAME_CONNREQ_PASSWORD, connRequestPassword)
-                    .putNumber(DB_FIELD_NAME_PERIODIC_INFORM_INTERVAL, informInterval)
-                    .putBoolean(DB_FIELD_NAME_PERIODIC_INFORM_ENABLE, bPeriodicInformEnabled);
+                    .put(FIELD_NAME_ORG_ID, orgId)
+                    .put(FIELD_NAME_MANUFACTURER, manufacturer)
+                    .put(FIELD_NAME_OUI, oui)
+                    .put(FIELD_NAME_PRODUCT_CLASS, productClass)
+                    .put(FIELD_NAME_MODEL_NAME, modelName)
+                    .put(FIELD_NAME_HW_VER, hwVersion)
+                    .put(FIELD_NAME_SW_VER, swVersion)
+                    .put(DB_FIELD_NAME_SN, sn)
+                    .put(DB_FIELD_NAME_REGISTRATION_ID, registrationId)
+                    .put(DB_FIELD_NAME_ADDITIONAL_HW_VER, additionalHwVersion)
+                    .put(DB_FIELD_NAME_IP_ADDRESS, ipAddress)
+                    .put(DB_FIELD_NAME_WAN_CONNECTION_PATH, wanIpConnectionPath)
+                    .put(DB_FIELD_NAME_CONNREQ_URL, connRequestUrl)
+                    .put(DB_FIELD_NAME_CONNREQ_USERNAME, connRequestUsername)
+                    .put(DB_FIELD_NAME_CONNREQ_PASSWORD, connRequestPassword)
+                    .put(DB_FIELD_NAME_PERIODIC_INFORM_INTERVAL, informInterval)
+                    .put(DB_FIELD_NAME_PERIODIC_INFORM_ENABLE, bPeriodicInformEnabled);
 
             if (changeCounter != null) {
-                parentCpe.putNumber(DB_FIELD_NAME_CHANGE_COUNTER, changeCounter);
+                parentCpe.put(DB_FIELD_NAME_CHANGE_COUNTER, changeCounter);
             }
         }
 
@@ -487,7 +486,7 @@ public class Cpe extends MultiTenantObject{
             return false;
         }
 
-        String[] fields = StringUtil.split(key, '-');
+        String[] fields = key.split("-");
         if (fields == null || fields.length != 3) {
             return false;
         }
@@ -509,9 +508,9 @@ public class Cpe extends MultiTenantObject{
      */
     public JsonObject getCpeIdentifier() {
         return new JsonObject()
-                .putString(CpeIdentifier.FIELD_NAME_OUI, deviceId.oui)
-                .putString(CpeIdentifier.FIELD_NAME_SN, deviceId.sn)
-                .putString(CpeIdentifier.FIELD_NAME_MAC_ADDRESS, deviceId.macAddress);
+                .put(CpeIdentifier.FIELD_NAME_OUI, deviceId.oui)
+                .put(CpeIdentifier.FIELD_NAME_SN, deviceId.sn)
+                .put(CpeIdentifier.FIELD_NAME_MAC_ADDRESS, deviceId.macAddress);
     }
 
     /**
@@ -519,11 +518,11 @@ public class Cpe extends MultiTenantObject{
      */
     public JsonObject toBasicJsonObjectForConnReq(){
         return new JsonObject()
-                .putString(AcsConstants.FIELD_NAME_ID, key)
-                .putString(DB_FIELD_NAME_SN, deviceId.sn)
-                .putString(DB_FIELD_NAME_CONNREQ_URL, deviceId.connRequestUrl)
-                .putString(DB_FIELD_NAME_CONNREQ_USERNAME, deviceId.connRequestUsername)
-                .putString(DB_FIELD_NAME_CONNREQ_PASSWORD, deviceId.connRequestPassword);
+                .put(AcsConstants.FIELD_NAME_ID, key)
+                .put(DB_FIELD_NAME_SN, deviceId.sn)
+                .put(DB_FIELD_NAME_CONNREQ_URL, deviceId.connRequestUrl)
+                .put(DB_FIELD_NAME_CONNREQ_USERNAME, deviceId.connRequestUsername)
+                .put(DB_FIELD_NAME_CONNREQ_PASSWORD, deviceId.connRequestPassword);
     }
 
     /**
@@ -532,11 +531,11 @@ public class Cpe extends MultiTenantObject{
      */
     public static JsonObject toBasicJsonObjectForConnReq(JsonObject cpeJsonObj){
         return new JsonObject()
-                .putString(AcsConstants.FIELD_NAME_ID, cpeJsonObj.getString(AcsConstants.FIELD_NAME_CPE_ID))
-                .putString(DB_FIELD_NAME_SN, cpeJsonObj.getString(DB_FIELD_NAME_SN))
-                .putString(DB_FIELD_NAME_CONNREQ_URL, cpeJsonObj.getString(DB_FIELD_NAME_CONNREQ_URL))
-                .putString(DB_FIELD_NAME_CONNREQ_USERNAME, cpeJsonObj.getString(DB_FIELD_NAME_CONNREQ_USERNAME))
-                .putString(DB_FIELD_NAME_CONNREQ_PASSWORD, cpeJsonObj.getString(DB_FIELD_NAME_CONNREQ_PASSWORD));
+                .put(AcsConstants.FIELD_NAME_ID, cpeJsonObj.getString(AcsConstants.FIELD_NAME_CPE_ID))
+                .put(DB_FIELD_NAME_SN, cpeJsonObj.getString(DB_FIELD_NAME_SN))
+                .put(DB_FIELD_NAME_CONNREQ_URL, cpeJsonObj.getString(DB_FIELD_NAME_CONNREQ_URL))
+                .put(DB_FIELD_NAME_CONNREQ_USERNAME, cpeJsonObj.getString(DB_FIELD_NAME_CONNREQ_USERNAME))
+                .put(DB_FIELD_NAME_CONNREQ_PASSWORD, cpeJsonObj.getString(DB_FIELD_NAME_CONNREQ_PASSWORD));
     }
 
     /**
@@ -555,21 +554,21 @@ public class Cpe extends MultiTenantObject{
      * A static frequently used query key to exclude all known root objects
      */
     private static final JsonObject queryKeyNoRootObjects = new JsonObject()
-            .putNumber("Device", 0)
-            .putNumber("InternetGatewayDevice", 0);
+            .put("Device", 0)
+            .put("InternetGatewayDevice", 0);
 
     /**
      * Persist/Save new CPE to MongoDB
      *
-     * @param eventBus
+     * @param mongoClient
      */
-    public void saveNewCpeToDb(EventBus eventBus) {
+    public void saveNewCpeToDb(MongoClient mongoClient) {
         /**
          * Persist it
          */
         log.info("Saving New CPE " + cpeJsonObj.toString());
         try {
-            VertxMongoUtils.save(eventBus, CPE_COLLECTION_NAME, cpeJsonObj, null);
+            VertxMongoUtils.save(mongoClient, CPE_COLLECTION_NAME, cpeJsonObj, null);
         } catch (VertxException e) {
             e.printStackTrace();
         }
@@ -781,22 +780,22 @@ public class Cpe extends MultiTenantObject{
     /**
      * Persist changes of this CPE to MongoDB
      */
-    public void updateDb(EventBus eventBus) {
-        updateDb(eventBus, null);
+    public void updateDb(MongoClient mongoClient) {
+        updateDb(mongoClient, null);
     }
 
     /**
      * Persist changes of this CPE to MongoDB with a custom handler
      */
     private Long NON_NULL_LONG = new Long(1);
-    public void updateDb(EventBus eventBus, Handler<Long> handler) {
+    public void updateDb(MongoClient mongoClient, Handler<Long> handler) {
         JsonObject updates = VertxMongoUtils.getUpdatesObject(sets, unsets, timestamps, pulls, pushes);
 
         //log.debug("Updates:\n" + updates.encodePrettily());
 
         if (updates != null && updates.size() > 0) {
             try {
-                VertxMongoUtils.update(eventBus, CPE_COLLECTION_NAME, key, updates, handler);
+                VertxMongoUtils.update(mongoClient, CPE_COLLECTION_NAME, key, updates, handler);
             } catch (VertxException e) {
                 e.printStackTrace();
             }
@@ -833,10 +832,10 @@ public class Cpe extends MultiTenantObject{
                     null,
                     null,
                     null);
-    public void deleteAllParamValuesAndAttributes(EventBus eventBus) {
+    public void deleteAllParamValuesAndAttributes(MongoClient mongoClient) {
         try {
             VertxMongoUtils.update(
-                    eventBus,
+                    mongoClient,
                     CPE_COLLECTION_NAME,
                     key,
                     DELETE_ALL_PARAM_VALUES_AND_ATTRIBUTES,
@@ -889,10 +888,10 @@ public class Cpe extends MultiTenantObject{
 
         // Get the parent object
         JsonObject parentObj = getParamValueObject(paths[0], false);
-        if (parentObj == null || parentObj.getField(paths[1]) == null) {
+        if (parentObj == null || parentObj.getValue(paths[1]) == null) {
             return null;
         } else {
-            return parentObj.getField(paths[1]).toString();
+            return parentObj.getValue(paths[1]).toString();
         }
     }
 
@@ -909,7 +908,7 @@ public class Cpe extends MultiTenantObject{
 
         // Get the parent object
         JsonObject parentObj = getParamValueObject(paths[0], true);
-        parentObj.putString(paths[1], value);
+        parentObj.put(paths[1], value);
     }
 
     /**
@@ -935,7 +934,7 @@ public class Cpe extends MultiTenantObject{
                 return null;
             }
         } else {
-            return parentObj.getNumber(paths[1]).intValue();
+            return parentObj.getInteger(paths[1]).intValue();
         }
     }
 
@@ -952,7 +951,7 @@ public class Cpe extends MultiTenantObject{
 
         // Get the parent object
         JsonObject parentObj = getParamAttrObject(paths[0], true);
-        parentObj.putNumber(paths[1], attr);
+        parentObj.put(paths[1], attr);
     }
 
     /**
@@ -974,18 +973,18 @@ public class Cpe extends MultiTenantObject{
             }
         }
 
-        String[] subPaths = StringUtil.split(path, '.');
+        String[] subPaths = path.split(".");
         JsonObject nextJson = root;
         for (int i = 0; i < subPaths.length; i ++) {
             String subPath = subPaths[i];
-            if (nextJson == null || nextJson.getObject(subPath) == null) {
+            if (nextJson == null || nextJson.getJsonObject(subPath) == null) {
                 if (bCreate) {
-                    nextJson.putObject(subPath, new JsonObject());
+                    nextJson.put(subPath, new JsonObject());
                 } else {
                     return null;
                 }
             }
-            nextJson = nextJson.getObject(subPath);
+            nextJson = nextJson.getJsonObject(subPath);
         }
         return nextJson;
     }
@@ -1000,15 +999,15 @@ public class Cpe extends MultiTenantObject{
      * @return
      */
     public JsonObject getParamValueObject(String path, boolean bCreate) {
-        JsonObject values = cpeJsonObj.getObject(DB_FIELD_NAME_PARAM_VALUES);
+        JsonObject values = cpeJsonObj.getJsonObject(DB_FIELD_NAME_PARAM_VALUES);
 
         // Create a new "paramValues" JSON object if needed
         if (bCreate && values == null) {
             values = new JsonObject();
-            cpeJsonObj.putObject(DB_FIELD_NAME_PARAM_VALUES, values);
+            cpeJsonObj.put(DB_FIELD_NAME_PARAM_VALUES, values);
         }
 
-        return getObject(cpeJsonObj.getObject(DB_FIELD_NAME_PARAM_VALUES), path, bCreate);
+        return getObject(cpeJsonObj.getJsonObject(DB_FIELD_NAME_PARAM_VALUES), path, bCreate);
     }
 
     /**
@@ -1021,12 +1020,12 @@ public class Cpe extends MultiTenantObject{
      * @return
      */
     public JsonObject getParamAttrObject(String path, boolean bCreate) {
-        JsonObject attrs = cpeJsonObj.getObject(DB_FIELD_NAME_PARAM_ATTRIBUTES);
+        JsonObject attrs = cpeJsonObj.getJsonObject(DB_FIELD_NAME_PARAM_ATTRIBUTES);
 
         // Create a new "paramAttributes" JSON object if needed
         if (bCreate && attrs == null) {
             attrs = new JsonObject();
-            cpeJsonObj.putObject(DB_FIELD_NAME_PARAM_ATTRIBUTES, attrs);
+            cpeJsonObj.put(DB_FIELD_NAME_PARAM_ATTRIBUTES, attrs);
         }
 
         return getObject(attrs, path, bCreate);

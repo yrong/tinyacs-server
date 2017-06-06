@@ -10,6 +10,7 @@ import io.vertx.core.json.JsonObject;
 
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.TreeMap;
 
 /**
@@ -78,7 +79,7 @@ public abstract class AbstractMultiOrgLocalCache extends AbstractLocalCache{
                 AcsApiCrudTypeEnum crudType = AcsApiCrudTypeEnum.getCrudTypeEnumByNameString(crudTypeString);
                 log.info("Received a " + cachedObjectType + " " + crudType.name() + " Event:\n"
                         + crudEvent.encodePrettily());
-                crudEvent.removeField(AcsConstants.FIELD_NAME_ACS_CRUD_TYPE);
+                crudEvent.remove(AcsConstants.FIELD_NAME_ACS_CRUD_TYPE);
 
                 // Get Org Id
                 String orgId = crudEvent.getString(AcsConstants.FIELD_NAME_ORG_ID);
@@ -152,17 +153,16 @@ public abstract class AbstractMultiOrgLocalCache extends AbstractLocalCache{
      * Get an instance of MongoDB Query Result Handler
      * @return
      */
-    public VertxMongoUtils.FindHandler getMongoQueryResultHandler() {
+    public Handler getMongoQueryResultHandler() {
         return new MultiOrgMongoQueryResultHandler();
     }
 
     /**
      * Inner Class for MongoDB Query Result Handler
      */
-    public class MultiOrgMongoQueryResultHandler extends VertxMongoUtils.FindHandler {
+    public class MultiOrgMongoQueryResultHandler implements Handler<List<JsonObject>> {
         @Override
-        public void handle(Message<JsonObject> jsonObjectMessage) {
-            super.handle(jsonObjectMessage);
+        public void handle(List<JsonObject> queryResults) {
 
             // Do nothing if MongoDB timed out
             if (queryResults == null || VertxMongoUtils.FIND_TIMED_OUT.equals(queryResults)) {
@@ -181,69 +181,67 @@ public abstract class AbstractMultiOrgLocalCache extends AbstractLocalCache{
                 }
             }
 
-            if (moreExist == false) {
-                // Compare treeMap and tmpHashMap
+            // Compare treeMap and tmpHashMap
 
-                // Check for unexpected deletion
-                for (String index : rawJsonObjectHashMap.keySet()) {
-                    if (tmpHashMap.containsKey(index) == false) {
-                        log.info("Deleting key " + index + " from cache..");
-                        JsonObject toBeDeleted = rawJsonObjectHashMap.get(index);
-                        String orgId = toBeDeleted.getString(AcsConstants.FIELD_NAME_ORG_ID);
-                        TreeMap<String, Object> anOrg = allPerOrgTreeMaps.get(orgId);
+            // Check for unexpected deletion
+            for (String index : rawJsonObjectHashMap.keySet()) {
+                if (tmpHashMap.containsKey(index) == false) {
+                    log.info("Deleting key " + index + " from cache..");
+                    JsonObject toBeDeleted = rawJsonObjectHashMap.get(index);
+                    String orgId = toBeDeleted.getString(AcsConstants.FIELD_NAME_ORG_ID);
+                    TreeMap<String, Object> anOrg = allPerOrgTreeMaps.get(orgId);
 
-                        // Remove from per-prg hash map
-                        if (anOrg != null) {
-                            anOrg.remove(getIndexString(toBeDeleted));
-                            if (anOrg.size() == 0) {
-                                log.info("Deleting the last " + cachedObjectType + " from org " + orgId);
-                                allPerOrgTreeMaps.remove(orgId);
-                            }
+                    // Remove from per-prg hash map
+                    if (anOrg != null) {
+                        anOrg.remove(getIndexString(toBeDeleted));
+                        if (anOrg.size() == 0) {
+                            log.info("Deleting the last " + cachedObjectType + " from org " + orgId);
+                            allPerOrgTreeMaps.remove(orgId);
                         }
-
-                        rawJsonObjectHashMap.remove(index);
                     }
+
+                    rawJsonObjectHashMap.remove(index);
                 }
-
-                // Check for unexpected creates and updates
-                for (String index : tmpHashMap.keySet()) {
-                    boolean bSaveDbObject = false;
-                    JsonObject dbObject = tmpHashMap.get(index);
-                    JsonObject cacheObject = rawJsonObjectHashMap.get(index);
-
-                    if (cacheObject == null) {
-                        log.info("Adding key " + index + " to cache..");
-                        bSaveDbObject = true;
-                    } else {
-                        // Replace if changed
-                        if(!cacheObject.equals(dbObject)) {
-                            log.info("Replacing key " + index + " ..");
-                            bSaveDbObject = true;
-                        }
-                    }
-
-                    if (bSaveDbObject) {
-                        // Add new object or Overwrite existing object
-                        String orgId = dbObject.getString(AcsConstants.FIELD_NAME_ORG_ID);
-                        TreeMap<String, Object> thisOrg = getPerOrgTreeMap(orgId);
-                        try {
-                            Object pojo = getPojoByJsonObject(dbObject);
-                            if (pojo != null) {
-                                rawJsonObjectHashMap.put(index, dbObject);
-                                thisOrg.put(getIndexString(dbObject), pojo);
-                            }
-                        } catch (Exception e) {
-                            log.error("Failed to convert DB object to a " + cachedObjectType
-                                    + " POJO due to exception " + e.getMessage() + "!\n"
-                                    + dbObject.encodePrettily());
-                            e.printStackTrace();
-                        }
-                    }
-                }
-
-                // Clean up
-                tmpHashMap.clear();
             }
+
+            // Check for unexpected creates and updates
+            for (String index : tmpHashMap.keySet()) {
+                boolean bSaveDbObject = false;
+                JsonObject dbObject = tmpHashMap.get(index);
+                JsonObject cacheObject = rawJsonObjectHashMap.get(index);
+
+                if (cacheObject == null) {
+                    log.info("Adding key " + index + " to cache..");
+                    bSaveDbObject = true;
+                } else {
+                    // Replace if changed
+                    if(!cacheObject.equals(dbObject)) {
+                        log.info("Replacing key " + index + " ..");
+                        bSaveDbObject = true;
+                    }
+                }
+
+                if (bSaveDbObject) {
+                    // Add new object or Overwrite existing object
+                    String orgId = dbObject.getString(AcsConstants.FIELD_NAME_ORG_ID);
+                    TreeMap<String, Object> thisOrg = getPerOrgTreeMap(orgId);
+                    try {
+                        Object pojo = getPojoByJsonObject(dbObject);
+                        if (pojo != null) {
+                            rawJsonObjectHashMap.put(index, dbObject);
+                            thisOrg.put(getIndexString(dbObject), pojo);
+                        }
+                    } catch (Exception e) {
+                        log.error("Failed to convert DB object to a " + cachedObjectType
+                                + " POJO due to exception " + e.getMessage() + "!\n"
+                                + dbObject.encodePrettily());
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            // Clean up
+            tmpHashMap.clear();
         }
     }
 

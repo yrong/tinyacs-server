@@ -519,7 +519,7 @@ public class VertxMongoUtils {
      *
      * TODO: Add exception handler.
      *
-     * @param eventBus
+     * @param mongoClient
      * @param collectionName
      * @param matcher
      * @param update

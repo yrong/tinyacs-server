@@ -98,6 +98,14 @@ public class VertxHttpClientUtils {
         return vertxInstance.createHttpClient(options);
     }
 
+    public static HttpClient createHttpClient(Vertx vertxInstance, String host, int port) {
+        /**
+         * Convert to URL by String
+         */
+        HttpClientOptions options = new HttpClientOptions().setDefaultHost(host).setDefaultPort(port);
+        return vertxInstance.createHttpClient(options);
+    }
+
     /**
      * A friendly wrapper to send async HTTP request.
      *

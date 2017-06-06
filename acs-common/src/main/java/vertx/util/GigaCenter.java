@@ -3,7 +3,6 @@ package vertx.util;
 import vertx.CcException;
 import vertx.model.AcsFile;
 import vertx.model.Cpe;
-import io.netty.util.internal.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.buffer.Buffer;
@@ -154,7 +153,7 @@ public class GigaCenter {
                             }
                         }
                         log.info("version: " + version);
-                        metadata.putString(AcsFile.FIELD_NAME_VERSION, version);
+                        metadata.put(AcsFile.FIELD_NAME_VERSION, version);
                         break;
 
                     case IMAGE_HEADER_CODE_PAYLOAD_ENCRYPTION_KEY:
@@ -189,7 +188,7 @@ public class GigaCenter {
                                     log.error("Unknown Support Module ID " + aSupportedModuleId + "!");
                                     break;
                             }
-                            metadata.putArray(AcsFile.FIELD_NAME_MODELS, supportedModules);
+                            metadata.put(AcsFile.FIELD_NAME_MODELS, supportedModules);
                         }
                         log.info("Supported Modules: " + supportedModules);
                         break;
@@ -253,7 +252,7 @@ public class GigaCenter {
         String header = headerLine.substring(headerLine.indexOf(CALIX_CONFIG_FILE_HEADER_FIELD_VERSION), headerEnd);
         JsonObject metadata = new JsonObject();
 
-        String[] fields = StringUtil.split(header, ' ');
+        String[] fields = header.split(" ");
         for (String aField : fields) {
             if (!aField.contains("=")) {
                 continue;
@@ -264,7 +263,7 @@ public class GigaCenter {
             log.info("Processing field " + fieldName + ": " + value);
             switch (fieldName) {
                 case CALIX_CONFIG_FILE_HEADER_FIELD_VERSION:
-                    metadata.putString(AcsFile.FIELD_NAME_VERSION, value);
+                    metadata.put(AcsFile.FIELD_NAME_VERSION, value);
                     break;
 
                 case CALIX_CONFIG_FILE_HEADER_FIELD_TYPE:
@@ -272,7 +271,7 @@ public class GigaCenter {
                     break;
 
                 case CALIX_CONFIG_FILE_HEADER_FIELD_CRC32:
-                    metadata.putString(AcsFile.FIELD_NAME_CRC32, value);
+                    metadata.put(AcsFile.FIELD_NAME_CRC32, value);
             }
         }
 
@@ -281,7 +280,7 @@ public class GigaCenter {
         /**
          * TODO: Validate CRC32 if any
          */
-        if (metadata.containsField(AcsFile.FIELD_NAME_CRC32)) {
+        if (metadata.containsKey(AcsFile.FIELD_NAME_CRC32)) {
             //String crc32 = metadata.getString(AcsFile.FIELD_NAME_CRC32);
         }
 
@@ -294,7 +293,7 @@ public class GigaCenter {
      * @return
      */
     public static boolean isZeroTouchUsername(String username) {
-        String[] fields = StringUtil.split(username, '-');
+        String[] fields = username.split("-");
         if (fields == null || fields.length != 3) {
             return false;
         }

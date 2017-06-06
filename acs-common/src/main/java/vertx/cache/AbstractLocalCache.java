@@ -1,5 +1,7 @@
 package vertx.cache;
 
+import io.vertx.core.Handler;
+import io.vertx.ext.mongo.MongoClient;
 import vertx.VertxException;
 import vertx.VertxMongoUtils;
 import vertx.model.AcsApiCrudTypeEnum;
@@ -7,12 +9,12 @@ import vertx.util.AcsConstants;
 import vertx.util.AcsMiscUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.vertx.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Project:  cwmp
@@ -58,10 +60,10 @@ public abstract class AbstractLocalCache {
      */
     public Vertx vertx;
 
-    /**
-     * DB Query Result Handler
-     */
-    public VertxMongoUtils.FindHandler mongoQueryResultHandler;
+    public Handler mongoQueryResultHandler;
+
+    MongoClient client;
+
 
     /**
      * Constructor.
@@ -87,10 +89,11 @@ public abstract class AbstractLocalCache {
          * Register Group CRUD Event Handler
          */
         log.info("Registering event handler for " + crudEventAddress);
-        vertx.eventBus().registerHandler(crudEventAddress, getCrudEventHandler());
+        vertx.eventBus().consumer(crudEventAddress, getCrudEventHandler());
 
         // Initialize DB Query Result Handler
         mongoQueryResultHandler = getMongoQueryResultHandler();
+        client = MongoClient.createShared(vertx, VertxMongoUtils.getModMongoPersistorConfig());
 
         // Initialize the cache by querying the DB
         refresh();
@@ -133,7 +136,7 @@ public abstract class AbstractLocalCache {
 
         try {
             VertxMongoUtils.find(
-                    vertx.eventBus(),
+                    client,
                     dbCollectionName,
                     getDbQueryMatcher(),
                     null,
@@ -189,7 +192,7 @@ public abstract class AbstractLocalCache {
                 AcsApiCrudTypeEnum crudType = AcsApiCrudTypeEnum.getCrudTypeEnumByNameString(crudTypeString);
                 log.info("Received a " + cachedObjectType + " " + crudType.name() + " Event:\n"
                         + crudEvent.encodePrettily());
-                crudEvent.removeField(AcsConstants.FIELD_NAME_ACS_CRUD_TYPE);
+                crudEvent.remove(AcsConstants.FIELD_NAME_ACS_CRUD_TYPE);
 
                 // Get index value
                 String index = getIndexString(crudEvent);
@@ -234,17 +237,16 @@ public abstract class AbstractLocalCache {
      * Get an instance of MongoDB Query Result Handler
      * @return
      */
-    public VertxMongoUtils.FindHandler getMongoQueryResultHandler() {
+    public Handler getMongoQueryResultHandler() {
         return new MongoQueryResultHandler();
     }
 
     /**
      * Inner Class for MongoDB Query Result Handler
      */
-    public class MongoQueryResultHandler extends VertxMongoUtils.FindHandler {
+    public class MongoQueryResultHandler implements Handler<List<JsonObject>> {
         @Override
-        public void handle(Message<JsonObject> jsonObjectMessage) {
-            super.handle(jsonObjectMessage);
+        public void handle(List<JsonObject> queryResults) {
 
             // Do nothing if MongoDB timed out
             if (queryResults == null || VertxMongoUtils.FIND_TIMED_OUT.equals(queryResults)) {
@@ -263,48 +265,46 @@ public abstract class AbstractLocalCache {
                 }
             }
 
-            if (moreExist == false) {
-                // Compare hashMap and tmpHashMap
-                // Check for unexpected deletion
-                for (String index : hashMap.keySet().toArray(new String[0])) {
-                    if (tmpHashMap.containsKey(index) == false) {
-                        log.info("Deleting key " + index + " from cache..");
-                        hashMap.remove(index);
-                    }
+            // Compare hashMap and tmpHashMap
+            // Check for unexpected deletion
+            for (String index : hashMap.keySet().toArray(new String[0])) {
+                if (tmpHashMap.containsKey(index) == false) {
+                    log.info("Deleting key " + index + " from cache..");
+                    hashMap.remove(index);
                 }
-                // Check for unexpected creation
-                for (String index : tmpHashMap.keySet().toArray(new String[0])) {
-                    if (hashMap.containsKey(index) == false) {
-                        log.info("Adding key " + index + " to cache..");
+            }
+            // Check for unexpected creation
+            for (String index : tmpHashMap.keySet().toArray(new String[0])) {
+                if (hashMap.containsKey(index) == false) {
+                    log.info("Adding key " + index + " to cache..");
+                    try {
+                        hashMap.put(index, getPojoByJsonObject(tmpHashMap.get(index)));
+                        rawJsonObjectHashMap.put(index, tmpHashMap.get(index));
+                    } catch (Exception e) {
+                        log.error("Failed to convert DB object to a " + cachedObjectType + " POJO due to "
+                                + e.getMessage() + "! DB Object Details:\n"
+                                + tmpHashMap.get(index).encodePrettily());
+                        e.printStackTrace();
+                    }
+                } else {
+                    // Replace if changed
+                    if(!tmpHashMap.get(index).equals(rawJsonObjectHashMap.get(index))) {
+                        log.info("Replacing key " + index + " ..");
+                        log.info("Old record: \n" + rawJsonObjectHashMap.get(index).encodePrettily());
+                        log.info("New record: \n" + tmpHashMap.get(index).encodePrettily());
                         try {
                             hashMap.put(index, getPojoByJsonObject(tmpHashMap.get(index)));
                             rawJsonObjectHashMap.put(index, tmpHashMap.get(index));
                         } catch (Exception e) {
-                            log.error("Failed to convert DB object to a " + cachedObjectType + " POJO due to "
-                                    + e.getMessage() + "! DB Object Details:\n"
+                            log.error("Failed to convert DB object to a " + cachedObjectType + " POJO!\n"
                                     + tmpHashMap.get(index).encodePrettily());
-                            e.printStackTrace();
-                        }
-                    } else {
-                        // Replace if changed
-                        if(!tmpHashMap.get(index).equals(rawJsonObjectHashMap.get(index))) {
-                            log.info("Replacing key " + index + " ..");
-                            log.info("Old record: \n" + rawJsonObjectHashMap.get(index).encodePrettily());
-                            log.info("New record: \n" + tmpHashMap.get(index).encodePrettily());
-                            try {
-                                hashMap.put(index, getPojoByJsonObject(tmpHashMap.get(index)));
-                                rawJsonObjectHashMap.put(index, tmpHashMap.get(index));
-                            } catch (Exception e) {
-                                log.error("Failed to convert DB object to a " + cachedObjectType + " POJO!\n"
-                                        + tmpHashMap.get(index).encodePrettily());
-                            }
                         }
                     }
                 }
-
-                // clean up as tmpHashMap is no longer needed
-                tmpHashMap.clear();
             }
+
+            // clean up as tmpHashMap is no longer needed
+            tmpHashMap.clear();
         }
     }
 

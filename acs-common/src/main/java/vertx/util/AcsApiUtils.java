@@ -1,5 +1,6 @@
 package vertx.util;
 
+import io.vertx.core.eventbus.DeliveryOptions;
 import vertx.model.AcsApiCrudTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,12 +39,13 @@ public class AcsApiUtils {
             JsonObject requestBody,
             long timeout,
             Handler<AsyncResult<Message<JsonObject>>> resultHandler) {
-        eventBus.sendWithTimeout(
+        DeliveryOptions options = new DeliveryOptions().setSendTimeout(timeout * 1000);
+        eventBus.send(
                 getServiceVertxAddress(serviceName),
                 requestBody
-                        .putString(AcsConstants.FIELD_NAME_METHOD, crudType.httpMethodString)
-                        .putString(AcsConstants.FIELD_NAME_ORG_ID, orgId),
-                timeout * 1000,
+                        .put(AcsConstants.FIELD_NAME_METHOD, crudType.httpMethodString)
+                        .put(AcsConstants.FIELD_NAME_ORG_ID, orgId),
+                options,
                 resultHandler
         );
     }

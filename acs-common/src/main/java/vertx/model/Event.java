@@ -1,5 +1,6 @@
 package vertx.model;
 
+import io.vertx.ext.mongo.MongoClient;
 import vertx.VertxException;
 import vertx.VertxMongoUtils;
 import vertx.util.AcsConstants;
@@ -33,31 +34,31 @@ public class Event {
      * Save an event
      */
     public static void saveEvent(
-            EventBus eventBus,
+            MongoClient mongoClient,
             String orgId,
             String deviceSn,
             EventTypeEnum eventType,
             EventSourceEnum source,
             JsonObject details) {
         JsonObject jsonObject = new JsonObject()
-                .putString(AcsConstants.FIELD_NAME_ORG_ID, orgId)
-                .putObject(FIELD_NAME_TIMESTAMP, VertxMongoUtils.getDateObject())
-                .putString(FIELD_NAME_TYPE, eventType.typeString)
-                .putString(FIELD_NAME_SEVERITY, eventType.severity.name())
-                .putString(FIELD_NAME_SOURCE, source.name());
+                .put(AcsConstants.FIELD_NAME_ORG_ID, orgId)
+                .put(FIELD_NAME_TIMESTAMP, VertxMongoUtils.getDateObject())
+                .put(FIELD_NAME_TYPE, eventType.typeString)
+                .put(FIELD_NAME_SEVERITY, eventType.severity.name())
+                .put(FIELD_NAME_SOURCE, source.name());
 
         if (details != null) {
-            jsonObject.putObject(FIELD_NAME_DETAILS, details);
+            jsonObject.put(FIELD_NAME_DETAILS, details);
         }
         if (deviceSn != null) {
-            jsonObject.putString(FIELD_NAME_DEVICE_SN, deviceSn);
+            jsonObject.put(FIELD_NAME_DEVICE_SN, deviceSn);
         }
 
         // Persist it
         //log.debug("Persisting a " + type + " ...");
         try {
             VertxMongoUtils.save(
-                    eventBus,
+                    mongoClient,
                     DB_COLLECTION_NAME,
                     jsonObject,
                     null

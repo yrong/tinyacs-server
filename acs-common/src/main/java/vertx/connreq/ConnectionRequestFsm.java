@@ -1,5 +1,8 @@
 package vertx.connreq;
 
+import io.vertx.core.http.HttpMethod;
+import io.vertx.ext.mongo.MongoClient;
+import io.vertx.redis.RedisClient;
 import vertx.VertxException;
 import vertx.VertxMongoUtils;
 import vertx.VertxRedisUtils;
@@ -9,7 +12,6 @@ import vertx.model.Cpe;
 import vertx.model.CpeIdentifier;
 import vertx.util.AcsConstants;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.java.redis.RedisClient;
 import org.apache.http.Header;
 import org.apache.http.auth.*;
 import org.apache.http.client.CredentialsProvider;
@@ -58,15 +60,15 @@ public class ConnectionRequestFsm {
     /**
      * Result Objects (used when saving to communication logs
      */
-    public static final JsonObject RESULT_SUCCEEDED = new JsonObject().putString("status", "Succeeded");
-    public static final JsonObject RESULT_AUTH_FAILURE = new JsonObject().putString("status", "Authentication Failure");
+    public static final JsonObject RESULT_SUCCEEDED = new JsonObject().put("status", "Succeeded");
+    public static final JsonObject RESULT_AUTH_FAILURE = new JsonObject().put("status", "Authentication Failure");
 
     /**
      * New State Machine String
      */
     public static final JsonObject NEW_CONN_REQ_FSM_STATE = new JsonObject()
-            .putString(ConnectionRequestConstants.STATE, STATE_SENDING)
-            .putString(ConnectionRequestConstants.CONN_REQ_MANAGER,VertxUtils.getHostnameAndPid());
+            .put(ConnectionRequestConstants.STATE, STATE_SENDING)
+            .put(ConnectionRequestConstants.CONN_REQ_MANAGER,VertxUtils.getHostnameAndPid());
     public static final String NEW_CONN_REQ_FSM_STATE_STRING = NEW_CONN_REQ_FSM_STATE.encode();
 
     /**
@@ -109,6 +111,8 @@ public class ConnectionRequestFsm {
     // Result
     JsonObject result = RESULT_SUCCEEDED;
 
+    MongoClient mongoClient;
+
 
     /**
      * Constructor by the original request sent from ACS API server.
@@ -140,6 +144,8 @@ public class ConnectionRequestFsm {
         redisKey = ConnectionRequestUtils.getConnReqRedisKeyByCpeId(cpeId);
         fsmInfo = NEW_CONN_REQ_FSM_STATE.copy();
         httpGet = new HttpGet(url);
+
+        mongoClient = MongoClient.createShared(vertx, VertxMongoUtils.getModMongoPersistorConfig());
 
         /**
          * Add to Hash Map
@@ -207,14 +213,14 @@ public class ConnectionRequestFsm {
                 } else {
                     // Unexpected response status code
                     resultString = response.statusMessage();
-                    result = new JsonObject().putString("status", "Unexpected HTTP response code " + resultString);
+                    result = new JsonObject().put("status", "Unexpected HTTP response code " + resultString);
                     bSent = true;
                 }
             } else {
                 bSent = true;
                 if (response.statusCode() != HttpResponseStatus.OK.code()) {
                     resultString = response.statusMessage();
-                    result = new JsonObject().putString("status", "Unexpected HTTP response code " + resultString);
+                    result = new JsonObject().put("status", "Unexpected HTTP response code " + resultString);
                 }
             }
 
@@ -277,7 +283,7 @@ public class ConnectionRequestFsm {
              */
             ConnectionRequestManagerVertice.connReqFsmHashMap.remove(cpeId);
 
-            result = new JsonObject().putString("status", ex.getMessage());
+            result = new JsonObject().put("status", ex.getMessage());
             // Save communication logs
             saveCommunicationLog(result);
 
@@ -303,12 +309,12 @@ public class ConnectionRequestFsm {
             String newState,
             String error,
             long timeout) {
-        fsmInfo.putString(ConnectionRequestConstants.STATE, newState);
+        fsmInfo.put(ConnectionRequestConstants.STATE, newState);
 
         if(error != null) {
-            fsmInfo.putString(ConnectionRequestConstants.ERROR, error);
+            fsmInfo.put(ConnectionRequestConstants.ERROR, error);
         } else {
-            fsmInfo.removeField(ConnectionRequestConstants.ERROR);
+            fsmInfo.remove(ConnectionRequestConstants.ERROR);
         }
 
         if (timeout > 0) {
@@ -351,7 +357,7 @@ public class ConnectionRequestFsm {
             destinationUrlPath = url;
         }
         HttpClientRequest clientRequest = httpClient.request(
-                "GET",
+                HttpMethod.GET,
                 destinationUrlPath,
                 httpResponseHandler
         );
@@ -394,17 +400,17 @@ public class ConnectionRequestFsm {
      */
     public void saveCommunicationLog(JsonObject result) {
         JsonObject dbObject = new JsonObject()
-                .putString(AcsConstants.FIELD_NAME_ORG_ID, Cpe.getOrgIdByCpeKey(cpeId))
-                .putObject(
+                .put(AcsConstants.FIELD_NAME_ORG_ID, Cpe.getOrgIdByCpeKey(cpeId))
+                .put(
                         AcsConstants.FIELD_NAME_CPE_ID,
-                        new JsonObject().putString(CpeIdentifier.FIELD_NAME_SN, Cpe.getSnByCpeKey(cpeId))
+                        new JsonObject().put(CpeIdentifier.FIELD_NAME_SN, Cpe.getSnByCpeKey(cpeId))
                 )
-                .putObject(CwmpMessage.DB_FIELD_NAME_TIMESTAMP, VertxMongoUtils.getDateObject())
-                .putString(CwmpMessage.DB_FIELD_NAME_TYPE, "Connection Request")
-                .putObject(CwmpMessage.DB_FIELD_NAME_SUMMARY, result)
-                .putNumber(CwmpMessage.DB_FIELD_NAME_SN, 0)
+                .put(CwmpMessage.DB_FIELD_NAME_TIMESTAMP, VertxMongoUtils.getDateObject())
+                .put(CwmpMessage.DB_FIELD_NAME_TYPE, "Connection Request")
+                .put(CwmpMessage.DB_FIELD_NAME_SUMMARY, result)
+                .put(CwmpMessage.DB_FIELD_NAME_SN, 0)
                 // Expire in one week
-                .putObject(
+                .put(
                         CwmpMessage.DB_FIELD_NAME_EXPIRE_AT,
                         VertxMongoUtils.getDateObject(System.currentTimeMillis() + CwmpMessage.DEFAULT_TTL)
                 );
@@ -412,7 +418,7 @@ public class ConnectionRequestFsm {
         // Persist it
         try {
             VertxMongoUtils.save(
-                    vertx.eventBus(),
+                    mongoClient,
                     CwmpMessage.DB_COLLECTION_NAME,
                     dbObject,
                     null

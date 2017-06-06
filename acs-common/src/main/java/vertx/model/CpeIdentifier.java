@@ -105,17 +105,17 @@ public class CpeIdentifier {
         validate(cpeIdentifier);
 
         // Always Have the OrgId
-        JsonObject matcher = new JsonObject().putString(Cpe.DB_FIELD_NAME_ORG_ID, orgId);
+        JsonObject matcher = new JsonObject().put(Cpe.DB_FIELD_NAME_ORG_ID, orgId);
 
         // Check for other fields
         if (cpeIdentifier.getString(FIELD_NAME_MAC_ADDRESS) != null) {
-            matcher.putString(Cpe.DB_FIELD_NAME_MAC_ADDRESS,
+            matcher.put(Cpe.DB_FIELD_NAME_MAC_ADDRESS,
                     cpeIdentifier.getString(FIELD_NAME_MAC_ADDRESS));
         } else {
-            matcher.putString(Cpe.DB_FIELD_NAME_SN,
+            matcher.put(Cpe.DB_FIELD_NAME_SN,
                     cpeIdentifier.getString(FIELD_NAME_SN));
             if (cpeIdentifier.getString(FIELD_NAME_OUI) != null) {
-                matcher.putString(CpeDeviceType.FIELD_NAME_OUI,
+                matcher.put(CpeDeviceType.FIELD_NAME_OUI,
                         cpeIdentifier.getString(FIELD_NAME_OUI));
             }
         }
@@ -130,7 +130,7 @@ public class CpeIdentifier {
      */
     public static JsonObject getCpeIdentifierByCpeDeviceId(JsonObject cpeDeviceId) {
         return new JsonObject()
-                .putString(FIELD_NAME_OUI, cpeDeviceId.getString(CpeDeviceType.FIELD_NAME_OUI))
-                .putString(FIELD_NAME_SN, cpeDeviceId.getString(Cpe.DB_FIELD_NAME_SN));
+                .put(FIELD_NAME_OUI, cpeDeviceId.getString(CpeDeviceType.FIELD_NAME_OUI))
+                .put(FIELD_NAME_SN, cpeDeviceId.getString(Cpe.DB_FIELD_NAME_SN));
     }
 }
