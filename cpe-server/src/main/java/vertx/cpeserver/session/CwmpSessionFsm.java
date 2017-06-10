@@ -177,16 +177,15 @@ public class CwmpSessionFsm {
                 try {
                     session.state = CwmpSessionFsmStateEnum.QueryingCpeDeviceDb;
                     VertxMongoUtils.findOne(
-                            session.eventBus,
+                            session.mongoClient,
                             Cpe.CPE_COLLECTION_NAME,
                             // Matcher which contains the CPE Key as the id
-                            new JsonObject().putString(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID, session.cpeKey),
+                            new JsonObject().put(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID, session.cpeKey),
                             // Async FindOne Result Handler
-                            new VertxMongoUtils.FindOneHandler(
-                                    new CwmpSession.DbQueryHandler(
-                                            session,
-                                            session.orgId,
-                                            session.informRequest.getDeviceId())),
+                            new CwmpSession.DbQueryHandler(
+                                    session,
+                                    session.orgId,
+                                    session.informRequest.getDeviceId()),
                             // Keys
                             null
                     );

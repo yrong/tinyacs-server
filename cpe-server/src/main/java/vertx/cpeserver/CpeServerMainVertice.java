@@ -1,18 +1,15 @@
 package vertx.cpeserver;
 
+import io.vertx.core.*;
 import vertx.VertxConstants;
-import vertx.VertxDeployUtils;
 import vertx.VertxUtils;
 import vertx.connreq.ConnectionRequestManagerVertice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.AbstractVerticle;
 
 /**
- * Project:  SXA CC CPE Server
+ * Project:  CPE Server
  *
  * @author: ronyang
  */
@@ -35,54 +32,17 @@ public class CpeServerMainVertice extends AbstractVerticle {
          */
         VertxUtils.displayBuildInfo(vertx);
 
-        /**
-         * Build the list of sub modules/vertices to be deployed
-         */
-        VertxDeployUtils.Deployments deployments = new VertxDeployUtils.Deployments();
-        // Add Mod MongoDB
-        deployments.add(VertxConstants.MOD_MONGO_PERSISTOR_DEPLOYMENT);
-        // Add Mod MongoDB-GridFS
-        deployments.add(VertxConstants.MOD_MONGO_GRIDFS_DEPLOYMENT);
-        // Add Mod Redis
-        deployments.add(VertxConstants.MOD_REDIS_DEPLOYMENT);
-        // Add Connection-Request Worker Vertice
-        deployments.add(VertxUtils.buildNewDeployment(ConnectionRequestManagerVertice.class.getName(), null));
-        Verticle connectionRequestManagerVerticeVerticle = new ConnectionRequestManagerVertice();
-        vertx.deployVerticle(connectionRequestManagerVerticeVerticle);
+        vertx.deployVerticle(ConnectionRequestManagerVertice.class.getName());
         // Add multiple TR-069 Server Vertice Instances
         for (int i = 0; i < CpeServerConstants.NUMBER_OF_SESSION_VERTICES; i ++) {
-            deployments.add(
-                    VertxUtils.buildNewDeployment(
-                            CpeServerTR069SessionVertice.class.getName(),
-                            new JsonObject().putNumber(CpeServerConstants.FIELD_NAME_VERTICE_INDEX, i)
-                    )
-            );
+            DeploymentOptions options = new DeploymentOptions();
+            options.setConfig(new JsonObject().put(CpeServerConstants.FIELD_NAME_VERTICE_INDEX, i));
+            vertx.deployVerticle(CpeServerTR069SessionVertice.class.getName(),options);
         }
         // Add Multiple HTTP Load Balancer Vertices
-        deployments.add(
-                VertxUtils.buildNewDeployment(
-                        CpeServerHttpLoadBalancerVertice.class.getName(),
-                        null,
-                        CpeServerConstants.NUMBER_OF_SESSION_VERTICES
-                )
-        );
+//        DeploymentOptions options = new DeploymentOptions().setInstances(CpeServerConstants.NUMBER_OF_SESSION_VERTICES);
+        vertx.deployVerticle(CpeServerHttpLoadBalancerVertice.class.getName());
 
-        /**
-         * Start all CPE server specific items after mongo persistor has been deployed
-         */
-        deployments.finalHandler = new AsyncResultHandler<String>() {
-            @Override
-            public void handle(AsyncResult<String> deployResult) {
-                if (deployResult.succeeded()) {
-                    log.info("All external and sub modules have been successfully installed.");
-                }
-            }
-        };
-
-        /**
-         * Start the Deployments
-         */
-        VertxUtils.deployModsVertices(container, deployments);
 
         /**
          * Start a 1-hour timer to display JVM Heap Info

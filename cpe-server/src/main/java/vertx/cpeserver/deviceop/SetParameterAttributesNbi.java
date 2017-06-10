@@ -32,7 +32,7 @@ public class SetParameterAttributesNbi extends SetParameterAttributes {
         /**
          * The parameter name/value pairs are stored in MongoDB as an array
          */
-        JsonObject rawParamAttrs = deviceOp.getObject(CpeDeviceOp.FIELD_NAME_PARAM_ATTRIBUTES);
+        JsonObject rawParamAttrs = deviceOp.getJsonObject(CpeDeviceOp.FIELD_NAME_PARAM_ATTRIBUTES);
         if (rawParamAttrs != null && rawParamAttrs.size() > 0) {
             start(session,
                     jsonObjToParameterAttributesList(rawParamAttrs, null, ""),

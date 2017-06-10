@@ -35,18 +35,18 @@ public class WanService {
      * Static Errors/Warnings
      */
     public static final JsonObject DB_TIMED_OUT =
-            new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR, "Internal Error (DB Timed Out)!");
+            new JsonObject().put(AcsConstants.FIELD_NAME_ERROR, "Internal Error (DB Timed Out)!");
     public static final JsonObject NO_SERVICE_PLAN =
-            new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR, "No Service Plan Assigned to Device!");
+            new JsonObject().put(AcsConstants.FIELD_NAME_ERROR, "No Service Plan Assigned to Device!");
     public static final JsonObject INVALID_PROFILE =
-            new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR, "Invalid Service Profile!");
+            new JsonObject().put(AcsConstants.FIELD_NAME_ERROR, "Invalid Service Profile!");
     public static final JsonObject INTERNAL_ERROR_NO_KEY_FOR_THE_NEW_WAN_CONN =
-            new JsonObject().putString(
+            new JsonObject().put(
                     AcsConstants.FIELD_NAME_ERROR,
                     "Internal Error! (unable to get the Interface Key for the newly created WAN Connection)"
             );
     public static final JsonObject INTERNAL_ERROR_UNEXPECTED_DEVICE_RESPONSE =
-            new JsonObject().putString(
+            new JsonObject().put(
                     AcsConstants.FIELD_NAME_ERROR,
                     "Internal Error! (unexpected response from device)"
             );
@@ -81,9 +81,9 @@ public class WanService {
     public static final String L2_INTERFACES_PREFIX = L2_BRIDGE_PREFIX + L2_AVAILABLE_INTERFACE;
     public static final String L2_BRIDGE_FILTER_PREFIX = "InternetGatewayDevice.Layer2Bridging.Filter.";
     public static final JsonObject L2SSID_BRIDGE_ENABLE_PARAMS = new JsonObject()
-            .putString(PARAM_NAME_BRIDGE_NAME, L2_SSID_BRIDGE_NAME)
-            .putBoolean(PARAM_NAME_BRIDGE_ENABLE, true)
-            .putNumber(PARAM_NAME_BRIDGE_VLAN_ID, 0);
+            .put(PARAM_NAME_BRIDGE_NAME, L2_SSID_BRIDGE_NAME)
+            .put(PARAM_NAME_BRIDGE_ENABLE, true)
+            .put(PARAM_NAME_BRIDGE_VLAN_ID, 0);
 
     /**
      * Hardcoded L2 Interface Indexes
@@ -106,16 +106,16 @@ public class WanService {
     public static final String PARAM_RADIO_ENABLED = "RadioEnabled";
 
     public static final JsonObject SSID_L2_BRIDGE_ENABLE = new JsonObject()
-            .putBoolean("Enable", true)
-            .putBoolean(PARAM_SSID_L2_BRIDGE_ENABLE, true);
-    public static final JsonObject L2SSID_BRIDGE_DISABLE = new JsonObject().putBoolean(PARAM_NAME_BRIDGE_ENABLE, false);
+            .put("Enable", true)
+            .put(PARAM_SSID_L2_BRIDGE_ENABLE, true);
+    public static final JsonObject L2SSID_BRIDGE_DISABLE = new JsonObject().put(PARAM_NAME_BRIDGE_ENABLE, false);
     public static final String TWO_POINT_4_GHZ_RADIO_PREFIX = WLAN_CONFIGURATION_PREFIX + TWO_POINT_4_GHZ_RADIO_INDEX + ".";
     public static final String FIVE_GHZ_RADIO_PREFIX = WLAN_CONFIGURATION_PREFIX + FIVE_GHZ_RADIO_INDEX + ".";
-    public static final JsonObject RADIO_ENABLE = new JsonObject().putBoolean("RadioEnabled", true);
-    public static final JsonObject FILTER_ENABLE = new JsonObject().putBoolean("FilterEnable", true);
+    public static final JsonObject RADIO_ENABLE = new JsonObject().put("RadioEnabled", true);
+    public static final JsonObject FILTER_ENABLE = new JsonObject().put("FilterEnable", true);
     public static final JsonObject FILTER_DISABLE = new JsonObject()
-            .putBoolean("FilterEnable", false)
-            .putString("FilterBridgeReference", "-1");
+            .put("FilterEnable", false)
+            .put("FilterBridgeReference", "-1");
 
 
     /**
@@ -142,10 +142,10 @@ public class WanService {
         /**
          * Create a new WanService POJO for each item in the "services" array
          */
-        JsonArray serviceJsonObjects = parentDeviceOp.getArray(CpeDeviceOp.FIELD_NAME_SERVICES);
+        JsonArray serviceJsonObjects = parentDeviceOp.getJsonArray(CpeDeviceOp.FIELD_NAME_SERVICES);
         WanService[] wanServices = new WanService[serviceJsonObjects.size()];
         for (int i = 0; i < wanServices.length; i++) {
-            wanServices[i] = new WanService(parentDeviceOp, session, (JsonObject) serviceJsonObjects.get(i));
+            wanServices[i] = new WanService(parentDeviceOp, session, (JsonObject) serviceJsonObjects.getValue(i));
         }
 
         /**
@@ -245,7 +245,7 @@ public class WanService {
         this.parentDeviceOp = parentDeviceOp;
         this.session = session;
         this.serviceProfile = serviceProfile;
-        this.subscriberServicePlan = parentDeviceOp.getObject(CpeDeviceOp.FIELD_NAME_SERVICE_PLAN);
+        this.subscriberServicePlan = parentDeviceOp.getJsonObject(CpeDeviceOp.FIELD_NAME_SERVICE_PLAN);
     }
 
     /**
@@ -278,7 +278,7 @@ public class WanService {
                         serviceProfile.getString(PARAM_NAME_SERVICE_CONNECTION_TYPE))) {
                     bBridged = true;
                     includedFilters = new JsonArray();
-                    bridgedInterfaces = serviceProfile.getArray(PARAM_NAME_BRIDGE_INTERFACE_ARRAY);
+                    bridgedInterfaces = serviceProfile.getJsonArray(PARAM_NAME_BRIDGE_INTERFACE_ARRAY);
                 }
                 break;
 
@@ -325,41 +325,40 @@ public class WanService {
             session.startInactiveTimer(VertxMongoUtils.DEFAULT_TIMEOUT);
             try {
                 VertxMongoUtils.findOne(
-                        session.eventBus,
+                        session.mongoClient,
                         ServicePlan.DB_COLLECTION_NAME,
                         ServicePlan.buildDeviceIdMatcher(session.cpe),
-                        new VertxMongoUtils.FindOneHandler(
-                                new Handler<JsonObject>() {
-                                    @Override
-                                    public void handle(JsonObject queryResult) {
-                                        if (queryResult == null) {
-                                            log.error(session.cpeKey + " has no service plan assigned!");
-                                            failed(CpeDeviceOp.CPE_DEVICE_OP_STATE_INVALID_REQUEST, NO_SERVICE_PLAN);
-                                        } else if (queryResult.equals(VertxMongoUtils.FIND_ONE_TIMED_OUT)) {
-                                            DeviceOpUtils.callbackInternalError(
-                                                    session,
-                                                    parentDeviceOp,
-                                                    DB_TIMED_OUT
-                                            );
-                                        } else {
-                                            subscriberServicePlan = queryResult;
-                                            log.debug(session.cpeKey + ": Found service plan: " + subscriberServicePlan);
-                                            if (nextService != null) {
-                                                // Save it for the next service
-                                                log.debug(session.cpeKey + ": Saving service plan for the next service.");
-                                                session.subscriberServicePlan = subscriberServicePlan;
-                                            }
+                        new Handler<JsonObject>() {
+                            @Override
+                            public void handle(JsonObject queryResult) {
+                                if (queryResult == null) {
+                                    log.error(session.cpeKey + " has no service plan assigned!");
+                                    failed(CpeDeviceOp.CPE_DEVICE_OP_STATE_INVALID_REQUEST, NO_SERVICE_PLAN);
+                                } else if (queryResult.equals(VertxMongoUtils.FIND_ONE_TIMED_OUT)) {
+                                    DeviceOpUtils.callbackInternalError(
+                                            session,
+                                            parentDeviceOp,
+                                            DB_TIMED_OUT
+                                    );
+                                } else {
+                                    subscriberServicePlan = queryResult;
+                                    log.debug(session.cpeKey + ": Found service plan: " + subscriberServicePlan);
+                                    if (nextService != null) {
+                                        // Save it for the next service
+                                        log.debug(session.cpeKey + ": Saving service plan for the next service.");
+                                        session.subscriberServicePlan = subscriberServicePlan;
+                                    }
 
-                                            if (session.serviceParameterValues == null) {
-                                                readAllParameterValues();
-                                            } else {
-                                                state = FsmStateEnum.Null;
-                                                processAllParameterValues(session.serviceParameterValues);
-                                            }
-                                        }
+                                    if (session.serviceParameterValues == null) {
+                                        readAllParameterValues();
+                                    } else {
+                                        state = FsmStateEnum.Null;
+                                        processAllParameterValues(session.serviceParameterValues);
                                     }
                                 }
-                        ),
+                            }
+                        }
+                        ,
                         null
                 );
             } catch (VertxException e) {
@@ -498,8 +497,8 @@ public class WanService {
                     /**
                      * Analyze all available interfaces
                      */
-                    for (String interfaceIndex : allAvailableInterfaces.getFieldNames()) {
-                        JsonObject anInterface = allAvailableInterfaces.getObject(interfaceIndex);
+                    for (String interfaceIndex : allAvailableInterfaces.fieldNames()) {
+                        JsonObject anInterface = allAvailableInterfaces.getJsonObject(interfaceIndex);
                         String interfaceReference = anInterface.getString(PARAM_NAME_INTERFACE_REFERENCE);
                         String interfaceKey = anInterface.getString(PARAM_NAME_AVAILABLE_INTERFACE_KEY);
                         if (interfaceKey == null || interfaceReference == null) {
@@ -515,8 +514,8 @@ public class WanService {
                     /**
                      * Analyze all filter instances
                      */
-                    for (String filterIndex : allFilters.getFieldNames()) {
-                        JsonObject aFilter = allFilters.getObject(filterIndex);
+                    for (String filterIndex : allFilters.fieldNames()) {
+                        JsonObject aFilter = allFilters.getJsonObject(filterIndex);
                         String filterKey = aFilter.getString("FilterKey");
                         if (newWanInterfaceKey.equals(filterKey)) {
                             log.info(session.cpeKey + ": Filter Index: " + filterIndex);
@@ -582,8 +581,8 @@ public class WanService {
         /**
          * Analyze all WAN Connections (i.e. VLANs)
          */
-        for (String wanConnIndex : allWanConnections.getFieldNames()) {
-            JsonObject aWanConn = allWanConnections.getObject(wanConnIndex);
+        for (String wanConnIndex : allWanConnections.fieldNames()) {
+            JsonObject aWanConn = allWanConnections.getJsonObject(wanConnIndex);
             String thisVlanId = aWanConn.getString(PARAM_NAME_VLAN_ID);
             if (vlanId == null) {
                 log.error(session.cpeKey + ": Received an invalid WAN Connection Object ("
@@ -678,8 +677,8 @@ public class WanService {
             );
             return;
         }
-        for (String bridgeIndex : allBridges.getFieldNames()) {
-            JsonObject aBridge = allBridges.getObject(bridgeIndex);
+        for (String bridgeIndex : allBridges.fieldNames()) {
+            JsonObject aBridge = allBridges.getJsonObject(bridgeIndex);
             String bridgeName = aBridge.getString(PARAM_NAME_BRIDGE_NAME);
             if (bridgeName != null) {
                 if ("Default".equals(bridgeName)) {
@@ -719,8 +718,8 @@ public class WanService {
              * Analyze all available interfaces
              */
             JsonArray bridgedInterfaceKeys = new JsonArray();
-            for (String interfaceIndex : allAvailableInterfaces.getFieldNames()) {
-                JsonObject anInterface = allAvailableInterfaces.getObject(interfaceIndex);
+            for (String interfaceIndex : allAvailableInterfaces.fieldNames()) {
+                JsonObject anInterface = allAvailableInterfaces.getJsonObject(interfaceIndex);
                 String interfaceReference = anInterface.getString(PARAM_NAME_INTERFACE_REFERENCE);
                 String interfaceKey = anInterface.getString(PARAM_NAME_AVAILABLE_INTERFACE_KEY);
                 if (interfaceKey == null || interfaceReference == null) {
@@ -741,15 +740,15 @@ public class WanService {
             /**
              * Analyze all filter instances
              */
-            for (String filterIndex : allFilters.getFieldNames()) {
-                JsonObject aFilter = allFilters.getObject(filterIndex);
+            for (String filterIndex : allFilters.fieldNames()) {
+                JsonObject aFilter = allFilters.getJsonObject(filterIndex);
                 String bridgeRef = aFilter.getString("FilterBridgeReference");
                 if (bridgedInterfaceKeys.contains(filterIndex)) {
                     // We want to include this filter into L2SSID Bridge if it is not already referencing the bridge
                     includedFilters.add(filterIndex);
                 } else {
                     // We don't want to include this filter into L2SSID Bridge
-                    JsonObject matchingInterface = allAvailableInterfaces.getObject(filterIndex);
+                    JsonObject matchingInterface = allAvailableInterfaces.getJsonObject(filterIndex);
                     if (matchingInterface != null &&
                             unUsedObjects != null &&
                             unUsedObjects.contains(matchingInterface.getString("InterfaceReference") + ".")) {
@@ -781,16 +780,16 @@ public class WanService {
 
             codecCapabilities = new JsonObject();
             allCodecs = new JsonObject();
-            for (String codecIndex : allRawCodecCapabilities.getFieldNames()) {
-                JsonObject aCodec = allRawCodecCapabilities.getObject(codecIndex);
+            for (String codecIndex : allRawCodecCapabilities.fieldNames()) {
+                JsonObject aCodec = allRawCodecCapabilities.getJsonObject(codecIndex);
                 String codecType = aCodec.getString("Codec");
                 if (codecType == null) {
                     log.error(session.cpeKey + ": Received invalid codec capabilities!" + allRawCodecCapabilities);
                     return;
                 }
-                codecCapabilities.putString(codecType, codecIndex);
+                codecCapabilities.put(codecType, codecIndex);
             }
-            for (String codecType : codecCapabilities.getFieldNames()) {
+            for (String codecType : codecCapabilities.fieldNames()) {
                 String codecIndex = codecCapabilities.getString(codecType);
                 VertxJsonUtils.deepAdd(
                         allCodecs,
@@ -1188,7 +1187,7 @@ public class WanService {
                     //voiceWanPath = voiceWanPath.substring(0, voiceWanPath.length() - 1);
                     parameterValueList = SetParameterValues.jsonObjToParameterValuesList(
                             session.cpe,
-                            new JsonObject().putString(
+                            new JsonObject().put(
                                     VOICE_SERVICE_WAN_IP_CONNECTION_PATH,
                                     voiceWanPath
                             ),
@@ -1200,13 +1199,13 @@ public class WanService {
                 /**
                  * Apply Subscriber Specific Voice Settings
                  */
-                JsonObject subscriberVoiceSettings = subscriberServicePlan.getObject(ServicePlan.FIELD_NAME_VOICE);
+                JsonObject subscriberVoiceSettings = subscriberServicePlan.getJsonObject(ServicePlan.FIELD_NAME_VOICE);
                 // Process Dial Plan
                 String dialPlanId = subscriberVoiceSettings.getString(
                         ServicePlan.FIELD_NAME_DIAL_PLAN,
                         DialPlan.SYSTEM_DEFAULT_DIAL_PLAN_ID
                 );
-                subscriberVoiceSettings.removeField(ServicePlan.FIELD_NAME_DIAL_PLAN);
+                subscriberVoiceSettings.remove(ServicePlan.FIELD_NAME_DIAL_PLAN);
                 JsonObject dialPlan = session.sessionVertice.dialPlanCache
                         .getDialPlanById(dialPlanId);
                 if (dialPlan == null) {
@@ -1227,13 +1226,13 @@ public class WanService {
                 parameterValueList = SetParameterValues.jsonObjToParameterValuesList(
                         session.cpe,
                         new JsonObject()
-                                .putValue(
+                                .put(
                                         "1.X_000631_Enable",
-                                        VertxJsonUtils.deepGet(subscriberVoiceSettings, "Line.1.Enable")
+                                        (Object)VertxJsonUtils.deepGet(subscriberVoiceSettings, "Line.1.Enable")
                                 )
-                                .putValue(
+                                .put(
                                         "2.X_000631_Enable",
-                                        VertxJsonUtils.deepGet(subscriberVoiceSettings, "Line.2.Enable")
+                                        (Object)VertxJsonUtils.deepGet(subscriberVoiceSettings, "Line.2.Enable")
                                 ),
                         parameterValueList,
                         VOICE_SERVICE_PHY_INTERFACE_PREFIX
@@ -1249,13 +1248,13 @@ public class WanService {
                 );
 
                 // Set filters
-                JsonObject enableFilter = FILTER_ENABLE.copy().putString("FilterBridgeReference", layer2SsidBridgeKey);
+                JsonObject enableFilter = FILTER_ENABLE.copy().put("FilterBridgeReference", layer2SsidBridgeKey);
                 for (int i = 0; i < includedFilters.size(); i ++) {
                     parameterValueList = SetParameterValues.jsonObjToParameterValuesList(
                             session.cpe,
                             enableFilter,
                             parameterValueList,
-                            L2_BRIDGE_FILTER_PREFIX + includedFilters.get(i) + "."
+                            L2_BRIDGE_FILTER_PREFIX + includedFilters.getValue(i) + "."
                     );
                 }
                 if (excludedFilters != null) {
@@ -1264,14 +1263,14 @@ public class WanService {
                                 session.cpe,
                                 FILTER_DISABLE,
                                 parameterValueList,
-                                L2_BRIDGE_FILTER_PREFIX + excludedFilters.get(i) + "."
+                                L2_BRIDGE_FILTER_PREFIX + excludedFilters.getValue(i) + "."
                         );
                     }
                 }
 
                 // SSID specific settings
                 for (int i = 0; i < bridgedInterfaces.size(); i ++) {
-                    String anInterface = bridgedInterfaces.get(i);
+                    String anInterface = bridgedInterfaces.getString(i);
                     int interfaceIndex = Integer.valueOf(anInterface.substring(anInterface.lastIndexOf(".") + 1));
                     int ssidIndex = interfaceIndex - 4;
                     if (ssidIndex > 0) {
@@ -1353,7 +1352,7 @@ public class WanService {
              *
              * Simply disable IGMP for now
              */
-            vlanParamValues.putBoolean(PARAM_NAME_IGMP_PROXY, false);
+            vlanParamValues.put(PARAM_NAME_IGMP_PROXY, false);
 
             /**
              * Remove the notion of this service from the Service Name of this WAN Connection
@@ -1362,14 +1361,14 @@ public class WanService {
                 String name = existingVlanObject.getString("Name");
                 if (name != null && name.contains(serviceName)) {
                     if (name.contains(" " + serviceName)) {
-                        vlanParamValues.putString("Name", name.replace(serviceName, "Service"));
+                        vlanParamValues.put("Name", name.replace(serviceName, "Service"));
                     }
                 }
             }
         } else {
-            for (String name : serviceProfile.getFieldNames()) {
+            for (String name : serviceProfile.fieldNames()) {
                 // Get the value
-                Object rawValue = serviceProfile.getField(name);
+                Object rawValue = serviceProfile.getValue(name);
 
                 switch (name) {
                     case PARAM_NAME_SERVICE_CONNECTION_TYPE:
@@ -1377,12 +1376,12 @@ public class WanService {
                         if (existingVlanPath == null) {
                             switch (rawValue.toString()) {
                                 case SERVICE_CONNECTION_TYPE_DHCP:
-                                    vlanParamValues.putString("ConnectionType", "IP_Routed");
-                                    vlanParamValues.putString("AddressingType", "DHCP");
+                                    vlanParamValues.put("ConnectionType", "IP_Routed");
+                                    vlanParamValues.put("AddressingType", "DHCP");
                                     break;
 
                                 case SERVICE_CONNECTION_TYPE_BRIDGED:
-                                    vlanParamValues.putString("ConnectionType", "IP_Bridged");
+                                    vlanParamValues.put("ConnectionType", "IP_Bridged");
                                     break;
                             }
                         }
@@ -1394,7 +1393,7 @@ public class WanService {
 
                     case Cpe.INTERNET_GATEWAY_DEVICE_ROOT:
                         // Override parameters (for voice)
-                        overrides = serviceProfile.getObject(name);
+                        overrides = serviceProfile.getJsonObject(name);
                         break;
 
                     default:
@@ -1416,9 +1415,9 @@ public class WanService {
                                     priority = 3;
                                 }
                                 JsonObject thisCodec = codec.copy()
-                                        .putBoolean("Enable", true)
-                                        .putNumber("Priority", priority);
-                                thisCodec.removeField("Codec");
+                                        .put("Enable", true)
+                                        .put("Priority", priority);
+                                thisCodec.remove("Codec");
 
                                 // Add to both lines
                                 VertxJsonUtils.deepAdd(
@@ -1433,7 +1432,7 @@ public class WanService {
                                 );
                             }
                         } else {
-                            vlanParamValues.putString(name, rawValue.toString());
+                            vlanParamValues.put(name, rawValue.toString());
                         }
                         break;
                 }
@@ -1441,16 +1440,16 @@ public class WanService {
 
             // Set mandatory parameters
             if (existingVlanPath == null) {
-                vlanParamValues.putBoolean("Enable", true);
-                vlanParamValues.putString("ExternalIPAddress", "0.0.0.0");
-                vlanParamValues.putString("DefaultGateway", "0.0.0.0");
-                vlanParamValues.putString("SubnetMask", "0.0.0.0");
+                vlanParamValues.put("Enable", true);
+                vlanParamValues.put("ExternalIPAddress", "0.0.0.0");
+                vlanParamValues.put("DefaultGateway", "0.0.0.0");
+                vlanParamValues.put("SubnetMask", "0.0.0.0");
             }
 
             // Are we re-using the existing VLAN?
             if (bReuseDataVlan) {
                 // Rename the WAN connection accordingly
-                vlanParamValues.putString("Name", "Data and " + serviceProfile.getString("Name"));
+                vlanParamValues.put("Name", "Data and " + serviceProfile.getString("Name"));
             }
         }
 
@@ -1487,7 +1486,7 @@ public class WanService {
         if (bBridged && bServiceEnabled()) {
             paramValues = L2SSID_BRIDGE_ENABLE_PARAMS;
         } else {
-            paramValues = new JsonObject().putBoolean(PARAM_NAME_BRIDGE_ENABLE, false);
+            paramValues = new JsonObject().put(PARAM_NAME_BRIDGE_ENABLE, false);
         }
 
         return SetParameterValues.jsonObjToParameterValuesList(
@@ -1505,7 +1504,7 @@ public class WanService {
         return SetParameterValues.jsonObjToParameterValuesList(
                 session.cpe,
                 new JsonObject()
-                        .putBoolean(PARAM_SSID_L2_BRIDGE_ENABLE, true),
+                        .put(PARAM_SSID_L2_BRIDGE_ENABLE, true),
                 null,
                 IPTV_SSID_PREFIX
         );
@@ -1522,11 +1521,11 @@ public class WanService {
 
         if (serviceProfile == null
                 || subscriberServicePlan == null
-                || !subscriberServicePlan.containsField(fieldName)) {
+                || !subscriberServicePlan.containsKey(fieldName)) {
             return false;
         }
 
-        JsonObject subscriberServiceSettings = subscriberServicePlan.getObject(fieldName);
+        JsonObject subscriberServiceSettings = subscriberServicePlan.getJsonObject(fieldName);
         boolean bEnabled;
         if (!bVoiceService) {
             // Video

@@ -34,7 +34,7 @@ public class GetParameterValuesNbi extends GetParameterValues {
      * @
      */
     public static void start(JsonObject deviceOp, CwmpSession session) {
-        JsonArray rawParameterNames = deviceOp.getArray(CpeDeviceOp.FIELD_NAME_PARAM_NAMES);
+        JsonArray rawParameterNames = deviceOp.getJsonArray(CpeDeviceOp.FIELD_NAME_PARAM_NAMES);
 
         if (rawParameterNames == null || rawParameterNames.size() == 0) {
             String error = CpeDeviceOp.FIELD_NAME_PARAM_NAMES + " not found or empty!\n" + deviceOp.encodePrettily();
@@ -42,7 +42,7 @@ public class GetParameterValuesNbi extends GetParameterValues {
         } else {
             ParameterNames paramNames = ParameterNames.Factory.newInstance();
             for (int i=0; i < rawParameterNames.size(); i ++) {
-                String paramName = rawParameterNames.get(i);
+                String paramName = rawParameterNames.getString(i);
                 if (CWMPTr098ModelExtensions.containCWMPAbstractName(paramName)) {
                     paramName = CWMPTr098ModelExtensions.convertCWMPAbstractNameToActualName(session.cpe, paramName);
                 }
@@ -87,7 +87,7 @@ public class GetParameterValuesNbi extends GetParameterValues {
              */
             GetParameterValues.defaultHandler.responseHandler(session, request, responseMessage);
 
-            if (!DEEP_DISCOVER_PARAM_NAME.equals(deviceOp.getArray(CpeDeviceOp.FIELD_NAME_PARAM_NAMES).get(0))) {
+            if (!DEEP_DISCOVER_PARAM_NAME.equals(deviceOp.getJsonArray(CpeDeviceOp.FIELD_NAME_PARAM_NAMES).getString(0))) {
                 /**
                  * Extract the parameter values from the response message.
                  */
@@ -97,11 +97,11 @@ public class GetParameterValuesNbi extends GetParameterValues {
             /**
              * Add the actual path at top level for all the abstract paths in the request
              */
-            JsonArray paramNames = deviceOp.getArray(CpeDeviceOp.FIELD_NAME_PARAM_NAMES);
+            JsonArray paramNames = deviceOp.getJsonArray(CpeDeviceOp.FIELD_NAME_PARAM_NAMES);
             for (int i=0; i < paramNames.size(); i ++) {
-                String paramName = paramNames.get(i);
+                String paramName = paramNames.getString(i);
                 if (CWMPTr098ModelExtensions.containCWMPAbstractName(paramName)) {
-                    paramValues.putString(
+                    paramValues.put(
                             paramName,
                             CWMPTr098ModelExtensions.convertCWMPAbstractNameToActualName(session.cpe, paramName)
                     );

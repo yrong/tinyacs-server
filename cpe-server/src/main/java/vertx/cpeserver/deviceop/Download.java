@@ -44,9 +44,9 @@ public class Download {
      */
     private static String INVALID_FILE_ID = "Internal ACS Server Error! (Invalid Internal File Id)";
     private static JsonObject INTERNAL_SERVER_ERROR = new JsonObject()
-            .putString(AcsConstants.FIELD_NAME_ERROR, "Internal ACS Server Error.");
+            .put(AcsConstants.FIELD_NAME_ERROR, "Internal ACS Server Error.");
     public static final JsonObject MONGODB_TIMED_OUT = new JsonObject()
-            .putString(AcsConstants.FIELD_NAME_ERROR, "ACS DB Timed Out! Please contact Calix Support Team.");
+            .put(AcsConstants.FIELD_NAME_ERROR, "ACS DB Timed Out! Please contact Calix Support Team.");
 
     /**
      * Add download URL/username/password info into the given "Download" RPC message, and send RPC if needed.
@@ -78,7 +78,7 @@ public class Download {
              * Download SW Image
              */
             download.setFileType(AcsFileType.Image.tr069DownloadFileTypeString);
-            if (anAcsFile.containsField(AcsFile.FIELD_NAME_VERSION)) {
+            if (anAcsFile.containsKey(AcsFile.FIELD_NAME_VERSION)) {
                 /**
                  * Return now if the target device is already running the same version.
                  */
@@ -96,7 +96,7 @@ public class Download {
                     /**
                      * Add version into device op
                      */
-                    deviceOp.putString(CpeDeviceOp.FIELD_NAME_VERSION, imageVersion);
+                    deviceOp.put(CpeDeviceOp.FIELD_NAME_VERSION, imageVersion);
                     log.debug(session.cpeKey + ": Downloading Image version " + imageVersion);
                 }
             }
@@ -127,9 +127,9 @@ public class Download {
                  * Use Internal File Server
                  */
                 download.setURL(AcsFile.getDownloadUrl(session.getAcsHostname(), internalFileId));
-                if (anAcsFile.containsField(AcsFile.FIELD_NAME_USERNAME)) {
+                if (anAcsFile.containsKey(AcsFile.FIELD_NAME_USERNAME)) {
                     download.setUsername(anAcsFile.getString(AcsFile.FIELD_NAME_USERNAME));
-                    if (anAcsFile.containsField(AcsFile.FIELD_NAME_PASSWORD)) {
+                    if (anAcsFile.containsKey(AcsFile.FIELD_NAME_PASSWORD)) {
                         download.setPassword(anAcsFile.getString(AcsFile.FIELD_NAME_PASSWORD));
                     }
                 }
@@ -159,14 +159,14 @@ public class Download {
                 DeviceOpUtils.callbackInternalError(
                         session,
                         deviceOp,
-                        new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR, error)
+                        new JsonObject().put(AcsConstants.FIELD_NAME_ERROR, error)
                 );
                 return;
             }
             download.setURL(AcsFile.getDownloadUrl(session.getAcsHostname(), internalFileId));
-            if (anAcsFile.containsField(AcsFile.FIELD_NAME_USERNAME)) {
+            if (anAcsFile.containsKey(AcsFile.FIELD_NAME_USERNAME)) {
                 download.setUsername(anAcsFile.getString(AcsFile.FIELD_NAME_USERNAME));
-                if (anAcsFile.containsField(AcsFile.FIELD_NAME_PASSWORD)) {
+                if (anAcsFile.containsKey(AcsFile.FIELD_NAME_PASSWORD)) {
                     download.setPassword(anAcsFile.getString(AcsFile.FIELD_NAME_PASSWORD));
                 }
             }
@@ -179,7 +179,7 @@ public class Download {
                 session.cpe.addSet(Cpe.DB_FIELD_NAME_CHANGE_COUNTER, 1);
             }
 
-            if (anAcsFile.containsField(AcsFile.FIELD_NAME_VERSION)) {
+            if (anAcsFile.containsKey(AcsFile.FIELD_NAME_VERSION)) {
                 /**
                  * Send a "GetParameterValues" message to get all vendor config files (for version check)
                  */
@@ -219,7 +219,7 @@ public class Download {
      */
     public static void start(final JsonObject deviceOp, final CwmpSession session)
             throws CwmpException {
-        final JsonObject anAcsFile = deviceOp.getObject(CpeDeviceOp.FIELD_NAME_FILE_STRUCT);
+        final JsonObject anAcsFile = deviceOp.getJsonObject(CpeDeviceOp.FIELD_NAME_FILE_STRUCT);
         if (anAcsFile != null) {
             /**
              * File Struct is present.
@@ -236,10 +236,10 @@ public class Download {
                  */
                 try {
                     VertxMongoUtils.findOne(
-                            session.vertx.eventBus(),
+                            session.mongoClient,
                             AcsFile.DB_COLLECTION_NAME,
-                            new JsonObject().putString(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID, internalFileId),
-                            new VertxMongoUtils.FindOneHandler(new Handler<JsonObject>() {
+                            new JsonObject().put(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID, internalFileId),
+                            new Handler<JsonObject>() {
                                 @Override
                                 public void handle(JsonObject anAcsFile) {
                                     // Check for MongoDB timeouts
@@ -262,7 +262,7 @@ public class Download {
                                         doDownload(session, deviceOp, anAcsFile);
                                     }
                                 }
-                            }),
+                            },
                             null
                     );
                 } catch (VertxException e) {
@@ -414,8 +414,8 @@ public class Download {
                     /**
                      * Traverse all config file entries
                      */
-                    for (String fileEntryIndex : allCfgFiles.getFieldNames()) {
-                        JsonObject cfgFile = allCfgFiles.getObject(fileEntryIndex);
+                    for (String fileEntryIndex : allCfgFiles.fieldNames()) {
+                        JsonObject cfgFile = allCfgFiles.getJsonObject(fileEntryIndex);
 
                         // Extract the name/version of this config file entry
                         String name = cfgFile.getString("Name");

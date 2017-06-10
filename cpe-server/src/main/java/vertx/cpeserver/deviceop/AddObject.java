@@ -141,7 +141,7 @@ public class AddObject {
                     session,
                     deviceOp,
                     CpeDeviceOp.CPE_DEVICE_OP_STATE_SUCCEEDED,
-                    new JsonObject().putNumber(CpeDeviceOp.FIELD_NAME_NEW_OBJECT_INDEX, instanceNumber)
+                    new JsonObject().put(CpeDeviceOp.FIELD_NAME_NEW_OBJECT_INDEX, instanceNumber)
             );
         }
     }

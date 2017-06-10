@@ -33,7 +33,7 @@ public class GetParameterAttributesNbi extends GetParameterAttributes {
     public static void start(JsonObject deviceOp, CwmpSession session) {
         log.info("GetParameterAttributes deviceOp: " + deviceOp);
 
-        JsonArray rawParameterNames = deviceOp.getArray(CpeDeviceOp.FIELD_NAME_PARAM_NAMES);
+        JsonArray rawParameterNames = deviceOp.getJsonArray(CpeDeviceOp.FIELD_NAME_PARAM_NAMES);
 
         if (rawParameterNames == null || rawParameterNames.size() == 0) {
             String error = CpeDeviceOp.FIELD_NAME_PARAM_NAMES + " not fond or empty!\n" + deviceOp.encodePrettily();
@@ -41,7 +41,7 @@ public class GetParameterAttributesNbi extends GetParameterAttributes {
         } else {
             ParameterNames paramNames = ParameterNames.Factory.newInstance();
             for (int i=0; i < rawParameterNames.size(); i ++) {
-                 String parameterName = rawParameterNames.get(i);
+                 String parameterName = rawParameterNames.getString(i);
                  paramNames.addString(parameterName);
             }
 

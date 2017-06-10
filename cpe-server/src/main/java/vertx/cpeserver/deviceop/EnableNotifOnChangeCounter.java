@@ -86,7 +86,7 @@ public class EnableNotifOnChangeCounter {
                 throws CwmpException {
             super.responseHandler(session, request, responseMessage);
 
-            if (session.cpe.sets.containsField(Cpe.DB_FIELD_NAME_CHANGE_COUNTER)) {
+            if (session.cpe.sets.containsKey(Cpe.DB_FIELD_NAME_CHANGE_COUNTER)) {
                 /**
                  * Build a new "SetParameterAttributes" Message to kick off the diag process
                  */

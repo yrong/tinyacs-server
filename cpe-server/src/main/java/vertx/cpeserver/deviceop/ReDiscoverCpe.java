@@ -33,7 +33,7 @@ public class ReDiscoverCpe {
             // Re-push the initial provisioning
             SetParameterValuesNbi.startNbiProvisioning(
                     session,
-                    session.cpe.cpeJsonObj.getObject(Cpe.DB_FIELD_NAME_INITIAL_PROVISIONING)
+                    session.cpe.cpeJsonObj.getJsonObject(Cpe.DB_FIELD_NAME_INITIAL_PROVISIONING)
             );
 
             // Overwrite Connection Request Username/Password, and also enable notifications

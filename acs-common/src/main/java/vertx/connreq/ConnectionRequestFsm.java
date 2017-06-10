@@ -362,7 +362,7 @@ public class ConnectionRequestFsm {
                 httpResponseHandler
         );
         clientRequest.exceptionHandler(httpExceptionHandler);
-        clientRequest.headers().set("User-Agent", "Calix cwmp");
+        clientRequest.headers().set("User-Agent", "cwmp");
         clientRequest.headers().set("Accept", "*/*");
         // Set timeout (in ms)
         clientRequest.setTimeout(ConnectionRequestConstants.DEFAULT_CONN_REQ_TIMEOUT);

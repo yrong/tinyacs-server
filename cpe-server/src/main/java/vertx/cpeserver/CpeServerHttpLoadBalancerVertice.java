@@ -1,5 +1,8 @@
 package vertx.cpeserver;
 
+import io.vertx.core.AbstractVerticle;
+import io.vertx.core.eventbus.DeliveryOptions;
+import io.vertx.core.http.HttpServerOptions;
 import vertx.VertxUtils;
 import vertx.cpeserver.httpauth.PerOrgAuthenticator;
 import vertx.cpeserver.session.CwmpSessionCookieUtils;
@@ -14,14 +17,12 @@ import org.apache.http.auth.AUTH;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.AsyncResultHandler;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
-import io.vertx.platform.Verticle;
 
 /**
  * Project:  SXA CC CPE Server
@@ -33,7 +34,7 @@ import io.vertx.platform.Verticle;
  *
  * @author: ronyang
  */
-public class CpeServerHttpLoadBalancerVertice extends Verticle {
+public class CpeServerHttpLoadBalancerVertice extends AbstractVerticle {
     private final Logger log = LoggerFactory.getLogger(CpeServerHttpLoadBalancerVertice.class.getName());
 
     /**
@@ -95,8 +96,8 @@ public class CpeServerHttpLoadBalancerVertice extends Verticle {
         /**
          * Start the HTTP server
          */
-        HttpServer server = vertx.createHttpServer();
-        server.setAcceptBacklog(10000);
+        HttpServerOptions options = new HttpServerOptions().setAcceptBacklog(10000);
+        HttpServer server = vertx.createHttpServer(options);
         server.requestHandler(requestHandler);
         server.listen(AcsConfigProperties.CPE_SERVER_LB_PORT);
         log.info(VertxUtils.highlightWithHashes("CPE Server Base URL: " + AcsConfigProperties.CPE_SERVER_BASE_URL));
@@ -128,7 +129,7 @@ public class CpeServerHttpLoadBalancerVertice extends Verticle {
                         // Pass the ACS Hostname to Session Vertice
                         String rawHostString = request.headers().get("Host");
                         if (rawHostString != null) {
-                            message.putString(
+                            message.put(
                                     CpeServerConstants.FIELD_NAME_ACS_HOST,
                                     // Extract the hostname
                                     rawHostString.substring(0, rawHostString.indexOf(":"))
@@ -171,7 +172,7 @@ public class CpeServerHttpLoadBalancerVertice extends Verticle {
                             String authHeader = request.headers().get(AUTH.WWW_AUTH_RESP);
                             if (authHeader != null) {
                                 log.debug("Received " + AUTH.WWW_AUTH_RESP + ": " + authHeader);
-                                message.putString(CpeServerConstants.FIELD_NAME_AUTH_HEADER, authHeader);
+                                message.put(CpeServerConstants.FIELD_NAME_AUTH_HEADER, authHeader);
 
                                 // Verify Auth Response Header
                                 if (authenticator.verifyAuthHeader(authHeader)) {
@@ -179,12 +180,12 @@ public class CpeServerHttpLoadBalancerVertice extends Verticle {
                                 } else if (authenticator.hasZeroTouchCredentials(authHeader)) {
                                     log.info("Detected a Zero-Touch Activation Request.");
                                     // Request does not have the real credentials but has zero-touch credentials
-                                    message.putBoolean(CpeServerConstants.FIELD_NAME_ZERO_TOUCH, true);
-                                    message.putString(
+                                    message.put(CpeServerConstants.FIELD_NAME_ZERO_TOUCH, true);
+                                    message.put(
                                             CpeServerConstants.FIELD_NAME_ACS_USERNAME,
                                             authenticator.acsUsername
                                     );
-                                    message.putString(
+                                    message.put(
                                             CpeServerConstants.FIELD_NAME_ACS_PASSWORD,
                                             authenticator.acsPassword
                                     );
@@ -194,7 +195,7 @@ public class CpeServerHttpLoadBalancerVertice extends Verticle {
                                 }
 
                                 // Add Org Id
-                                message.putString(AcsConstants.FIELD_NAME_ORG_ID, authenticator.id);
+                                message.put(AcsConstants.FIELD_NAME_ORG_ID, authenticator.id);
 
                                 // Pick the next session vertice in a round-robin fashion
                                 sessionVerticeIndex = nextSessionVerticeIndex;
@@ -215,7 +216,7 @@ public class CpeServerHttpLoadBalancerVertice extends Verticle {
                             }
 
                             // Pass the cookie string to session vertice
-                            message.putString(CpeServerConstants.FIELD_NAME_COOKIE, cookie);
+                            message.put(CpeServerConstants.FIELD_NAME_COOKIE, cookie);
                         }
 
                         // Build the destination event bus address by session vertice index
@@ -227,69 +228,67 @@ public class CpeServerHttpLoadBalancerVertice extends Verticle {
                          * Payload
                          */
                         if (body.length() > 0) {
-                            message.putString(CpeServerConstants.FIELD_NAME_BODY, body.toString());
+                            message.put(CpeServerConstants.FIELD_NAME_BODY, body.toString());
                         }
 
                         /**
                          * Send the request to Session vertice via event bus
                          */
-                        vertx.eventBus().sendWithTimeout(
+                        DeliveryOptions options = new DeliveryOptions().setSendTimeout(DEFAULT_TIMEOUT);
+                        vertx.eventBus().send(
                                 ebAddress,
                                 message,
-                                DEFAULT_TIMEOUT,
-                                new AsyncResultHandler<Message<JsonObject>>() {
-                                    @Override
-                                    public void handle(AsyncResult<Message<JsonObject>> asyncResult) {
-                                        if (asyncResult.failed()) {
-                                            log.error("Failed to receive reply from " + ebAddress
-                                                    + "due to " + asyncResult.cause() + "!");
-                                            log.error("Original Request Message:\n" + message.encodePrettily());
-                                            sendResponse(request, HttpResponseStatus.OK, INTERNAL_TIMEOUT);
-                                            return;
-                                        }
-
-                                        JsonObject response = asyncResult.result().body();
-                                        //log.debug("Received reply:\n" + response.encodePrettily());
-
-                                        /**
-                                         * Check Cookie
-                                         */
-                                        String cookie = response.getString(CpeServerConstants.FIELD_NAME_COOKIE);
-                                        if (cookie != null) {
-                                            request.response().putHeader("Set-Cookie", cookie);
-                                        }
-
-                                        /**
-                                         * Check Status Code
-                                         */
-                                        int statusCode = response.getInteger(
-                                                CpeServerConstants.FIELD_NAME_STATUS_CODE,
-                                                HttpResponseStatus.OK.code()
-                                        );
-                                        HttpResponseStatus status = HttpResponseStatus.valueOf(statusCode);
-                                        if (!status.equals(HttpResponseStatus.OK)) {
-                                            VertxUtils.setResponseStatus(request, HttpResponseStatus.valueOf(statusCode));
-
-                                            if (statusCode == HttpResponseStatus.UNAUTHORIZED.code()) {
-                                                // Auth Challenge
-                                                if (response.containsField(CpeServerConstants.FIELD_NAME_AUTH_CHALLENGE)) {
-                                                    request.response().putHeader(
-                                                            AUTH.WWW_AUTH,
-                                                            response.getString(CpeServerConstants.FIELD_NAME_AUTH_CHALLENGE)
-                                                    );
-                                                }
-                                            } else if (statusCode == HttpResponseStatus.NO_CONTENT.code()) {
-                                                request.response().putHeader("Content-Type", "text/xml; charset=\"utf-8\"");
-                                                request.response().putHeader("SOAPAction", "\"\"");
-                                            }
-                                        }
-
-                                        /**
-                                         * Body
-                                         */
-                                        String body = response.getString(CpeServerConstants.FIELD_NAME_BODY);
-                                        sendResponse(request, status, body);
+                                options,
+                                ar -> {
+                                    if (ar.failed()) {
+                                        log.error("Failed to receive reply from " + ebAddress
+                                                + "due to " + ar.cause() + "!");
+                                        log.error("Original Request Message:\n" + message.encodePrettily());
+                                        sendResponse(request, HttpResponseStatus.OK, INTERNAL_TIMEOUT);
+                                        return;
                                     }
+
+                                    JsonObject response = (JsonObject)ar.result().body();
+                                    //log.debug("Received reply:\n" + response.encodePrettily());
+
+                                    /**
+                                     * Check Cookie
+                                     */
+                                    String response_cookie = response.getString(CpeServerConstants.FIELD_NAME_COOKIE);
+                                    if (response_cookie != null) {
+                                        request.response().putHeader("Set-Cookie", response_cookie);
+                                    }
+
+                                    /**
+                                     * Check Status Code
+                                     */
+                                    int statusCode = response.getInteger(
+                                            CpeServerConstants.FIELD_NAME_STATUS_CODE,
+                                            HttpResponseStatus.OK.code()
+                                    );
+                                    HttpResponseStatus status = HttpResponseStatus.valueOf(statusCode);
+                                    if (!status.equals(HttpResponseStatus.OK)) {
+                                        VertxUtils.setResponseStatus(request, HttpResponseStatus.valueOf(statusCode));
+
+                                        if (statusCode == HttpResponseStatus.UNAUTHORIZED.code()) {
+                                            // Auth Challenge
+                                            if (response.containsKey(CpeServerConstants.FIELD_NAME_AUTH_CHALLENGE)) {
+                                                request.response().putHeader(
+                                                        AUTH.WWW_AUTH,
+                                                        response.getString(CpeServerConstants.FIELD_NAME_AUTH_CHALLENGE)
+                                                );
+                                            }
+                                        } else if (statusCode == HttpResponseStatus.NO_CONTENT.code()) {
+                                            request.response().putHeader("Content-Type", "text/xml; charset=\"utf-8\"");
+                                            request.response().putHeader("SOAPAction", "\"\"");
+                                        }
+                                    }
+
+                                    /**
+                                     * Body
+                                     */
+                                    String response_body = response.getString(CpeServerConstants.FIELD_NAME_BODY);
+                                    sendResponse(request, status, response_body);
                                 }
                         );
                     } catch (Exception ex) {

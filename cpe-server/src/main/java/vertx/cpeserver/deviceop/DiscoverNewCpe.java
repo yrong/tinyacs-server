@@ -155,8 +155,8 @@ public class DiscoverNewCpe {
             // Use default connection request credentials
             session.cpe.deviceId.connRequestUsername = ManagementServerBootstrap.DEFAULT_USERNAME;
             session.cpe.deviceId.connRequestPassword = ManagementServerBootstrap.DEFAULT_PASSWORD;
-            session.cpe.cpeJsonObj.putString("_id", session.cpe.getCpeKey());
-            session.cpe.cpeJsonObj.putString(Cpe.DB_FIELD_NAME_ORG_ID, session.cpe.deviceId.getOrgId());
+            session.cpe.cpeJsonObj.put("_id", session.cpe.getCpeKey());
+            session.cpe.cpeJsonObj.put(Cpe.DB_FIELD_NAME_ORG_ID, session.cpe.deviceId.getOrgId());
             session.cpe.deviceId.addToJsonObject(session.cpe.cpeJsonObj);
             log.info("Updated CPE info: " + session.cpe.toString());
             session.cpe.bDiscoveryDone = true;
@@ -164,7 +164,7 @@ public class DiscoverNewCpe {
             /**
              * Save the device type if new
              */
-            CpeDeviceType.addIfNew(session.vertx.eventBus(), session.cpe.deviceId.toDeviceTypeObject());
+            CpeDeviceType.addIfNew(session.mongoClient, session.cpe.deviceId.toDeviceTypeObject());
 
             /**
              * Is the Device Type and Data Model Known?
@@ -189,7 +189,7 @@ public class DiscoverNewCpe {
             /**
              * Save new CPE object to MongoDB
              */
-            session.cpe.saveNewCpeToDb(session.eventBus);
+            session.cpe.saveNewCpeToDb(session.mongoClient);
 
             /**
              * TODO: Publish "Discovery Started" event
@@ -204,7 +204,7 @@ public class DiscoverNewCpe {
             /**
              * Enqueue initial-provisioning parameter values
              */
-            JsonObject initialProvisioning = session.cpe.cpeJsonObj.getObject(Cpe.DB_FIELD_NAME_INITIAL_PROVISIONING);
+            JsonObject initialProvisioning = session.cpe.cpeJsonObj.getJsonObject(Cpe.DB_FIELD_NAME_INITIAL_PROVISIONING);
             if (initialProvisioning != null) {
                 SetParameterValuesNbi.startNbiProvisioning(session, initialProvisioning);
             }

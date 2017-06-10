@@ -205,12 +205,12 @@ public class SetParameterValues {
             paramList = ParameterValueList.Factory.newInstance();
         }
 
-        for (String fieldName : paramValues.getFieldNames()) {
-            if (paramValues.getField(fieldName) instanceof JsonObject) {
+        for (String fieldName : paramValues.fieldNames()) {
+            if (paramValues.getValue(fieldName) instanceof JsonObject) {
                 // The field is a JSON Object, dig in
                 jsonObjToParameterValuesList(
                         cpe,
-                        paramValues.getObject(fieldName),
+                        paramValues.getJsonObject(fieldName),
                         paramList,
                         prefix + fieldName + "."
                 );
@@ -230,9 +230,9 @@ public class SetParameterValues {
 
                 // Sometime the values may also contain an abstracted name
                 // for example the WAN-IP Interface used for IP-Ping and Trace-Route Diagnostics
-                Object rawValue = paramValues.getField(fieldName);
+                Object rawValue = paramValues.getValue(fieldName);
                 if (rawValue != null) {
-                    String stringValue = paramValues.getField(fieldName).toString();
+                    String stringValue = paramValues.getValue(fieldName).toString();
                     if (CWMPTr098ModelExtensions.containCWMPAbstractName(stringValue)) {
                         stringValue = CWMPTr098ModelExtensions.convertCWMPAbstractNameToActualName(cpe, stringValue);
                     }

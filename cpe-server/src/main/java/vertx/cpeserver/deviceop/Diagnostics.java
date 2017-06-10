@@ -47,9 +47,9 @@ public class Diagnostics {
         String diagType = deviceOp.getString(CpeDeviceOp.FIELD_NAME_DIAG_TYPE);
 
         // Build the parameter list struct
-        JsonObject diagParams = deviceOp.getObject(CpeDeviceOp.FIELD_NAME_DIAG_PARAMS);
+        JsonObject diagParams = deviceOp.getJsonObject(CpeDeviceOp.FIELD_NAME_DIAG_PARAMS);
         // Set "DiagnosticsState" to "Requested" will tell the CPE to start the diagnostics process
-        diagParams.putString(DIAG_STATE, DIAG_STATE_REQUESTED);
+        diagParams.put(DIAG_STATE, DIAG_STATE_REQUESTED);
         ParameterValueList paramList = SetParameterValuesNbi.jsonObjToParameterValuesList(
                 session.cpe,
                 diagParams,
@@ -192,7 +192,7 @@ public class Diagnostics {
                         session,
                         deviceOp,
                         CpeDeviceOp.CPE_DEVICE_OP_STATE_FAILED,
-                        new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR, diagState.substring(6))
+                        new JsonObject().put(AcsConstants.FIELD_NAME_ERROR, diagState.substring(6))
                 );
             } else {
                 log.debug("Diag is still in progress...");

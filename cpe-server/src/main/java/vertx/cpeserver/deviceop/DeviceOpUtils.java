@@ -1,6 +1,7 @@
 package vertx.cpeserver.deviceop;
 
 import io.vertx.core.eventbus.DeliveryOptions;
+import io.vertx.core.http.HttpMethod;
 import vertx.VertxConstants;
 import vertx.VertxHttpClientUtils;
 import vertx.VertxRedisUtils;
@@ -17,7 +18,6 @@ import vertx.model.CpeDeviceOp;
 import vertx.model.CpeDeviceOpTypeEnum;
 import vertx.util.AcsConstants;
 import dslforumOrgCwmp12.FaultDocument;
-import io.netty.handler.codec.http.HttpMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.AsyncResult;
@@ -44,11 +44,11 @@ public class DeviceOpUtils {
      * Static Common Error JSON Objects
      */
     private static final JsonObject DEVICE_OP_TIME_OUT =
-            new JsonObject().putString(CpeDeviceOp.FIELD_NAME_ERROR,"Device Timed Out!");
+            new JsonObject().put(CpeDeviceOp.FIELD_NAME_ERROR,"Device Timed Out!");
     private static final JsonObject DEVICE_OP_DRAINED =
-            new JsonObject().putString(CpeDeviceOp.FIELD_NAME_ERROR, "TR-069/CWMP Session terminated by CPE unexpectedly!");
+            new JsonObject().put(CpeDeviceOp.FIELD_NAME_ERROR, "TR-069/CWMP Session terminated by CPE unexpectedly!");
     private static final JsonObject INVALID_DEVICE_OP =
-            new JsonObject().putString(CpeDeviceOp.FIELD_NAME_ERROR, "Invalid Device Operation!");
+            new JsonObject().put(CpeDeviceOp.FIELD_NAME_ERROR, "Invalid Device Operation!");
 
     /**
      * Enqueue a Device Op to a CWMP Session.

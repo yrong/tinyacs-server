@@ -47,13 +47,13 @@ public class DynamicObject extends SetParameterValuesNbi.CpeSetParameterValuesNb
         /**
          * Create a new DynamicObject POJO for each item in the "dynamicObjects" array
          */
-        JsonArray rawDynamicObjects= parentDeviceOp.getArray(CpeDeviceOp.FIELD_NAME_DYNAMIC_OBJECTS);
+        JsonArray rawDynamicObjects= parentDeviceOp.getJsonArray(CpeDeviceOp.FIELD_NAME_DYNAMIC_OBJECTS);
         DynamicObject[] dynamicObjects = new DynamicObject[rawDynamicObjects.size()];
         for (int i = 0; i < dynamicObjects.length; i++) {
             dynamicObjects[i] = new DynamicObject(
                     parentDeviceOp,
                     session,
-                    (JsonObject) rawDynamicObjects.get(i));
+                    (JsonObject) rawDynamicObjects.getValue(i));
         }
 
         /**
@@ -84,7 +84,7 @@ public class DynamicObject extends SetParameterValuesNbi.CpeSetParameterValuesNb
 
         this.session = session;
 
-        keyParameter = rawDynamicObject.getObject(ConfigurationCategory.FIELD_NAME_KEY_PARAMETER);
+        keyParameter = rawDynamicObject.getJsonObject(ConfigurationCategory.FIELD_NAME_KEY_PARAMETER);
         keyParameterName = keyParameter.getString("name");
 
         pathPrefix = rawDynamicObject
@@ -92,8 +92,8 @@ public class DynamicObject extends SetParameterValuesNbi.CpeSetParameterValuesNb
                 .replace("{i}.", "");
 
         paramValues = rawDynamicObject.copy();
-        paramValues.removeField(ConfigurationCategory.FIELD_NAME_KEY_PARAMETER);
-        paramValues.removeField(ConfigurationCategory.FIELD_NAME_TR098_PATH_PREFIX);
+        paramValues.remove(ConfigurationCategory.FIELD_NAME_KEY_PARAMETER);
+        paramValues.remove(ConfigurationCategory.FIELD_NAME_TR098_PATH_PREFIX);
         keyParameterValue = VertxJsonUtils.deepGet(paramValues, pathPrefix + "{i}." + keyParameterName);
     }
 
@@ -124,7 +124,7 @@ public class DynamicObject extends SetParameterValuesNbi.CpeSetParameterValuesNb
         // Any more dynamic objects lined up?
         if (nextDynamicObject != null) {
             nextDynamicObject.start();
-        } else if (deviceOp.containsField(CpeDeviceOp.FIELD_NAME_SERVICES)) {
+        } else if (deviceOp.containsKey(CpeDeviceOp.FIELD_NAME_SERVICES)) {
             // The parent device op contain services
             /**
              * Process WAN Services
@@ -167,8 +167,8 @@ public class DynamicObject extends SetParameterValuesNbi.CpeSetParameterValuesNb
                                 GetParameterValuesNbi.parameterValueStructsToJsonObject(parameterValueStructs);
                         JsonObject existingObjects = VertxJsonUtils.deepGet(existingParamValues, pathPrefix);
 
-                        for (String existingObjIndex : existingObjects.getFieldNames()) {
-                            JsonObject anExistingObject = existingObjects.getObject(existingObjIndex);
+                        for (String existingObjIndex : existingObjects.fieldNames()) {
+                            JsonObject anExistingObject = existingObjects.getJsonObject(existingObjIndex);
                             String existingKeyParamValue = anExistingObject.getString(keyParameterName);
                             if (existingKeyParamValue != null && existingKeyParamValue.equals(keyParameterValue)) {
                                 // Found it

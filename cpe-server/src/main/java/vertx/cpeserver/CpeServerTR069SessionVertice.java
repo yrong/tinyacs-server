@@ -1,5 +1,6 @@
 package vertx.cpeserver;
 
+import io.vertx.core.AbstractVerticle;
 import vertx.VertxConfigProperties;
 import vertx.VertxHttpClientUtils;
 import vertx.VertxUtils;
@@ -21,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import io.vertx.core.Handler;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
-import io.vertx.platform.Verticle;
 import redis.clients.jedis.Jedis;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,7 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author: ronyang
  */
-public class CpeServerTR069SessionVertice extends Verticle {
+public class CpeServerTR069SessionVertice extends AbstractVerticle {
     private final Logger log = LoggerFactory.getLogger(CpeServerTR069SessionVertice.class.getName());
 
     /**
@@ -65,15 +65,15 @@ public class CpeServerTR069SessionVertice extends Verticle {
      * Frequently Used JSON Object
      */
     public static final JsonObject OK =
-            new JsonObject().putString(AcsConstants.FIELD_NAME_STATUS_CODE, HttpResponseStatus.OK.toString());
+            new JsonObject().put(AcsConstants.FIELD_NAME_STATUS_CODE, HttpResponseStatus.OK.toString());
     public static final JsonObject NULL_POINTER =
             new JsonObject()
-                    .putString(AcsConstants.FIELD_NAME_STATUS_CODE, HttpResponseStatus.BAD_REQUEST.toString())
-                    .putString(AcsConstants.FIELD_NAME_ERROR, "Null Pointer(s)!");
+                    .put(AcsConstants.FIELD_NAME_STATUS_CODE, HttpResponseStatus.BAD_REQUEST.toString())
+                    .put(AcsConstants.FIELD_NAME_ERROR, "Null Pointer(s)!");
     public static final JsonObject NO_SUCH_SESSION =
             new JsonObject()
-                    .putString(AcsConstants.FIELD_NAME_STATUS_CODE, HttpResponseStatus.NOT_FOUND.toString())
-                    .putString(AcsConstants.FIELD_NAME_ERROR, "No session found for the given CPE id!");
+                    .put(AcsConstants.FIELD_NAME_STATUS_CODE, HttpResponseStatus.NOT_FOUND.toString())
+                    .put(AcsConstants.FIELD_NAME_ERROR, "No session found for the given CPE id!");
 
     /**
      * Start the Vertice
@@ -82,22 +82,22 @@ public class CpeServerTR069SessionVertice extends Verticle {
         /**
          * Read Vertice Index from config
          */
-        verticeIndex = container.config().getInteger(CpeServerConstants.FIELD_NAME_VERTICE_INDEX);
+        verticeIndex = config().getInteger(CpeServerConstants.FIELD_NAME_VERTICE_INDEX);
         log.info("Starting Session Vertice " + verticeIndex + "...");
 
         /**
          * Initialize Static Session Info String
          */
         CONN_REQ_FSM_INFO_STRING = new JsonObject()
-                .putString(ConnectionRequestConstants.STATE, ConnectionRequestFsm.STATE_SESSION)
-                .putString(ConnectionRequestConstants.CWMP_SESSION_MANAGER,
+                .put(ConnectionRequestConstants.STATE, ConnectionRequestFsm.STATE_SESSION)
+                .put(ConnectionRequestConstants.CWMP_SESSION_MANAGER,
                         VertxUtils.getHostnameAndPid() + "~" + verticeIndex)
                 .encode();
 
         /**
          * Register a handler to receive direct device-op requests via Event Bus
          */
-        vertx.eventBus().registerHandler(
+        vertx.eventBus().consumer(
                 AcsConstants.VERTX_ADDRESS_ACS_DEVICE_OP_REQUEST_PREFIX
                         + VertxUtils.getHostnameAndPid() + "~" + verticeIndex,
                 DIRECT_DEVICE_OP_REQ_HANDLER
@@ -136,9 +136,9 @@ public class CpeServerTR069SessionVertice extends Verticle {
         /**
          * Register Handler for HTTP Request (forwarded from the HTTP Load Balancer Vertices)
          */
-        vertx.eventBus().registerLocalHandler(
+        vertx.eventBus().localConsumer(
                 CpeServerConstants.CWMP_SESSION_VERTICE_ADDRESS_PREFIX + String.valueOf(verticeIndex),
-                new CwmpHttpRequestHandler(vertx, this)
+                (Handler)new CwmpHttpRequestHandler(vertx, this)
         );
     }
 
@@ -168,7 +168,7 @@ public class CpeServerTR069SessionVertice extends Verticle {
         public void handle(final Message<JsonObject> reqMessage) {
             JsonObject reqBody = reqMessage.body();
             String cpeId = reqBody.getString(AcsConstants.FIELD_NAME_ID);
-            JsonObject deviceOp = reqBody.getObject(CpeDeviceOp.FIELD_NAME_DEVICE_OP);
+            JsonObject deviceOp = reqBody.getJsonObject(CpeDeviceOp.FIELD_NAME_DEVICE_OP);
 
             // Validate pointers
             if (cpeId == null || deviceOp == null) {

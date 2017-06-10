@@ -1,6 +1,7 @@
 package vertx.cpeserver.session;
 
 import io.vertx.core.eventbus.Message;
+import io.vertx.ext.mongo.MongoClient;
 import io.vertx.redis.RedisClient;
 import vertx.*;
 import vertx.connreq.ConnectionRequestUtils;
@@ -120,6 +121,8 @@ public class CwmpSession {
     // Has this CPE reported a new value for its change counter?
     public boolean cpeChangeCounterChanged = false;
 
+    public MongoClient mongoClient;
+
     /**
      * Default constructor that requires an "Inform" request.
      *
@@ -150,6 +153,7 @@ public class CwmpSession {
 
         // Save the Vert.X Event Bus
         this.eventBus = vertx.eventBus();
+        this.mongoClient = MongoClient.createShared(vertx, VertxMongoUtils.getModMongoPersistorConfig());
 
         // Save the Redis Client
         this.redisClient = redisClient;
@@ -359,7 +363,7 @@ public class CwmpSession {
                 /**
                  * Call SXA JBoss/Stager API to update Elastic Search Index
                  */
-                SxaStagerApiUtils.deviceDiscoveryAndUpdate(vertx.eventBus(), cpe);
+                SxaStagerApiUtils.deviceDiscoveryAndUpdate(mongoClient, cpe);
             }
 
             if (cpe.bDecommissioned) {
@@ -382,7 +386,7 @@ public class CwmpSession {
                  * Save Discovery Event
                  */
                 Event.saveEvent(
-                        eventBus,
+                        mongoClient,
                         cpe.orgId,
                         cpe.deviceId.sn,
                         EventTypeEnum.Discovery,
@@ -407,7 +411,7 @@ public class CwmpSession {
              * Persist CPE Data now
              */
             cpe.updateDb(
-                    eventBus,
+                    mongoClient,
                     (cpe.bNeedDiscovery && cpe.bDiscoveryDone) ?
                             // Add this CPE to the cpe-discovery queue after saving it to DB
                             new Handler<Long>() {
@@ -417,9 +421,9 @@ public class CwmpSession {
                                         CpeDiscoveryUtils.addToQueue(
                                                 redisClient,
                                                 cpe.deviceId.toJsonObject()
-                                                        .putString(AcsConstants.FIELD_NAME_ORG_ID, cpe.getOrgId())
-                                                        .putBoolean("newDiscovery", !cpe.bNeedReDiscovery)
-                                                        .putString(AcsConstants.FIELD_NAME_ID, cpe.key)
+                                                        .put(AcsConstants.FIELD_NAME_ORG_ID, cpe.getOrgId())
+                                                        .put("newDiscovery", !cpe.bNeedReDiscovery)
+                                                        .put(AcsConstants.FIELD_NAME_ID, cpe.key)
                                         );
                                     }
                                 }
@@ -636,7 +640,7 @@ public class CwmpSession {
 
             if (s != null) {
                 try {
-                    session.inProgressDeviceOp = new JsonObject(s).getObject(CpeDeviceOp.FIELD_NAME_DEVICE_OP);
+                    session.inProgressDeviceOp = new JsonObject(s).getJsonObject(CpeDeviceOp.FIELD_NAME_DEVICE_OP);
                     if (session.inProgressDeviceOp != null &&
                             session.inProgressDeviceOp.getString(CpeDeviceOp.FIELD_NAME_OPERATION) != null) {
                         opType = CpeDeviceOpTypeEnum.getDeviceOpTypeEnumByString(
@@ -656,17 +660,17 @@ public class CwmpSession {
                     if (session.cpeUpgraded) {
                         // Save autonomous boot event
                         Event.saveEvent(
-                                session.eventBus,
+                                session.mongoClient,
                                 session.cpe.orgId,
                                 session.cpe.deviceId.sn,
                                 EventTypeEnum.SwUpgrade,
                                 EventSourceEnum.Autonomous,
-                                new JsonObject().putString("upgraded to", session.cpe.deviceId.swVersion)
+                                new JsonObject().put("upgraded to", session.cpe.deviceId.swVersion)
                         );
                     } else {
                         // Save autonomous boot event
                         Event.saveEvent(
-                                session.eventBus,
+                                session.mongoClient,
                                 session.cpe.orgId,
                                 session.cpe.deviceId.sn,
                                 session.bootEventType.equals(EventTypeEnum.Reboot)?
@@ -1033,7 +1037,7 @@ public class CwmpSession {
 
             // Persist this CWMP Message
             if (cwmpMessage != null && session.cpe != null) {
-                cwmpMessage.persist(session.eventBus, session.cpe, null);
+                cwmpMessage.persist(session.mongoClient, session.cpe, null);
             }
 
             CwmpSessionFsm.transit(session, CwmpSessionFsmEventEnum.CpeMessageReceived);
@@ -1149,7 +1153,7 @@ public class CwmpSession {
         }
 
         // Persist the Inform message
-        receivedCpeMessage.persist(eventBus, cpe, informEventCodes);
+        receivedCpeMessage.persist(mongoClient, cpe, informEventCodes);
 
         /**
          * Process the parameter list if present
@@ -1165,16 +1169,16 @@ public class CwmpSession {
 
             // Check for SW Upgrades and WAN IP Changes
             if (cpe.sets != null) {
-                if (cpe.sets.containsField(Cpe.DeviceId.FIELD_NAME_SW_VER)) {
+                if (cpe.sets.containsKey(Cpe.DeviceId.FIELD_NAME_SW_VER)) {
                     cpeUpgraded = true;
                 }
-                if (cpe.sets.containsField(Cpe.DB_FIELD_NAME_IP_ADDRESS)) {
+                if (cpe.sets.containsKey(Cpe.DB_FIELD_NAME_IP_ADDRESS)) {
                     cpeWanIpInfoChanged = true;
                 }
-                if (cpe.sets.containsField(Cpe.DB_FIELD_NAME_REGISTRATION_ID)) {
+                if (cpe.sets.containsKey(Cpe.DB_FIELD_NAME_REGISTRATION_ID)) {
                     cpeRegIdChanged = true;
                 }
-                if (cpe.sets.containsField(Cpe.DB_FIELD_NAME_CHANGE_COUNTER)) {
+                if (cpe.sets.containsKey(Cpe.DB_FIELD_NAME_CHANGE_COUNTER)) {
                     cpeChangeCounterChanged = true;
                 }
             }
@@ -1218,7 +1222,7 @@ public class CwmpSession {
                 /**
                  * Save the device type if new
                  */
-                CpeDeviceType.addIfNew(vertx.eventBus(), cpe.deviceId.toDeviceTypeObject());
+                CpeDeviceType.addIfNew(mongoClient, cpe.deviceId.toDeviceTypeObject());
 
                 /**
                  * Try to Turn On Change Counter Notification if the previous SW version didn't support it
@@ -1263,32 +1267,32 @@ public class CwmpSession {
             TransferCompleteFaultStruct fault = transferComplete.getFaultStruct();
             fileTransferResult = new JsonObject();
             if (transferComplete.getStartTime() != null) {
-                fileTransferResult.putString("fileTransferStartTime", transferComplete.getStartTime().toString());
+                fileTransferResult.put("fileTransferStartTime", transferComplete.getStartTime().toString());
             }
             if (transferComplete.getCompleteTime() != null) {
-                fileTransferResult.putString("fileTransferCompleteTime", transferComplete.getCompleteTime().toString());
+                fileTransferResult.put("fileTransferCompleteTime", transferComplete.getCompleteTime().toString());
             }
             if (fault != null) {
                 if (fault.getFaultCode() == 0) {
-                    fileTransferResult.putString(
+                    fileTransferResult.put(
                             CpeDeviceOp.FIELD_NAME_STATE,
                             CpeDeviceOp.CPE_DEVICE_OP_STATE_SUCCEEDED
                     );
                 } else {
-                    fileTransferResult.putString(CpeDeviceOp.FIELD_NAME_STATE, CpeDeviceOp.CPE_DEVICE_OP_STATE_FAILED);
-                    fileTransferResult.putString(CpeDeviceOp.FIELD_NAME_ERROR,
+                    fileTransferResult.put(CpeDeviceOp.FIELD_NAME_STATE, CpeDeviceOp.CPE_DEVICE_OP_STATE_FAILED);
+                    fileTransferResult.put(CpeDeviceOp.FIELD_NAME_ERROR,
                             "File Transfer Failed! TR-069/CWMP Fault Details: " + fault.getFaultCode()
                                     + ": " + fault.getFaultString());
 
                     // Cleanup incomplete file record
-                    AcsFile.cleanupIncompleteUploads(eventBus, cpe.deviceId.sn);
+                    AcsFile.cleanupIncompleteUploads(mongoClient, cpe.deviceId.sn);
 
                     /**
                      * TODO: Handle Download Failure
                      */
                 }
             } else {
-                fileTransferResult.putString(CpeDeviceOp.FIELD_NAME_STATE, CpeDeviceOp.CPE_DEVICE_OP_STATE_SUCCEEDED);
+                fileTransferResult.put(CpeDeviceOp.FIELD_NAME_STATE, CpeDeviceOp.CPE_DEVICE_OP_STATE_SUCCEEDED);
             }
             transferCompleteCallback();
         }
@@ -1316,7 +1320,7 @@ public class CwmpSession {
                 inProgressDeviceOp.getString(CpeDeviceOp.FIELD_NAME_FILE_TYPE)
         );
         if (AcsFileType.Unknown.equals(fileType)) {
-            JsonObject fileStruct = inProgressDeviceOp.getObject(CpeDeviceOp.FIELD_NAME_FILE_STRUCT);
+            JsonObject fileStruct = inProgressDeviceOp.getJsonObject(CpeDeviceOp.FIELD_NAME_FILE_STRUCT);
             if (fileStruct != null) {
                 fileType = AcsFileType.getAcsFileType(fileStruct.getString(AcsFile.FIELD_NAME_TYPE));
             }
@@ -1327,13 +1331,13 @@ public class CwmpSession {
              * Download is in progress
              */
             if (fileTransferResult == null) {
-                fileTransferResult = inProgressDeviceOp.getObject(CpeDeviceOp.FIELD_NAME_RESULT);
+                fileTransferResult = inProgressDeviceOp.getJsonObject(CpeDeviceOp.FIELD_NAME_RESULT);
                 if (fileTransferResult == null) {
                     // Keep waiting
                     return;
                 } else {
                     // CPE has already completed the reboot after file transfer
-                    fileTransferResult.putString("rebootCompleteTime", VertxJsonUtils.getIso8601DateString());
+                    fileTransferResult.put("rebootCompleteTime", VertxJsonUtils.getIso8601DateString());
                 }
             } else {
                 /**
@@ -1366,7 +1370,7 @@ public class CwmpSession {
                              * Store the file transfer info into Redis
                              */
                             log.info(cpeKey + ": Received transferComplete result, waiting for the next reboot.");
-                            inProgressDeviceOp.putObject(CpeDeviceOp.FIELD_NAME_RESULT, fileTransferResult);
+                            inProgressDeviceOp.put(CpeDeviceOp.FIELD_NAME_RESULT, fileTransferResult);
                             DeviceOpUtils.saveInProgressDeviceOp(this, inProgressDeviceOp, CpeDeviceOpTypeEnum.Invalid);
                             return;
                         }
@@ -1391,17 +1395,17 @@ public class CwmpSession {
         deviceOpState = fileTransferResult.getString(CpeDeviceOp.FIELD_NAME_STATE);
         if (multiSessionOpType.equals(CpeDeviceOpTypeEnum.Upload)) {
             // add the internal file id into the upload result
-            fileTransferResult.putString(
+            fileTransferResult.put(
                     CpeDeviceOp.FIELD_NAME_INTERNAL_FILE_ID,
                     inProgressDeviceOp.getString(CpeDeviceOp.FIELD_NAME_INTERNAL_FILE_ID)
             );
             // add credentials if any
-            if (inProgressDeviceOp.containsField(AcsFile.FIELD_NAME_USERNAME)) {
-                fileTransferResult.putString(
+            if (inProgressDeviceOp.containsKey(AcsFile.FIELD_NAME_USERNAME)) {
+                fileTransferResult.put(
                         AcsFile.FIELD_NAME_USERNAME,
                         inProgressDeviceOp.getString(AcsFile.FIELD_NAME_USERNAME)
                 );
-                fileTransferResult.putString(
+                fileTransferResult.put(
                         AcsFile.FIELD_NAME_PASSWORD,
                         inProgressDeviceOp.getString(AcsFile.FIELD_NAME_PASSWORD)
                 );
@@ -1426,7 +1430,7 @@ public class CwmpSession {
                      * Store the file transfer info into Redis
                      */
                     log.info(cpeKey + ": Received transferComplete result, waiting for the next reboot.");
-                    inProgressDeviceOp.putObject(CpeDeviceOp.FIELD_NAME_RESULT, fileTransferResult);
+                    inProgressDeviceOp.put(CpeDeviceOp.FIELD_NAME_RESULT, fileTransferResult);
                     DeviceOpUtils.saveInProgressDeviceOp(this, inProgressDeviceOp, CpeDeviceOpTypeEnum.Invalid);
                     return;
                 }
@@ -1434,7 +1438,7 @@ public class CwmpSession {
                 /**
                  * Check if the device is actually running the expected SW version
                  */
-                JsonObject fileStruct = inProgressDeviceOp.getObject(CpeDeviceOp.FIELD_NAME_FILE_STRUCT);
+                JsonObject fileStruct = inProgressDeviceOp.getJsonObject(CpeDeviceOp.FIELD_NAME_FILE_STRUCT);
                 String expectedVersion = null;
                 if (fileStruct != null) {
                     expectedVersion = fileStruct.getString(AcsFile.FIELD_NAME_VERSION);
@@ -1446,7 +1450,7 @@ public class CwmpSession {
 
                         // Fail the device op with details
                         deviceOpState = CpeDeviceOp.CPE_DEVICE_OP_STATE_FAILED;
-                        fileTransferResult.putString(
+                        fileTransferResult.put(
                                 AcsConstants.FIELD_NAME_ERROR,
                                 "Device runs version " + cpe.deviceId.swVersion + " after downloading version "
                                         + expectedVersion
@@ -1470,7 +1474,7 @@ public class CwmpSession {
                 //}
             }
         }
-        fileTransferResult.removeField(CpeDeviceOp.FIELD_NAME_STATE);
+        fileTransferResult.remove(CpeDeviceOp.FIELD_NAME_STATE);
 
         // Perform Callback
         DeviceOpUtils.callback(
@@ -1568,7 +1572,7 @@ public class CwmpSession {
 
         // Persist this CWMP Message
         if (cpe != null) {
-            cwmpMessage.persist(eventBus, cpe, informEventCodes);
+            cwmpMessage.persist(mongoClient, cpe, informEventCodes);
         }
     }
 

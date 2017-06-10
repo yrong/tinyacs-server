@@ -180,11 +180,11 @@ public class SetParameterAttributes {
             paramList = SetParameterAttributesList.Factory.newInstance();
         }
 
-        for (String fieldName : paramAttributes.getFieldNames()) {
-            if (paramAttributes.getField(fieldName) instanceof JsonObject) {
+        for (String fieldName : paramAttributes.fieldNames()) {
+            if (paramAttributes.getValue(fieldName) instanceof JsonObject) {
                 // The field is a JSON Object, dig in
                 jsonObjToParameterAttributesList(
-                        paramAttributes.getObject(fieldName),
+                        paramAttributes.getJsonObject(fieldName),
                         paramList,
                         prefix + fieldName + "."
                 );
@@ -196,7 +196,7 @@ public class SetParameterAttributes {
                 SetParameterAttributesStruct attrStruct = paramList.addNewSetParameterAttributesStruct();
                 attrStruct.setName(prefix + fieldName);
                 attrStruct.setNotificationChange(true);
-                attrStruct.setNotification(Integer.valueOf(paramAttributes.getField(fieldName).toString()));
+                attrStruct.setNotification(Integer.valueOf(paramAttributes.getValue(fieldName).toString()));
             }
         }
 

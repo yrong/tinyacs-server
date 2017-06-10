@@ -37,7 +37,7 @@ public class SetParameterValuesNbi extends SetParameterValues {
         /**
          * Convert to TR-069 ParameterValuesList
          */
-        JsonObject rawParameterValues = deviceOp.getObject(CpeDeviceOp.FIELD_NAME_PARAM_VALUES);
+        JsonObject rawParameterValues = deviceOp.getJsonObject(CpeDeviceOp.FIELD_NAME_PARAM_VALUES);
         if (rawParameterValues != null && rawParameterValues.size() > 0) {
             /**
              * Convert to ParameterValueList
@@ -52,7 +52,7 @@ public class SetParameterValuesNbi extends SetParameterValues {
             /**
              * Does the device op involve any dynamic objects?
              */
-            if (deviceOp.containsField(CpeDeviceOp.FIELD_NAME_DYNAMIC_OBJECTS)) {
+            if (deviceOp.containsKey(CpeDeviceOp.FIELD_NAME_DYNAMIC_OBJECTS)) {
                 /**
                  * Process Dynamic Objects
                  */
@@ -61,7 +61,7 @@ public class SetParameterValuesNbi extends SetParameterValues {
                 /**
                  * Does the device op involve any WAN Services?
                  */
-                if (deviceOp.containsField(CpeDeviceOp.FIELD_NAME_SERVICES)) {
+                if (deviceOp.containsKey(CpeDeviceOp.FIELD_NAME_SERVICES)) {
                     /**
                      * Process WAN Services
                      */
@@ -91,8 +91,8 @@ public class SetParameterValuesNbi extends SetParameterValues {
         log.info("SetParameterValues nbiProvisioning: " + nbiProvisioning);
 
         // Clear the force flag
-        if (nbiProvisioning.containsField(Cpe.DB_FIELD_NAME_INITIAL_PROVISIONING_FORCE_APPLY)) {
-            nbiProvisioning.removeField(Cpe.DB_FIELD_NAME_INITIAL_PROVISIONING_FORCE_APPLY);
+        if (nbiProvisioning.containsKey(Cpe.DB_FIELD_NAME_INITIAL_PROVISIONING_FORCE_APPLY)) {
+            nbiProvisioning.remove(Cpe.DB_FIELD_NAME_INITIAL_PROVISIONING_FORCE_APPLY);
             session.cpe.addUnSet(Cpe.DB_FIELD_NAME_INITIAL_PROVISIONING + "."
                     + Cpe.DB_FIELD_NAME_INITIAL_PROVISIONING_FORCE_APPLY);
         }
@@ -104,7 +104,7 @@ public class SetParameterValuesNbi extends SetParameterValues {
             // Do the conversion
             JsonObject rawParameterValues = new JsonObject();
             ParameterValueList parameterValueList = null;
-            for (String nbiPath : nbiProvisioning.getFieldNames()) {
+            for (String nbiPath : nbiProvisioning.fieldNames()) {
                 String tr098Path = NbiDeviceProvisioning.nbiPathToTr098Path(nbiPath) + ".";
 
                 // Look for cwmp Extensions
@@ -114,7 +114,7 @@ public class SetParameterValuesNbi extends SetParameterValues {
 
                 parameterValueList = jsonObjToParameterValuesList(
                         session.cpe,
-                        nbiProvisioning.getObject(nbiPath),
+                        nbiProvisioning.getJsonObject(nbiPath),
                         parameterValueList,
                         tr098Path
                 );
@@ -162,7 +162,7 @@ public class SetParameterValuesNbi extends SetParameterValues {
             /**
              * Does the device op involve any dynamic objects?
              */
-            if (deviceOp.containsField(CpeDeviceOp.FIELD_NAME_DYNAMIC_OBJECTS)) {
+            if (deviceOp.containsKey(CpeDeviceOp.FIELD_NAME_DYNAMIC_OBJECTS)) {
                 /**
                  * Process Dynamic Objects
                  */
@@ -171,7 +171,7 @@ public class SetParameterValuesNbi extends SetParameterValues {
                 /**
                  * Does the device op involve any WAN Services?
                  */
-                if (deviceOp.containsField(CpeDeviceOp.FIELD_NAME_SERVICES)) {
+                if (deviceOp.containsKey(CpeDeviceOp.FIELD_NAME_SERVICES)) {
                     /**
                      * Process WAN Services
                      */

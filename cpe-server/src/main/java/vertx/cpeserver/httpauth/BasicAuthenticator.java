@@ -1,12 +1,12 @@
 package vertx.cpeserver.httpauth;
 
+import io.netty.handler.codec.base64.Base64;
 import vertx.util.AcsMiscUtils;
 import vertx.util.GigaCenter;
 import io.netty.util.internal.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.json.impl.Base64;
 
 /**
  * Project:  cwmp
@@ -76,12 +76,12 @@ public class BasicAuthenticator extends PerOrgAuthenticator {
      */
     @Override
     public boolean hasZeroTouchCredentials(String authHeader) {
-        String decodedHeader = new String(Base64.decode(authHeader));
+        String decodedHeader = new String(java.util.Base64.getDecoder().decode(authHeader));
         if (!decodedHeader.startsWith("Basic ")) {
             return false;
         }
 
-        String[] fields = StringUtil.split(decodedHeader.substring(6), ':');
+        String[] fields = decodedHeader.substring(6).split(":");
 
         if (fields == null || fields.length != 2) {
             return false;

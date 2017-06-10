@@ -31,7 +31,7 @@ public class Upload {
      */
     private static String INVALID_FILE_TYPE = "Invalid File Type!";
     private static JsonObject INTERNAL_SERVER_ERROR = new JsonObject()
-            .putString(AcsConstants.FIELD_NAME_ERROR, "Internal ACS Server Error.");
+            .put(AcsConstants.FIELD_NAME_ERROR, "Internal ACS Server Error.");
 
     /**
      * Create the request and add it to the queue using a custom response handler.
@@ -59,7 +59,7 @@ public class Upload {
         log.info(session.cpeKey + ": Processing a " + acsFileType.typeString + " Upload request...");
 
         // Extract the file struct if any
-        JsonObject fileStruct = deviceOp.getObject(CpeDeviceOp.FIELD_NAME_FILE_STRUCT);
+        JsonObject fileStruct = deviceOp.getJsonObject(CpeDeviceOp.FIELD_NAME_FILE_STRUCT);
         if (fileStruct != null) {
             /**
              * File Struct is present (i.e. system performed auto backup).
@@ -85,23 +85,23 @@ public class Upload {
             String fileName = AcsFile.autoGenerateFileName(session.cpe.deviceId.sn, acsFileType);
             JsonObject fileCreationReq = new JsonObject()
                     // add CPE Identifier
-                    .putObject(AcsConstants.FIELD_NAME_CPE_ID,
+                    .put(AcsConstants.FIELD_NAME_CPE_ID,
                             new JsonObject()
-                                    .putString(CpeIdentifier.FIELD_NAME_OUI, session.cpe.deviceId.oui)
-                                    .putString(CpeIdentifier.FIELD_NAME_SN, session.cpe.deviceId.sn)
+                                    .put(CpeIdentifier.FIELD_NAME_OUI, session.cpe.deviceId.oui)
+                                    .put(CpeIdentifier.FIELD_NAME_SN, session.cpe.deviceId.sn)
                     )
-                    .putString(AcsConstants.FIELD_NAME_NAME, fileName)
-                    .putString(AcsFile.FIELD_NAME_TYPE, acsFileType.typeString);
+                    .put(AcsConstants.FIELD_NAME_NAME, fileName)
+                    .put(AcsFile.FIELD_NAME_TYPE, acsFileType.typeString);
 
             // CSR Username
             String csrUsername = deviceOp.getString(CpeDeviceOp.FIELD_NAME_CSR_USERNAME);
             if (csrUsername != null) {
-                fileCreationReq.putString(AcsFile.FIELD_NAME_CSR_USERNAME, csrUsername);
+                fileCreationReq.put(AcsFile.FIELD_NAME_CSR_USERNAME, csrUsername);
             }
             // Description
             String description = deviceOp.getString(CpeDeviceOp.FIELD_NAME_DESCRIPTION);
             if (description != null) {
-                fileCreationReq.putString(AcsConstants.FIELD_NAME_DESCRIPTION, description);
+                fileCreationReq.put(AcsConstants.FIELD_NAME_DESCRIPTION, description);
             }
 
             // Send the request to File Service API
@@ -137,8 +137,8 @@ public class Upload {
 
                                     // save credentials
                                     if (AcsFileType.LogFile.equals(acsFileType)) {
-                                        deviceOp.putString(AcsFile.FIELD_NAME_USERNAME, username);
-                                        deviceOp.putString(AcsFile.FIELD_NAME_PASSWORD, password);
+                                        deviceOp.put(AcsFile.FIELD_NAME_USERNAME, username);
+                                        deviceOp.put(AcsFile.FIELD_NAME_PASSWORD, password);
                                     }
                                 }
                             } else {
@@ -157,7 +157,7 @@ public class Upload {
                                 );
                             } else {
                                 // Save the upload URL into the device op
-                                deviceOp.putString(CpeDeviceOp.FIELD_NAME_INTERNAL_FILE_ID, internalFileId);
+                                deviceOp.put(CpeDeviceOp.FIELD_NAME_INTERNAL_FILE_ID, internalFileId);
 
                                 /**
                                  * Enqueue the "Upload" Request
