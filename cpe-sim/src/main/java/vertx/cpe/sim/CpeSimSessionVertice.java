@@ -1,5 +1,8 @@
 package vertx.cpe.sim;
 
+import io.vertx.core.AbstractVerticle;
+import io.vertx.ext.mongo.MongoClient;
+import vertx.VertxMongoUtils;
 import vertx.util.CpeDataModelMgmt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,7 +10,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
-import io.vertx.platform.Verticle;
 
 /**
  * Project:  CPE Simulator
@@ -16,13 +18,15 @@ import io.vertx.platform.Verticle;
  *
  * @author: ronyang
  */
-public class CpeSimSessionVertice extends Verticle {
+public class CpeSimSessionVertice extends AbstractVerticle {
     private static final Logger log = LoggerFactory.getLogger(CpeSimSessionVertice.class.getName());
 
     /**
      * Event Bus
      */
     EventBus eventBus;
+
+    public MongoClient mongoClient;
 
     /**
      * Start the Vertice
@@ -34,6 +38,8 @@ public class CpeSimSessionVertice extends Verticle {
          * Save event bus
          */
         eventBus = vertx.eventBus();
+
+        mongoClient = MongoClient.createShared(vertx, VertxMongoUtils.getModMongoPersistorConfig());
 
         /**
          * Initialize Data Models
@@ -48,7 +54,7 @@ public class CpeSimSessionVertice extends Verticle {
         /**
          * Register Handler for new-session events
          */
-        eventBus.registerLocalHandler(
+        eventBus.localConsumer(
                 CpeSimConstants.VERTX_ADDRESS_NEW_SESSION,
                 new Handler<Message<JsonObject>>() {
                     @Override
@@ -60,12 +66,13 @@ public class CpeSimSessionVertice extends Verticle {
                         } else {
                             CpeSession session = new CpeSession(
                                     vertx,
-                                    event.body().getObject("queryResult"),
+                                    mongoClient,
+                                    event.body().getJsonObject("queryResult"),
                                     event.body().getString("orgId"),
                                     event.body().getLong("sn"),
                                     event.body().getString("eventCode"),
                                     event.body().getBoolean("newCpe", false),
-                                    event.body().getObject("newValues"),
+                                    event.body().getJsonObject("newValues"),
                                     event.body().getString("commandKey")
                             );
                         }

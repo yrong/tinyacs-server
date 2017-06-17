@@ -1,5 +1,6 @@
 package vertx.cpe.sim;
 
+import io.vertx.ext.mongo.MongoClient;
 import vertx.VertxException;
 import vertx.VertxMongoUtils;
 import vertx.VertxUtils;
@@ -25,7 +26,8 @@ public class PopulateCpeDb {
     /**
      * Static Variables
      */
-    public static Vertx vertx;
+//    public static Vertx vertx;
+    public MongoClient mongoClient;
     public static HttpServerRequest httpRequest;
     public static long start;
     public static long end;
@@ -41,25 +43,28 @@ public class PopulateCpeDb {
     static long failCount;
     static long sn;
 
+    public PopulateCpeDb(MongoClient mongoClient){
+        this.mongoClient = mongoClient;
+    }
+
     /**
      * Perform the actual population with a range of CPE SNs.
      *
-     * @param vertxInstance
+     * @param mongoClient
      * @param httpServerRequest
      * @param orgIdArg
      * @param ouiArg
      * @param startSn
      * @param lastSn
      */
-    public static void doPopulate(
-            Vertx vertxInstance,
+    public  void doPopulate(
+            MongoClient mongoClient,
             final HttpServerRequest httpServerRequest,
             String orgIdArg,
             String ouiArg,
             String startSn,
             final String lastSn
     ) {
-        vertx = vertxInstance;
         oui = ouiArg;
         orgId = orgIdArg;
 
@@ -82,7 +87,7 @@ public class PopulateCpeDb {
         // Start the loop
         try {
             VertxMongoUtils.save(
-                    vertx.eventBus(),
+                    mongoClient,
                     Cpe.CPE_COLLECTION_NAME,
                     CpeSimUtils.getDefaultCpeDataObjectBySn(sn, orgId, oui),
                     saveResultHandler
@@ -95,7 +100,7 @@ public class PopulateCpeDb {
     /**
      * Save Result Handler
      */
-    public static Handler<Message<JsonObject>> saveResultHandler = new Handler<Message<JsonObject>> () {
+    public Handler<Message<JsonObject>> saveResultHandler = new Handler<Message<JsonObject>> () {
         @Override
         public void handle(Message<JsonObject> result) {
             if (result == null || result.body() == null
@@ -143,7 +148,7 @@ public class PopulateCpeDb {
                     // Insert the next one
                     try {
                         VertxMongoUtils.save(
-                                vertx.eventBus(),
+                                PopulateCpeDb.this.mongoClient,
                                 Cpe.CPE_COLLECTION_NAME,
                                 CpeSimUtils.getDefaultCpeDataObjectBySn(sn, orgId, oui),
                                 saveResultHandler

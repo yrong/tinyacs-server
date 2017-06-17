@@ -465,7 +465,7 @@ public class VertxMongoUtils {
             /**
              * Optional Custom Handler
              */
-            Handler<Long> customHandler
+            Handler customHandler
     ) throws VertxException {
         updateWithMatcher(
                 mongoClient,
@@ -501,7 +501,7 @@ public class VertxMongoUtils {
             /**
              * Optional Custom Handler
              */
-            Handler<Long> customHandler
+            Handler customHandler
     ) throws VertxException {
         updateWithMatcher(
                 mongoClient,
@@ -539,7 +539,7 @@ public class VertxMongoUtils {
             /**
              * Optional Custom Handler
              */
-            Handler<Long> customHandler
+            Handler customHandler
     ) throws VertxException {
         /**
          * Validate the mandatory arguments
@@ -558,7 +558,7 @@ public class VertxMongoUtils {
         mongoClient.updateCollectionWithOptions(collectionName,matcher,update,options,res->{
             if (res.succeeded()) {
                 if(customHandler!=null){
-                    customHandler.handle(res.result().getDocModified());
+                    customHandler.handle(res.result().toJson());
                 }
             } else {
                 res.cause().printStackTrace();

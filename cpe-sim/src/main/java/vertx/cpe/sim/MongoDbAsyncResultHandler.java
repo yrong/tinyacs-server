@@ -1,5 +1,6 @@
 package vertx.cpe.sim;
 
+import io.vertx.ext.mongo.MongoClient;
 import vertx.cwmp.CwmpInformEventCodes;
 import vertx.model.Cpe;
 import org.slf4j.Logger;
@@ -18,10 +19,10 @@ import io.vertx.core.json.JsonObject;
 public class MongoDbAsyncResultHandler implements Handler<Message<JsonObject>> {
     private static final Logger log = LoggerFactory.getLogger(MongoDbAsyncResultHandler.class.getName());
 
-    /**
-     * Vertx
-     */
+
     Vertx vertx;
+
+    MongoClient mongoClient;
 
     /**
      * HTTP Request
@@ -65,7 +66,7 @@ public class MongoDbAsyncResultHandler implements Handler<Message<JsonObject>> {
     /**
      * Constructor.
      *
-     * @param vertx
+     * @param mongoClient
      * @param request
      * @param newValues
      * @param eventCode
@@ -76,6 +77,7 @@ public class MongoDbAsyncResultHandler implements Handler<Message<JsonObject>> {
      */
     public MongoDbAsyncResultHandler(
             Vertx vertx,
+            MongoClient mongoClient,
             HttpServerRequest request,
             JsonObject newValues,
             String eventCode,
@@ -84,6 +86,7 @@ public class MongoDbAsyncResultHandler implements Handler<Message<JsonObject>> {
             String oui,
             long sn) {
         this.vertx = vertx;
+        this.mongoClient = mongoClient;
         this.request = request;
         this.eventCode = eventCode;
         this.baseSn = baseSn;
@@ -121,13 +124,13 @@ public class MongoDbAsyncResultHandler implements Handler<Message<JsonObject>> {
         /**
          * Update result has a field called "number".
          */
-        boolean isUpdate = result.body().containsField("number");
+        boolean isUpdate = result.body().containsKey("number");
         if (isUpdate) {
             /**
              * Handle update result
              */
             CpeSimUtils.findCpeById(
-                    vertx.eventBus(),
+                    mongoClient,
                     cpeKey,
                     this
             );
@@ -135,28 +138,28 @@ public class MongoDbAsyncResultHandler implements Handler<Message<JsonObject>> {
             /**
              * Handle query result
              */
-            JsonObject queryResult = result.body().getObject("result");
+            JsonObject queryResult = result.body().getJsonObject("result");
             if (queryResult == null) {
                 // Create a new empty CPE in DB
                 String cpeKey = Cpe.getCpeKey(orgId, "000631", CpeSimUtils.snToHexString(sn));
                 CpeSimUtils.persistCpe(
-                        vertx.eventBus(),
+                        mongoClient,
                         cpeKey,
-                        new JsonObject().putString("_id", cpeKey),
+                        new JsonObject().put("_id", cpeKey),
                         true
                 );
             }
 
             log.info("Starting CWMP Session for CPE " + CpeSimUtils.snToHexString(sn) + "...");
             JsonObject message = new JsonObject()
-                    .putString("orgId", orgId)
-                    .putNumber("sn", sn)
-                    .putString("eventCode", eventCode);
+                    .put("orgId", orgId)
+                    .put("sn", sn)
+                    .put("eventCode", eventCode);
             if (CwmpInformEventCodes.VALUE_CHANGE.equals(eventCode)) {
-                message.putObject("newValues", newValues);
+                message.put("newValues", newValues);
             }
             if (queryResult != null) {
-                message.putObject("queryResult", queryResult);
+                message.put("queryResult", queryResult);
             }
 
             // Start a new session by sending an event to one of the session verticles
@@ -166,6 +169,7 @@ public class MongoDbAsyncResultHandler implements Handler<Message<JsonObject>> {
             if (lastSn != null && sn < lastSn) {
                 MongoDbAsyncResultHandler mongoHandler = new MongoDbAsyncResultHandler(
                         vertx,
+                        mongoClient,
                         request,
                         newValues,
                         eventCode,
@@ -176,9 +180,9 @@ public class MongoDbAsyncResultHandler implements Handler<Message<JsonObject>> {
                 );
 
                 if (CwmpInformEventCodes.VALUE_CHANGE.equals(eventCode)) {
-                    CpeSimUtils.updateCpeById(vertx.eventBus(), cpeKey, newValues, mongoHandler);
+                    CpeSimUtils.updateCpeById(mongoClient, cpeKey, newValues, mongoHandler);
                 } else {
-                    CpeSimUtils.findCpeById(vertx.eventBus(), cpeKey, mongoHandler);
+                    CpeSimUtils.findCpeById(mongoClient, cpeKey, mongoHandler);
                 }
             } else {
                 // Send HTTP response

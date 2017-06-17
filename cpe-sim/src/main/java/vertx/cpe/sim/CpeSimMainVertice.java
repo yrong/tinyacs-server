@@ -1,21 +1,23 @@
 package vertx.cpe.sim;
 
+import io.vertx.core.AbstractVerticle;
+import io.vertx.core.DeploymentOptions;
+import io.vertx.ext.mongo.MongoClient;
 import vertx.VertxConstants;
-import vertx.VertxDeployUtils;
+import vertx.VertxMongoUtils;
 import vertx.VertxUtils;
 import vertx.util.CpeDataModelMgmt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServer;
-import io.vertx.platform.Verticle;
 
 /**
  * Project:  CPE Simulator
  *
  * @author: ronyang
  */
-public class CpeSimMainVertice extends Verticle {
+public class CpeSimMainVertice extends AbstractVerticle {
     private final Logger log = LoggerFactory.getLogger(CpeSimMainVertice.class.getName());
 
     /**
@@ -27,6 +29,8 @@ public class CpeSimMainVertice extends Verticle {
      * Vertice Start Time
      */
     public static long startTime = System.currentTimeMillis();
+
+    public MongoClient mongoClient;
 
     /**
      * Start the Vertice
@@ -41,6 +45,8 @@ public class CpeSimMainVertice extends Verticle {
          */
         eventBus = vertx.eventBus();
 
+        mongoClient = MongoClient.createShared(vertx, VertxMongoUtils.getModMongoPersistorConfig());
+
 
         /**
          * Initialize Data Models
@@ -53,16 +59,6 @@ public class CpeSimMainVertice extends Verticle {
         CpeSimUtils.initDefaultCpeData(vertx);
 
         /**
-         * Deploy Mongo Persistor
-         */
-        /**
-         * Build the list of sub modules/vertices to be deployed
-         */
-        VertxDeployUtils.Deployments deployments = new VertxDeployUtils.Deployments();
-        deployments.add(VertxConstants.MOD_MONGO_PERSISTOR_DEPLOYMENT);
-        VertxUtils.deployModsVertices(container, deployments);
-
-        /**
          * Deploy multiple Session Vertice based on the # of CPE Cores
          */
         int numberOfVertices = Runtime.getRuntime().availableProcessors();
@@ -70,19 +66,20 @@ public class CpeSimMainVertice extends Verticle {
             numberOfVertices = 32;
         }
         log.info("Starting " + numberOfVertices + " session vertices.");
-        container.deployVerticle(CpeSimSessionVertice.class.getName(), numberOfVertices);
+        DeploymentOptions options = new DeploymentOptions().setInstances(numberOfVertices);
+        vertx.deployVerticle(CpeSimSessionVertice.class.getName(),options);
 
         /**
          * Deploy multiple Diag worker vertices
          */
         log.info("Starting " + numberOfVertices + " diag worker vertices.");
-        container.deployVerticle(CpeDiagWorkerVertice.class.getName(), numberOfVertices);
+        vertx.deployVerticle(CpeDiagWorkerVertice.class.getName(), options);
 
         /**
          * Start the server
          */
         HttpServer server = vertx.createHttpServer();
-        server.requestHandler(new HttpRequestHandler(vertx, container));
+        server.requestHandler(new HttpRequestHandler(vertx,mongoClient));
         server.listen(CpeSimConstants.HTTP_SERVICE_REQ_PORT);
     }
 }

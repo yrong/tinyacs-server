@@ -2,6 +2,8 @@ package vertx.cpe.sim;
 
 import broadbandForumOrgCwmpDatamodel14.ModelObject;
 import broadbandForumOrgCwmpDatamodel14.ModelParameter;
+import io.vertx.core.http.HttpClientOptions;
+import io.vertx.ext.mongo.MongoClient;
 import vertx.VertxJsonUtils;
 import vertx.VertxMongoUtils;
 import vertx.cwmp.*;
@@ -19,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.VoidHandler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientResponse;
@@ -44,6 +45,8 @@ public class CpeSession {
      * Vertx
      */
     Vertx vertx;
+    MongoClient mongoClient;
+
 
     /**
      * CPE DB Record
@@ -118,6 +121,7 @@ public class CpeSession {
      */
     public CpeSession(
             Vertx vertx,
+            MongoClient mongoClient,
             JsonObject queryResult,
             String orgId,
             long snLong,
@@ -126,6 +130,7 @@ public class CpeSession {
             JsonObject newValues,
             String commandKey) {
         this.vertx = vertx;
+        this.mongoClient = mongoClient;
         this.bToBePersisted = bIsNew;
         this.bIsNew = bIsNew;
         this.newValues = newValues;
@@ -150,20 +155,14 @@ public class CpeSession {
         acsUrlPath = CpeSimConstants.ACS_URL_SUFFIX;
 
         // Build HTTP Client
-        httpClient = vertx.createHttpClient()
-                .setHost(CpeSimConstants.ACS_HOST)
-                .setPort(CpeSimConstants.ACS_PORT)
-                .exceptionHandler(new Handler<Throwable>() {
-                    @Override
-                    public void handle(Throwable exception) {
-                        log.error("Caught HTTP Client Exception " + exception.getMessage());
-                    }
-                });
+        HttpClientOptions options = new HttpClientOptions().setDefaultHost(CpeSimConstants.ACS_HOST).setDefaultPort(CpeSimConstants.ACS_PORT);
+        httpClient = vertx.createHttpClient(options);
+
 
         // Store Diag Results if any
         if (eventCode.equals(CwmpInformEventCodes.DIAGNOSTICS_COMPLETE)) {
             if (newValues != null) {
-                for (String name : newValues.getFieldNames()) {
+                for (String name : newValues.fieldNames()) {
                     cpe.setValue(name, newValues.getString(name));
                 }
                 bToBePersisted = true;
@@ -200,73 +199,128 @@ public class CpeSession {
          */
         @Override
         public void handle(final HttpClientResponse resp) {
-            final Buffer body = new Buffer(0);
+            final Buffer body = Buffer.buffer();
 
             // Incremental Data Buffer handler
-            resp.dataHandler(new Handler<Buffer>() {
-                public void handle(Buffer data) {
-                    body.appendBuffer(data);
+//            resp.bodyHandler(new Handler<Buffer>() {
+//                public void handle(Buffer data) {
+//                    body.appendBuffer(data);
+//                }
+//            });
+
+            resp.bodyHandler((data)-> {
+                body.appendBuffer(data);
+            });
+
+            resp.endHandler((Void)->{
+                if (resp.cookies() != null && resp.cookies().size() >= 1) {
+                    cookie = "";
+                    for (int i = 0; i < resp.cookies().size(); i ++) {
+                        String aCookie = resp.cookies().get(i);
+                        //log.info("Found a cookie: " + aCookie);
+                        cookie = i > 0? " " : "" + cookie + aCookie;
+                    }
+                    //log.info("Final Cookie: " + cookie);
+                }
+                try {
+                    if (body.length() > 0) {
+                        stateMachine(new CwmpMessage(body.toString()));
+                    } else {
+                        if (resp.statusCode() == HttpResponseStatus.UNAUTHORIZED.code()) {
+                            String authResp = null;
+                            // Get Auth Challenge
+                            String challenge = resp.headers().get(AUTH.WWW_AUTH);
+                            if (challenge == null) {
+                                // No challenge string. Username/Password are invalid
+                                log.error("Invalid Username/Password!");
+
+                                // Must Terminate Session
+                                stateMachine(null);
+                            } else if (challenge.startsWith("Digest ")) {
+                                authResp = HttpDigestAuthUtils.getAuthResponse(
+                                        challenge,
+                                        "/" + CpeSimConstants.ACS_URL_SUFFIX,
+                                        "POST",
+                                        CpeSimConstants.ACS_USERNAME,
+                                        CpeSimConstants.ACS_PASSWORD
+                                );
+                            } else if (challenge.startsWith("Basic ")) {
+                                authResp = CpeSimUtils.getBasicAuthString();
+                            }
+
+                            // Build and Send another Inform with Authorization Response
+                            if (authResp != null) {
+                                log.info("Sending auth response " + authResp);
+                                sendMessageToAcs(buildInform(eventCode), authResp);
+                            }
+                        } else {
+                            stateMachine(null);
+                        }
+                    }
+                } catch (CwmpException e) {
+                    e.printStackTrace();
+                    log.error("Raw SOAP Message:\n" + body.toString());
                 }
             });
 
             // Final Data Buffer Handler
-            resp.endHandler(new VoidHandler() {
-                public void handle() {
-                    // The entire response body has been received
-
-                    // Parse all Cookie(s)
-                    if (resp.cookies() != null && resp.cookies().size() >= 1) {
-                        cookie = "";
-                        for (int i = 0; i < resp.cookies().size(); i ++) {
-                            String aCookie = resp.cookies().get(i);
-                            //log.info("Found a cookie: " + aCookie);
-                            cookie = i > 0? " " : "" + cookie + aCookie;
-                        }
-                        //log.info("Final Cookie: " + cookie);
-                    }
-
-                    // Drive the state machine with this response
-                    try {
-                        if (body.length() > 0) {
-                            stateMachine(new CwmpMessage(body.toString()));
-                        } else {
-                            if (resp.statusCode() == HttpResponseStatus.UNAUTHORIZED.code()) {
-                                String authResp = null;
-                                // Get Auth Challenge
-                                String challenge = resp.headers().get(AUTH.WWW_AUTH);
-                                if (challenge == null) {
-                                    // No challenge string. Username/Password are invalid
-                                    log.error("Invalid Username/Password!");
-
-                                    // Must Terminate Session
-                                    stateMachine(null);
-                                } else if (challenge.startsWith("Digest ")) {
-                                    authResp = HttpDigestAuthUtils.getAuthResponse(
-                                            challenge,
-                                            "/" + CpeSimConstants.ACS_URL_SUFFIX,
-                                            "POST",
-                                            CpeSimConstants.ACS_USERNAME,
-                                            CpeSimConstants.ACS_PASSWORD
-                                    );
-                                } else if (challenge.startsWith("Basic ")) {
-                                    authResp = CpeSimUtils.getBasicAuthString();
-                                }
-
-                                // Build and Send another Inform with Authorization Response
-                                if (authResp != null) {
-                                    log.info("Sending auth response " + authResp);
-                                    sendMessageToAcs(buildInform(eventCode), authResp);
-                                }
-                            } else {
-                                stateMachine(null);
-                            }
-                        }
-                    } catch (CwmpException e) {
-                        e.printStackTrace();
-                        log.error("Raw SOAP Message:\n" + body.toString());
-                    }
-                }
-            });
+//            resp.endHandler(new Handler<Void>() {
+//                public void handle() {
+//                    // The entire response body has been received
+//
+//                    // Parse all Cookie(s)
+//                    if (resp.cookies() != null && resp.cookies().size() >= 1) {
+//                        cookie = "";
+//                        for (int i = 0; i < resp.cookies().size(); i ++) {
+//                            String aCookie = resp.cookies().get(i);
+//                            //log.info("Found a cookie: " + aCookie);
+//                            cookie = i > 0? " " : "" + cookie + aCookie;
+//                        }
+//                        //log.info("Final Cookie: " + cookie);
+//                    }
+//
+//                    // Drive the state machine with this response
+//                    try {
+//                        if (body.length() > 0) {
+//                            stateMachine(new CwmpMessage(body.toString()));
+//                        } else {
+//                            if (resp.statusCode() == HttpResponseStatus.UNAUTHORIZED.code()) {
+//                                String authResp = null;
+//                                // Get Auth Challenge
+//                                String challenge = resp.headers().get(AUTH.WWW_AUTH);
+//                                if (challenge == null) {
+//                                    // No challenge string. Username/Password are invalid
+//                                    log.error("Invalid Username/Password!");
+//
+//                                    // Must Terminate Session
+//                                    stateMachine(null);
+//                                } else if (challenge.startsWith("Digest ")) {
+//                                    authResp = HttpDigestAuthUtils.getAuthResponse(
+//                                            challenge,
+//                                            "/" + CpeSimConstants.ACS_URL_SUFFIX,
+//                                            "POST",
+//                                            CpeSimConstants.ACS_USERNAME,
+//                                            CpeSimConstants.ACS_PASSWORD
+//                                    );
+//                                } else if (challenge.startsWith("Basic ")) {
+//                                    authResp = CpeSimUtils.getBasicAuthString();
+//                                }
+//
+//                                // Build and Send another Inform with Authorization Response
+//                                if (authResp != null) {
+//                                    log.info("Sending auth response " + authResp);
+//                                    sendMessageToAcs(buildInform(eventCode), authResp);
+//                                }
+//                            } else {
+//                                stateMachine(null);
+//                            }
+//                        }
+//                    } catch (CwmpException e) {
+//                        e.printStackTrace();
+//                        log.error("Raw SOAP Message:\n" + body.toString());
+//                    }
+//                }
+//            });
         }
     }
 
@@ -285,7 +339,7 @@ public class CpeSession {
             if (bToBePersisted) {
                 log.info("Persisting CPE meta data...");
                 CpeSimUtils.persistCpe(
-                        vertx.eventBus(),
+                        mongoClient,
                         cpe.getCpeKey(),
                         VertxMongoUtils.getUpdatesObject(cpe.sets, cpe.unsets, null, null, null),
                         false
@@ -302,10 +356,10 @@ public class CpeSession {
                     public void handle(Long event) {
                         log.info("Starting a scheduled followup CWMP Session for CPE " + cpe.getCpeKey());
                         JsonObject message = new JsonObject()
-                                .putString("orgId", cpeJsonObject.getString("orgId"))
-                                .putNumber("sn", Long.decode("0x" + sn))
-                                .putString("eventCode", followUpSessionType)
-                                .putString("commandKey", followUpSessionCmdKey);
+                                .put("orgId", cpeJsonObject.getString("orgId"))
+                                .put("sn", Long.decode("0x" + sn))
+                                .put("eventCode", followUpSessionType)
+                                .put("commandKey", followUpSessionCmdKey);
 
                         // Start a new session by sending an event to one of the session vertices
                         vertx.eventBus().send(CpeSimConstants.VERTX_ADDRESS_NEW_SESSION, message);
@@ -452,10 +506,10 @@ public class CpeSession {
             /**
              * Add new values (that just changed).
              */
-            JsonObject sets = newValues.getObject("$set");
+            JsonObject sets = newValues.getJsonObject("$set");
             if (sets != null) {
-                for (String fieldName : sets.getFieldNames()) {
-                    log.info(fieldName + " : " + sets.getField(fieldName).toString() + ", notif: "
+                for (String fieldName : sets.fieldNames()) {
+                    log.info(fieldName + " : " + sets.getValue(fieldName).toString() + ", notif: "
                             + cpe.getNotifAttr(fieldName));
                     if (cpe.getNotifAttr(fieldName) != CwmpNotificationValues.NOTIFICATION_OFF) {
                         parameterValueStruct = parameterValueList.addNewParameterValueStruct();
@@ -588,7 +642,7 @@ public class CpeSession {
                                     parameterValueStruct.getName());
                     }
                 } else if (name.contains("Diagnostics.")) {
-                    diagArgs.putString(name.substring(name.indexOf("Diagnostics.") + 12), value);
+                    diagArgs.put(name.substring(name.indexOf("Diagnostics.") + 12), value);
                 }
             } catch (Exception ex) {
                 log.error("setValue() failed for " + parameterValueStruct.getName() + "! Exception: ");
@@ -618,9 +672,9 @@ public class CpeSession {
         if (diagType != null) {
             vertx.eventBus().send(CpeSimConstants.VERTX_ADDRESS_DIAG_REQUEST,
                     new JsonObject()
-                            .putObject("cpe", cpeJsonObject)
-                            .putString("diagType", diagType)
-                            .putObject("diagArgs", diagArgs)
+                            .put("cpe", cpeJsonObject)
+                            .put("diagType", diagType)
+                            .put("diagArgs", diagArgs)
             );
         }
 
@@ -818,13 +872,13 @@ public class CpeSession {
 
                 log.info("Creating Parameter " + objectPath + modelParameter.getName()
                         + " with default value " + defaultValue);
-                newObject.putString(modelParameter.getName(), defaultValue);
+                newObject.put(modelParameter.getName(), defaultValue);
                 cpe.addSet(Cpe.DB_FIELD_NAME_PARAM_VALUES + "." + modelParameter.getName(), defaultValue);
             }
 
             // Add the new object to its parent object
             JsonObject parentObject = cpe.getParamValueObject(path, true);
-            parentObject.putObject(String.valueOf(nextInstance), newObject);
+            parentObject.put(String.valueOf(nextInstance), newObject);
 
             // Build a new CWMP Message
             CwmpMessage cwmpMessage = new CwmpMessage(CwmpMessage.DEFAULT_CWMP_VERSION, Integer.valueOf(request.id));
@@ -866,7 +920,7 @@ public class CpeSession {
 
         // Get the parent object of the target object
         JsonObject parentObj = cpe.getParamValueObject(paths[0], false);
-        if (parentObj == null || parentObj.getObject(paths[1]) == null) {
+        if (parentObj == null || parentObj.getJsonObject(paths[1]) == null) {
             if (parentObj == null) {
                 log.error("Failed to find parent object " + paths[0] + "!");
             } else {
@@ -882,7 +936,7 @@ public class CpeSession {
         }
 
         // Delete the target object from parent object
-        parentObj.removeField(paths[1]);
+        parentObj.remove(paths[1]);
         cpe.addUnSet(Cpe.DB_FIELD_NAME_PARAM_VALUES + "." + request.soapEnv.getBody().getDeleteObject().getObjectName());
 
 
@@ -939,7 +993,7 @@ public class CpeSession {
      * @return
      */
     public int getNextAvailableObjectInstance(String objectPath) {
-        String[] subPaths = StringUtil.split(objectPath, '.');
+        String[] subPaths = objectPath.split(objectPath, '.');
 
         // Max Instance Index
         int maxIndex = CpeSimUtils.getMaxInstanceIndex(
@@ -957,7 +1011,7 @@ public class CpeSession {
         }
 
         // Traverse all existing instances
-        Set<String> allInstances = parentObj.getFieldNames();
+        Set<String> allInstances = parentObj.fieldNames();
 
         /*
         log.info(parentObj.encodePrettily());
@@ -1005,16 +1059,16 @@ public class CpeSession {
             JsonObject obj,
             dslforumOrgCwmp12.ParameterValueList  parameterValueList) {
         // Traverse all sub field
-        Set<String> fieldNames = obj.getFieldNames();
+        Set<String> fieldNames = obj.fieldNames();
         for (String fieldName : fieldNames) {
-            if (obj.getField(fieldName) instanceof JsonObject) {
+            if (obj.getValue(fieldName) instanceof JsonObject) {
                 // Found another level of object
-                getObjectValues(path + "." + fieldName, (JsonObject)obj.getField(fieldName), parameterValueList);
+                getObjectValues(path + "." + fieldName, (JsonObject)obj.getValue(fieldName), parameterValueList);
             } else {
                 // this is a parameter
                 ParameterValueStruct parameterValueStruct = parameterValueList.addNewParameterValueStruct();
                 parameterValueStruct.setName(path + "." + fieldName);
-                parameterValueStruct.addNewValue().setStringValue(obj.getField(fieldName).toString());
+                parameterValueStruct.addNewValue().setStringValue(obj.getValue(fieldName).toString());
             }
         }
     }
@@ -1045,16 +1099,16 @@ public class CpeSession {
             JsonObject obj,
             dslforumOrgCwmp12.ParameterAttributeList  parameterAttributeList) {
         // Traverse all sub field
-        Set<String> fieldNames = obj.getFieldNames();
+        Set<String> fieldNames = obj.fieldNames();
         for (String fieldName : fieldNames) {
-            if (obj.getField(fieldName) instanceof JsonObject) {
+            if (obj.getValue(fieldName) instanceof JsonObject) {
                 // Found another level of object
-                getObjectAttributes(path + "." + fieldName, (JsonObject) obj.getField(fieldName), parameterAttributeList);
+                getObjectAttributes(path + "." + fieldName, (JsonObject) obj.getValue(fieldName), parameterAttributeList);
             } else {
                 // this is a parameter
                 ParameterAttributeStruct attributeStruct = parameterAttributeList.addNewParameterAttributeStruct();
                 attributeStruct.setName(path + "." + fieldName);
-                attributeStruct.setNotification(obj.getNumber(fieldName).intValue());
+                attributeStruct.setNotification(obj.getInteger(fieldName).intValue());
             }
         }
     }

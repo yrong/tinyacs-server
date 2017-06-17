@@ -1,5 +1,6 @@
 package vertx.cpe.sim;
 
+import io.vertx.ext.mongo.MongoClient;
 import vertx.VertxConstants;
 import vertx.VertxMongoUtils;
 import vertx.VertxUtils;
@@ -10,7 +11,6 @@ import org.apache.http.auth.AUTH;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.AsyncResultHandler;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
@@ -20,8 +20,9 @@ import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.json.impl.Base64;
 
+import java.util.Base64;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -55,7 +56,7 @@ public class CpeSimUtils {
     public static void initDefaultCpeData(Vertx vertx) {
         vertx.fileSystem().readFile(
                 DEFAULT_CPE_DATA_FILE,
-                new AsyncResultHandler<Buffer>() {
+                new Handler<AsyncResult<Buffer>>() {
                     public void handle(AsyncResult<Buffer> ar) {
                         if (ar.succeeded()) {
                             try {
@@ -71,7 +72,8 @@ public class CpeSimUtils {
                 });
 
         // Init shared session set
-        allSessions = vertx.sharedData().getSet(CpeSimConstants.SHARED_SESSION_SET);
+        vertx.sharedData().getLocalMap("map").put(CpeSimConstants.SHARED_SESSION_SET,new HashSet<String>());
+        allSessions = (Set<String>)vertx.sharedData().getLocalMap("map").get(CpeSimConstants.SHARED_SESSION_SET);
     }
 
     /**
@@ -92,7 +94,7 @@ public class CpeSimUtils {
     public static String getBasicAuthString() {
         if (basicAuthString == null) {
             String authString = CpeSimConstants.ACS_USERNAME + ":" + CpeSimConstants.ACS_PASSWORD;
-            basicAuthString = "Basic " + Base64.encodeBytes(authString.getBytes());
+            basicAuthString = "Basic " + Base64.getEncoder().encodeToString(authString.getBytes());
         }
 
         return basicAuthString;
@@ -115,26 +117,26 @@ public class CpeSimUtils {
         /**
          * Overwrite IP and MAC Addresses
          */
-        cpe.putString(Cpe.DB_FIELD_NAME_IP_ADDRESS, CpeSimUtils.snToIpAddress(sn));
-        cpe.putString(Cpe.DB_FIELD_NAME_MAC_ADDRESS, CpeSimUtils.snToMacAddress(sn));
+        cpe.put(Cpe.DB_FIELD_NAME_IP_ADDRESS, CpeSimUtils.snToIpAddress(sn));
+        cpe.put(Cpe.DB_FIELD_NAME_MAC_ADDRESS, CpeSimUtils.snToMacAddress(sn));
 
         /**
          * Overwrite the CPE Key/SN/Connection Request URL
          */
         String cpeKey = Cpe.getCpeKey(orgId, oui, CpeSimUtils.snToHexString(sn));
-        cpe.putString("_id", cpeKey);
-        cpe.putString(Cpe.DB_FIELD_NAME_SN, CpeSimUtils.snToHexString(sn));
-        cpe.putString(Cpe.DB_FIELD_NAME_CONNREQ_URL, CpeSimUtils.getConnReqUrl(cpeKey));
+        cpe.put("_id", cpeKey);
+        cpe.put(Cpe.DB_FIELD_NAME_SN, CpeSimUtils.snToHexString(sn));
+        cpe.put(Cpe.DB_FIELD_NAME_CONNREQ_URL, CpeSimUtils.getConnReqUrl(cpeKey));
 
-        JsonObject igd = cpe.getObject(Cpe.DB_FIELD_NAME_PARAM_VALUES)
-                .getObject(Cpe.INTERNET_GATEWAY_DEVICE_ROOT);
+        JsonObject igd = cpe.getJsonObject(Cpe.DB_FIELD_NAME_PARAM_VALUES)
+                .getJsonObject(Cpe.INTERNET_GATEWAY_DEVICE_ROOT);
 
-        igd.getObject("ManagementServer")
-                .putString("URL", CpeSimConstants.ACS_URL)
-                .putString("ConnectionRequestURL", CpeSimUtils.getConnReqUrl(cpeKey));
+        igd.getJsonObject("ManagementServer")
+                .put("URL", CpeSimConstants.ACS_URL)
+                .put("ConnectionRequestURL", CpeSimUtils.getConnReqUrl(cpeKey));
 
-        igd.getObject("DeviceInfo")
-                .putString("SerialNumber", CpeSimUtils.snToHexString(sn));
+        igd.getJsonObject("DeviceInfo")
+                .put("SerialNumber", CpeSimUtils.snToHexString(sn));
 
         return cpe;
     }
@@ -158,16 +160,16 @@ public class CpeSimUtils {
         /**
          * Overwrite IP and MAC Addresses
          */
-        cpe.putString(Cpe.DB_FIELD_NAME_IP_ADDRESS, CpeSimUtils.snToIpAddress(sn));
-        cpe.putString(Cpe.DB_FIELD_NAME_MAC_ADDRESS, CpeSimUtils.snToMacAddress(sn));
+        cpe.put(Cpe.DB_FIELD_NAME_IP_ADDRESS, CpeSimUtils.snToIpAddress(sn));
+        cpe.put(Cpe.DB_FIELD_NAME_MAC_ADDRESS, CpeSimUtils.snToMacAddress(sn));
 
         /**
          * Overwrite the CPE Key/SN/Connection Request URL
          */
         String cpeKey = Cpe.getCpeKey(orgId, oui, CpeSimUtils.snToHexString(sn));
-        cpe.putString("_id", cpeKey);
-        cpe.putString(Cpe.DB_FIELD_NAME_SN, CpeSimUtils.snToHexString(sn));
-        cpe.putString(Cpe.DB_FIELD_NAME_CONNREQ_URL, CpeSimUtils.getConnReqUrl(cpeKey));
+        cpe.put("_id", cpeKey);
+        cpe.put(Cpe.DB_FIELD_NAME_SN, CpeSimUtils.snToHexString(sn));
+        cpe.put(Cpe.DB_FIELD_NAME_CONNREQ_URL, CpeSimUtils.getConnReqUrl(cpeKey));
 
         return cpe;
     }
@@ -190,10 +192,10 @@ public class CpeSimUtils {
             String authResponse,
             String payload,
             Handler<HttpClientResponse> handler) {
-        log.info("Sending payload to " + getUrlFromHttpClient(httpClient) + url + ":\n" + payload);
+//        log.info("Sending payload to " + getUrlFromHttpClient(httpClient) + url + ":\n" + payload);
 
         // Build the request
-        HttpClientRequest request = httpClient.request(httpMethod.name(), url, handler);
+        HttpClientRequest request = httpClient.request((io.vertx.core.http.HttpMethod.valueOf(httpMethod.name())), url, handler);
 
         // Content Type
         request.headers().set("Content-Type", "text/xml");
@@ -229,104 +231,79 @@ public class CpeSimUtils {
      * @param client
      * @return
      */
-    public static String getUrlFromHttpClient(HttpClient client) {
-        return "http://" + client.getHost() + ":" + client.getPort();
-    }
+//    public static String getUrlFromHttpClient(HttpClient client) {
+//        return "http://" + client.getHost() + ":" + client.getPort();
+//    }
 
     /**
      * Find a single CPE by CPE Key/Id
      */
-    public static void findCpeById(EventBus eventBus, String cpeKey, Handler<Message<JsonObject>> handler) {
-        /**
-         * Build the query message
-         */
-        JsonObject queryMessage = new JsonObject();
-        queryMessage.putString("action", "findone");
-        queryMessage.putString("collection", CpeSimConstants.MONGO_CPE_SIM__COLLECTION);
-        queryMessage.putObject("matcher", new JsonObject().putString("_id", cpeKey));
-        //log.info(queryMessage.encodePrettily());
-
-        /**
-         * Send it
-         */
-        eventBus.send(
-                VertxConstants.VERTX_ADDRESS_MONGODB,
-                queryMessage,
-                handler
-        );
+    public static void findCpeById(MongoClient mongoClient, String cpeKey, Handler<Message<JsonObject>> handler) {
+        try{
+            VertxMongoUtils.findOne(mongoClient,CpeSimConstants.MONGO_CPE_SIM__COLLECTION,new JsonObject().put("_id", cpeKey),handler,null);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
     }
 
     /**
      * Update a single CPE by CPE Key/Id
      */
     public static void updateCpeById(
-            EventBus eventBus,
+            MongoClient mongoClient,
             String cpeKey,
             JsonObject updates,
-            Handler<Message<JsonObject>> handler) {
-        /**
-         * Build the query message
-         */
-        JsonObject updateMessage = new JsonObject();
-        updateMessage.putString("action", "update");
-        updateMessage.putString("collection", CpeSimConstants.MONGO_CPE_SIM__COLLECTION);
-        updateMessage.putObject("criteria", new JsonObject().putString("_id", cpeKey));
+            Handler handler) {
 
         /**
          * Convert update object
          */
         JsonObject newUpdates = new JsonObject();
         JsonObject newSets = new JsonObject();
-        JsonObject sets = updates.getObject("$set");
+        JsonObject sets = updates.getJsonObject("$set");
         if (sets != null) {
-            for (String fieldName : sets.getFieldNames()) {
-                String value = sets.getField(fieldName).toString();
-                newSets.putString(fieldName + "._value", value);
+            for (String fieldName : sets.fieldNames()) {
+                String value = sets.getValue(fieldName).toString();
+                newSets.put(fieldName + "._value", value);
             }
 
-            newUpdates.putObject("$set", newSets);
+            newUpdates.put("$set", newSets);
         }
-        if (updates.containsField("$unset")) {
-            newUpdates.putObject("$unset", updates.getObject("$unset"));
+        if (updates.containsKey("$unset")) {
+            newUpdates.put("$unset", updates.getJsonObject("$unset"));
         }
-        if (updates.containsField("$currentDate")) {
-            newUpdates.putObject("$currentDate", updates.getObject("$currentDate"));
+        if (updates.containsKey("$currentDate")) {
+            newUpdates.put("$currentDate", updates.getJsonObject("$currentDate"));
         }
-        updateMessage.putObject("objNew", newUpdates);
 
-        log.info(updateMessage.encodePrettily());
-
-        /**
-         * Send it
-         */
-        eventBus.send(
-                VertxConstants.VERTX_ADDRESS_MONGODB,
-                updateMessage,
-                handler
-        );
+        try{
+            VertxMongoUtils.updateWithMatcher(mongoClient,CpeSimConstants.MONGO_CPE_SIM__COLLECTION,new JsonObject().put("_id", cpeKey),newUpdates,handler);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
     }
 
     /**
      * Persist CPE Meta Data.
      *
-     * @param eventBus
+     * @param mongoClient
      * @param cpe
      */
-    public static void persistCpe(EventBus eventBus, String id, JsonObject cpe, boolean bIsNew) {
+    public static void persistCpe(MongoClient mongoClient, String id, JsonObject cpe, boolean bIsNew) {
         log.info("Saving CPE...\n" + cpe.encodePrettily());
         try {
             if (bIsNew) {
                 VertxMongoUtils.save(
-                        eventBus,
+                        mongoClient,
                         CpeSimConstants.MONGO_CPE_SIM__COLLECTION,
                         cpe,
                         null
                 );
             } else {
                 VertxMongoUtils.updateWithMatcher(
-                        eventBus,
+                        mongoClient,
                         CpeSimConstants.MONGO_CPE_SIM__COLLECTION,
-                        new JsonObject().putString(AcsConstants.FIELD_NAME_ID, id),
+                        new JsonObject().put(AcsConstants.FIELD_NAME_ID, id),
                         cpe,
                         null
                 );

@@ -1,5 +1,6 @@
 package vertx.cpe.sim;
 
+import io.vertx.ext.mongo.MongoClient;
 import vertx.VertxUtils;
 import vertx.cwmp.CwmpInformEventCodes;
 import vertx.model.Cpe;
@@ -11,7 +12,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
-import io.vertx.platform.Container;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,25 +29,23 @@ public class HttpRequestHandler implements Handler<HttpServerRequest>{
      */
     Vertx vertx;
 
-    /**
-     * Vert.X Container Instance
-     */
-    Container container;
 
     /**
      * URL path to CWMP Inform Event Type Map
      */
     Map<String, String> eventCodeMap;
 
+
+    MongoClient mongoClient;
+
     /**
      * Constructor.
      *
      * @param vertx
      */
-    public HttpRequestHandler(Vertx vertx, Container container) {
+    public HttpRequestHandler(Vertx vertx,MongoClient mongoClient) {
         this.vertx = vertx;
-        this.container = container;
-
+        this.mongoClient = mongoClient;
         eventCodeMap = new HashMap<>();
         eventCodeMap.put("connreq", CwmpInformEventCodes.CONNECTION_REQUEST);
         eventCodeMap.put("periodic", CwmpInformEventCodes.PERIODIC);
@@ -85,7 +83,7 @@ public class HttpRequestHandler implements Handler<HttpServerRequest>{
             request.response().end();
 
             // Call the Vert.X Container's exit() method for a clean exit
-            container.exit();
+            vertx.close();
             return;
         }
 
@@ -94,7 +92,7 @@ public class HttpRequestHandler implements Handler<HttpServerRequest>{
          *
          * Expecting "/{event-code}/{orgId}/{OUI}/{SN}"
          */
-        final String[] pathParams = StringUtil.split(path, '/');
+        final String[] pathParams = path.split(path, '/');
         if (pathParams.length != 4) {
             VertxUtils.badHttpRequest(
                     request,
@@ -113,6 +111,7 @@ public class HttpRequestHandler implements Handler<HttpServerRequest>{
         /**
          * Analyze the Event Code
          */
+        PopulateCpeDb populateCpeDb = new PopulateCpeDb(mongoClient);
         final String eventCode = eventCodeMap.get(pathParams[0]);
         if (eventCode != null) {
             log.info("Simulating a " + eventCode + " event for CPE " + cpeKey);
@@ -122,8 +121,8 @@ public class HttpRequestHandler implements Handler<HttpServerRequest>{
              */
             String lastSnHexStr = request.params().get("lastSn");
             if (lastSnHexStr != null) {
-                PopulateCpeDb.doPopulate(
-                        vertx,
+                populateCpeDb.doPopulate(
+                        mongoClient,
                         request,
                         pathParams[1],
                         pathParams[2],
@@ -166,11 +165,12 @@ public class HttpRequestHandler implements Handler<HttpServerRequest>{
                      * Update MongoDB with the new value(s), and then query the DB and start session(s)
                      */
                     CpeSimUtils.updateCpeById(
-                            vertx.eventBus(),
+                            mongoClient,
                             cpeKey,
                             newValues,
                             new MongoDbAsyncResultHandler(
                                     vertx,
+                                    mongoClient,
                                     request,
                                     newValues,
                                     eventCode,
@@ -185,10 +185,11 @@ public class HttpRequestHandler implements Handler<HttpServerRequest>{
                      * Query the DB with a handler that starts a CWMP session based on the query result
                      */
                     CpeSimUtils.findCpeById(
-                            vertx.eventBus(),
+                            mongoClient,
                             cpeKey,
                             new MongoDbAsyncResultHandler(
                                     vertx,
+                                    mongoClient,
                                     request,
                                     newValues,
                                     eventCode,
