@@ -14,4 +14,4 @@ curl -K LAN_host_arrival.txt
 curl -K LAN_host_depart.txt
 
 # Pre Populate CPE DB
-curl "http://vmlnx-ronyang:30005/populateDb/2550/000631/08A027C00000?lastSn=08A027C00100"
+curl "http://localhost:30005/populateDb/2550/000631/08A027C00000?lastSn=08A027C00100"

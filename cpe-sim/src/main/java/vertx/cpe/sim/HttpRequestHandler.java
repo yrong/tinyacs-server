@@ -92,7 +92,7 @@ public class HttpRequestHandler implements Handler<HttpServerRequest>{
          *
          * Expecting "/{event-code}/{orgId}/{OUI}/{SN}"
          */
-        final String[] pathParams = path.split(path, '/');
+        final String[] pathParams = path.split("/");
         if (pathParams.length != 4) {
             VertxUtils.badHttpRequest(
                     request,

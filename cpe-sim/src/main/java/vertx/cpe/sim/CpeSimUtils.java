@@ -48,7 +48,7 @@ public class CpeSimUtils {
     /**
      * Shared Session Map
      */
-    public static Set<String> allSessions;
+    public static Set<String> allSessions = new HashSet<String>();
 
     /**
      * Get Default CPE Meta Data from resource file.
@@ -72,8 +72,8 @@ public class CpeSimUtils {
                 });
 
         // Init shared session set
-        vertx.sharedData().getLocalMap("map").put(CpeSimConstants.SHARED_SESSION_SET,new HashSet<String>());
-        allSessions = (Set<String>)vertx.sharedData().getLocalMap("map").get(CpeSimConstants.SHARED_SESSION_SET);
+//        vertx.sharedData().getLocalMap("map").put(CpeSimConstants.SHARED_SESSION_SET,new HashSet<String>());
+//        allSessions = (Set<String>)vertx.sharedData().getLocalMap("map").get(CpeSimConstants.SHARED_SESSION_SET);
     }
 
     /**
@@ -238,7 +238,7 @@ public class CpeSimUtils {
     /**
      * Find a single CPE by CPE Key/Id
      */
-    public static void findCpeById(MongoClient mongoClient, String cpeKey, Handler<Message<JsonObject>> handler) {
+    public static void findCpeById(MongoClient mongoClient, String cpeKey, Handler<JsonObject> handler) {
         try{
             VertxMongoUtils.findOne(mongoClient,CpeSimConstants.MONGO_CPE_SIM__COLLECTION,new JsonObject().put("_id", cpeKey),handler,null);
         }catch(Exception e){

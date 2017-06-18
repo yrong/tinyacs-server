@@ -20,7 +20,7 @@ public class CpeServerConstants {
      * Vert.x Event Bus Address Prefix for HTTP Request Messages
      */
     public static final String CWMP_SESSION_VERTICE_ADDRESS_PREFIX = "cwmp-session-vertice~";
-    public static final int NUMBER_OF_SESSION_VERTICES = VertxUtils.getNumberOfCpuCores();
+    public static final int NUMBER_OF_SESSION_VERTICES = 1;//VertxUtils.getNumberOfCpuCores();
 
     /**
      * Message Field Definition for messages between the HTTP vertices and the Session Vertices

@@ -3,7 +3,6 @@ package vertx.cpe.sim;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.ext.mongo.MongoClient;
-import vertx.VertxConstants;
 import vertx.VertxMongoUtils;
 import vertx.VertxUtils;
 import vertx.util.CpeDataModelMgmt;
@@ -61,7 +60,7 @@ public class CpeSimMainVertice extends AbstractVerticle {
         /**
          * Deploy multiple Session Vertice based on the # of CPE Cores
          */
-        int numberOfVertices = Runtime.getRuntime().availableProcessors();
+        int numberOfVertices = 1;//Runtime.getRuntime().availableProcessors();
         if (numberOfVertices > 32) {
             numberOfVertices = 32;
         }

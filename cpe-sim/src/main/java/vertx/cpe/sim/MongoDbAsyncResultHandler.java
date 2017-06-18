@@ -16,7 +16,7 @@ import io.vertx.core.json.JsonObject;
  *
  * @author: ronyang
  */
-public class MongoDbAsyncResultHandler implements Handler<Message<JsonObject>> {
+public class MongoDbAsyncResultHandler implements Handler<JsonObject> {
     private static final Logger log = LoggerFactory.getLogger(MongoDbAsyncResultHandler.class.getName());
 
 
@@ -115,30 +115,29 @@ public class MongoDbAsyncResultHandler implements Handler<Message<JsonObject>> {
      * @param result
      */
     @Override
-    public void handle(Message<JsonObject> result) {
-        /**
-         * Extract Status ("ok" vs. "error")
-         */
-        String status = result.body().getString("status");
+    public void handle(JsonObject result) {
 
-        /**
-         * Update result has a field called "number".
-         */
-        boolean isUpdate = result.body().containsKey("number");
-        if (isUpdate) {
-            /**
-             * Handle update result
-             */
-            CpeSimUtils.findCpeById(
-                    mongoClient,
-                    cpeKey,
-                    this
-            );
-        } else {
+//        String status = result.getString("status");
+//
+//        /**
+//         * Update result has a field called "number".
+//         */
+//        boolean isUpdate = result.containsKey("number");
+//        if (isUpdate) {
+//            /**
+//             * Handle update result
+//             */
+//            CpeSimUtils.findCpeById(
+//                    mongoClient,
+//                    cpeKey,
+//                    this
+//            );
+//        } else
+            {
             /**
              * Handle query result
              */
-            JsonObject queryResult = result.body().getJsonObject("result");
+            JsonObject queryResult = result;//result.getJsonObject("result");
             if (queryResult == null) {
                 // Create a new empty CPE in DB
                 String cpeKey = Cpe.getCpeKey(orgId, "000631", CpeSimUtils.snToHexString(sn));

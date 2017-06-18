@@ -100,28 +100,10 @@ public class PopulateCpeDb {
     /**
      * Save Result Handler
      */
-    public Handler<Message<JsonObject>> saveResultHandler = new Handler<Message<JsonObject>> () {
+    public Handler saveResultHandler = new Handler<String> () {
         @Override
-        public void handle(Message<JsonObject> result) {
-            if (result == null || result.body() == null
-                    || !VertxMongoUtils.MOD_MONGO_FIELD_NAME_STATUS_VALUE_OK.equals(
-                    result.body().getString(VertxMongoUtils.MOD_MONGO_FIELD_NAME_STATUS))
-                    ) {
-                // Failed
-                String error = "Failed to insert CPE record with sn " + CpeSimUtils.snToHexString(sn) + "!";
-                log.error(error);
-                httpRequest.response().write(error + "\n");
-
-                consecutiveFailures ++;
-                failCount ++;
-                if (consecutiveFailures > 3) {
-                    // Quit
-                    error = "Quitting due to 3 consecutive failures.";
-                    log.error(error);
-                    httpRequest.response().write(error + "\n");
-                    httpRequest.response().end();
-                }
-            } else {
+        public void handle(String result) {
+            {
                 // Succeeded
                 String response = "Inserted CPE record for sn " + CpeSimUtils.snToHexString(sn) + ".";
                 log.info(response);
