@@ -1,5 +1,10 @@
 package vertx.acs.worker.workflow;
 
+import io.vertx.core.AbstractVerticle;
+import io.vertx.ext.mongo.MongoClient;
+import io.vertx.redis.RedisClient;
+import io.vertx.redis.RedisOptions;
+import vertx.VertxConfigProperties;
 import vertx.VertxException;
 import vertx.VertxConstants;
 import vertx.VertxMongoUtils;
@@ -7,7 +12,6 @@ import vertx.acs.cache.PassiveWorkflowCache;
 import vertx.acs.utils.ReplacementUtils;
 import vertx.model.*;
 import vertx.util.*;
-import io.vertx.java.redis.RedisClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.AsyncResult;
@@ -15,7 +19,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.platform.Verticle;
 
 import java.util.TreeMap;
 
@@ -26,7 +29,7 @@ import java.util.TreeMap;
  *
  * @author: ronyang
  */
-public class PassiveWorkflowWorkerVertice extends Verticle{
+public class PassiveWorkflowWorkerVertice extends AbstractVerticle{
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
     // Async Redis Client Instance
@@ -53,11 +56,13 @@ public class PassiveWorkflowWorkerVertice extends Verticle{
      * Query Key when checking for replacements
      */
     public static final JsonObject DEVICE_REPLACEMENT_QUERY_KEY = new JsonObject()
-            .putNumber(AcsConstants.FIELD_NAME_ID, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_SN, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_REGISTRATION_ID, 1)
-            .putNumber(CpeDeviceType.FIELD_NAME_MODEL_NAME, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_TO_BE_REPLACED_BY, 1);
+            .put(AcsConstants.FIELD_NAME_ID, 1)
+            .put(Cpe.DB_FIELD_NAME_SN, 1)
+            .put(Cpe.DB_FIELD_NAME_REGISTRATION_ID, 1)
+            .put(CpeDeviceType.FIELD_NAME_MODEL_NAME, 1)
+            .put(Cpe.DB_FIELD_NAME_TO_BE_REPLACED_BY, 1);
+
+    MongoClient mongoClient;
 
     /**
      * Start the worker
@@ -66,7 +71,10 @@ public class PassiveWorkflowWorkerVertice extends Verticle{
         /**
          * Initialize Redis Client
          */
-        redisClient = new RedisClient(vertx.eventBus(), VertxConstants.VERTX_ADDRESS_REDIS);
+        RedisOptions options = new RedisOptions().setHost(VertxConfigProperties.redisHost).setPort(VertxConfigProperties.redisPort);
+        redisClient = RedisClient.create(vertx,options);
+
+        mongoClient = MongoClient.createShared(vertx,VertxMongoUtils.getModMongoPersistorConfig());
 
         /**
          * Initialize Local passive workflow cache
@@ -136,106 +144,106 @@ public class PassiveWorkflowWorkerVertice extends Verticle{
                      * Check For Replacements by querying the device collection
                      */
                     JsonObject deviceMatcher = new JsonObject()
-                            .putString(AcsConstants.FIELD_NAME_ORG_ID, orgId)
-                            .putObject(
+                            .put(AcsConstants.FIELD_NAME_ORG_ID, orgId)
+                            .put(
                                     Cpe.DB_FIELD_NAME_SN,
-                                    new JsonObject().putString(VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_NOT_EQUAL, sn)
+                                    new JsonObject().put(VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_NOT_EQUAL, sn)
                             );
                     if (regId != null && regId.length() > 0) {
-                        deviceMatcher.putArray(
+                        deviceMatcher.put(
                                 VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_OR,
                                 new JsonArray()
-                                        .add(new JsonObject().putString(Cpe.DB_FIELD_NAME_TO_BE_REPLACED_BY, sn))
-                                        .add(new JsonObject().putString(Cpe.DB_FIELD_NAME_REGISTRATION_ID, regId))
+                                        .add(new JsonObject().put(Cpe.DB_FIELD_NAME_TO_BE_REPLACED_BY, sn))
+                                        .add(new JsonObject().put(Cpe.DB_FIELD_NAME_REGISTRATION_ID, regId))
                         );
                     } else {
-                        deviceMatcher.putString(Cpe.DB_FIELD_NAME_TO_BE_REPLACED_BY, sn);
+                        deviceMatcher.put(Cpe.DB_FIELD_NAME_TO_BE_REPLACED_BY, sn);
                     }
                     VertxMongoUtils.findOne(
-                            vertx.eventBus(),
+                            mongoClient,
                             Cpe.CPE_COLLECTION_NAME,
                             deviceMatcher,
-                            new VertxMongoUtils.FindOneHandler(
-                                    new Handler<JsonObject>() {
-                                        @Override
-                                        public void handle(JsonObject oldDevice) {
-                                            if (VertxMongoUtils.FIND_ONE_TIMED_OUT.equals(oldDevice)
-                                                    || oldDevice == null) {
-                                                // Not replacing any existing device
-                                                traverseAllWorkflows(orgId, cpeKey, cpe, null);
-                                            } else {
-                                                outstandingDiscoverSessions --;
+
+                                new Handler<JsonObject>() {
+                                    @Override
+                                    public void handle(JsonObject oldDevice) {
+                                        if (VertxMongoUtils.FIND_ONE_TIMED_OUT.equals(oldDevice)
+                                                || oldDevice == null) {
+                                            // Not replacing any existing device
+                                            traverseAllWorkflows(orgId, cpeKey, cpe, null);
+                                        } else {
+                                            outstandingDiscoverSessions --;
+
+                                            /**
+                                             * Decommission old device if old device and new device have the
+                                             * same regId.
+                                             */
+                                            if (regId != null &&
+                                                    regId.equals(
+                                                            oldDevice.getString(Cpe.DB_FIELD_NAME_REGISTRATION_ID))
+                                                    ) {
+                                                /**
+                                                 * Save Decommissioned Event
+                                                 */
+                                                Event.saveEvent(
+                                                        mongoClient,
+                                                        orgId,
+                                                        oldDevice.getString(Cpe.DB_FIELD_NAME_SN),
+                                                        EventTypeEnum.Decommissioned,
+                                                        EventSourceEnum.System,
+                                                        new JsonObject().put(
+                                                                "replaced by",
+                                                                Cpe.getSnByCpeKey(cpeKey)
+                                                        )
+                                                );
 
                                                 /**
-                                                 * Decommission old device if old device and new device have the
-                                                 * same regId.
+                                                 * Mark old device as "Decommissioned" after querying the
+                                                 * subscriber record.
                                                  */
-                                                if (regId != null &&
-                                                        regId.equals(
-                                                                oldDevice.getString(Cpe.DB_FIELD_NAME_REGISTRATION_ID))
-                                                        ) {
-                                                    /**
-                                                     * Save Decommissioned Event
-                                                     */
-                                                    Event.saveEvent(
-                                                            vertx.eventBus(),
-                                                            orgId,
-                                                            oldDevice.getString(Cpe.DB_FIELD_NAME_SN),
-                                                            EventTypeEnum.Decommissioned,
-                                                            EventSourceEnum.System,
-                                                            new JsonObject().putString(
-                                                                    "replaced by",
-                                                                    Cpe.getSnByCpeKey(cpeKey)
-                                                            )
-                                                    );
+                                                markDeviceDecommissioned(orgId, regId, oldDevice);
+                                            }
 
-                                                    /**
-                                                     * Mark old device as "Decommissioned" after querying the
-                                                     * subscriber record.
-                                                     */
-                                                    markDeviceDecommissioned(orgId, regId, oldDevice);
-                                                }
+                                            String newDeviceModel = cpe.getString(CpeDeviceType.FIELD_NAME_MODEL_NAME);
+                                            String oldDeviceModel = oldDevice.getString(CpeDeviceType.FIELD_NAME_MODEL_NAME);
+                                            if (newDeviceModel.equals(oldDeviceModel)) {
+                                                // Replacing an existing device
+                                                ReplacementUtils.doReplacement(
+                                                        vertx.eventBus(),
+                                                        mongoClient,
+                                                        redisClient,
+                                                        passiveWorkflowCache.getPerOrgTreeMap(orgId),
+                                                        cpe,
+                                                        orgId,
+                                                        cpeKey,
+                                                        oldDevice.getString(AcsConstants.FIELD_NAME_ID),
+                                                        oldDevice.containsKey(Cpe.DB_FIELD_NAME_TO_BE_REPLACED_BY)
+                                                );
+                                            } else {
+                                                String error = "Model mismatch. (replacing an " + oldDeviceModel
+                                                        + " with an " + newDeviceModel + ")";
+                                                log.error("Replacement Failed due to " + error);
 
-                                                String newDeviceModel = cpe.getString(CpeDeviceType.FIELD_NAME_MODEL_NAME);
-                                                String oldDeviceModel = oldDevice.getString(CpeDeviceType.FIELD_NAME_MODEL_NAME);
-                                                if (newDeviceModel.equals(oldDeviceModel)) {
-                                                    // Replacing an existing device
-                                                    ReplacementUtils.doReplacement(
-                                                            vertx.eventBus(),
-                                                            redisClient,
-                                                            passiveWorkflowCache.getPerOrgTreeMap(orgId),
-                                                            cpe,
-                                                            orgId,
-                                                            cpeKey,
-                                                            oldDevice.getString(AcsConstants.FIELD_NAME_ID),
-                                                            oldDevice.containsField(Cpe.DB_FIELD_NAME_TO_BE_REPLACED_BY)
-                                                    );
-                                                } else {
-                                                    String error = "Model mismatch. (replacing an " + oldDeviceModel
-                                                            + " with an " + newDeviceModel + ")";
-                                                    log.error("Replacement Failed due to " + error);
-
-                                                    /**
-                                                     * Save Replacement Failure Event
-                                                     */
-                                                    Event.saveEvent(
-                                                            vertx.eventBus(),
-                                                            orgId,
-                                                            Cpe.getSnByCpeKey(cpeKey),
-                                                            EventTypeEnum.ReplacementFailure,
-                                                            EventSourceEnum.System,
-                                                            new JsonObject()
-                                                                    .putString(
-                                                                            "old device",
-                                                                            oldDevice.getString(Cpe.DB_FIELD_NAME_SN)
-                                                                    )
-                                                                    .putString("cause", error)
-                                                    );
-                                                }
+                                                /**
+                                                 * Save Replacement Failure Event
+                                                 */
+                                                Event.saveEvent(
+                                                        mongoClient,
+                                                        orgId,
+                                                        Cpe.getSnByCpeKey(cpeKey),
+                                                        EventTypeEnum.ReplacementFailure,
+                                                        EventSourceEnum.System,
+                                                        new JsonObject()
+                                                                .put(
+                                                                        "old device",
+                                                                        oldDevice.getString(Cpe.DB_FIELD_NAME_SN)
+                                                                )
+                                                                .put("cause", error)
+                                                );
                                             }
                                         }
                                     }
-                            ),
+                                },
                             DEVICE_REPLACEMENT_QUERY_KEY
                     );
                 } else {
@@ -268,10 +276,10 @@ public class PassiveWorkflowWorkerVertice extends Verticle{
             final JsonObject device) {
         try {
             VertxMongoUtils.findOne(
-                    vertx.eventBus(),
+                    mongoClient,
                     Subscriber.DB_COLLECTION_NAME,
                     Subscriber.getDeviceMatcherByDeviceIdArray(orgId, new JsonArray().add(regId)),
-                    new VertxMongoUtils.FindOneHandler(
+
                             new Handler<JsonObject>() {
                                 @Override
                                 public void handle(JsonObject subscriber) {
@@ -293,7 +301,7 @@ public class PassiveWorkflowWorkerVertice extends Verticle{
 
                                     try {
                                         VertxMongoUtils.update(
-                                                vertx.eventBus(),
+                                                mongoClient,
                                                 Cpe.CPE_COLLECTION_NAME,
                                                 device.getString(AcsConstants.FIELD_NAME_ID),
                                                 VertxMongoUtils.getUpdatesObject(
@@ -310,7 +318,7 @@ public class PassiveWorkflowWorkerVertice extends Verticle{
                                     }
                                 }
                             }
-                    ),
+                    ,
                     null
             );
         } catch (VertxException e) {
@@ -351,8 +359,8 @@ public class PassiveWorkflowWorkerVertice extends Verticle{
                 // Found a match
                 new WorkflowCpeTracker(
                         vertx,
-                        cpe.putString(FIELD_WORKFLOW_ID, aWorkflow.id)
-                                .putArray(FIELD_SKIP_WORKFLOWS, skip == null ? new JsonArray() : skip.add(aWorkflow.id)),
+                        cpe.put(FIELD_WORKFLOW_ID, aWorkflow.id)
+                                .put(FIELD_SKIP_WORKFLOWS, skip == null ? new JsonArray() : skip.add(aWorkflow.id)),
                         aWorkflow,
                         cpeExecResultHandler
                 );
@@ -367,10 +375,10 @@ public class PassiveWorkflowWorkerVertice extends Verticle{
              * Run Deep Discovery
              */
             // Convert action into API request
-            JsonObject requestBody = new JsonObject().putObject(CpeDeviceOp.FIELD_NAME_CPE_DB_OBJECT, cpe);
-            requestBody.putArray(CpeDeviceOp.FIELD_NAME_PARAM_NAMES, DEEP_DISCOVER_PARAM_NAMES);
-            requestBody.putObject(CpeDeviceOp.FIELD_NAME_GET_OPTIONS, WorkflowAction.GET_LIVE_DATA);
-            requestBody.putString(CpeDeviceOp.FIELD_NAME_OPERATION,
+            JsonObject requestBody = new JsonObject().put(CpeDeviceOp.FIELD_NAME_CPE_DB_OBJECT, cpe);
+            requestBody.put(CpeDeviceOp.FIELD_NAME_PARAM_NAMES, DEEP_DISCOVER_PARAM_NAMES);
+            requestBody.put(CpeDeviceOp.FIELD_NAME_GET_OPTIONS, WorkflowAction.GET_LIVE_DATA);
+            requestBody.put(CpeDeviceOp.FIELD_NAME_OPERATION,
                     CpeDeviceOpTypeEnum.GetParameterValues.name());
 
             AcsApiUtils.sendApiRequest(
@@ -398,7 +406,7 @@ public class PassiveWorkflowWorkerVertice extends Verticle{
                                 log.error("Failed to perform deep discovery for CPE " + cpeKey + "!");
                                 try {
                                     VertxMongoUtils.delete(
-                                            vertx.eventBus(),
+                                            mongoClient,
                                             Cpe.CPE_COLLECTION_NAME,
                                             cpeKey,
                                             null
@@ -428,7 +436,7 @@ public class PassiveWorkflowWorkerVertice extends Verticle{
                     cpeExecResult.getString(AcsConstants.FIELD_NAME_ORG_ID),
                     cpeExecResult.getString(AcsConstants.FIELD_NAME_ID),
                     cpeExecResult,
-                    cpeExecResult.getArray(FIELD_SKIP_WORKFLOWS).add(cpeExecResult.getString(FIELD_WORKFLOW_ID))
+                    cpeExecResult.getJsonArray(FIELD_SKIP_WORKFLOWS).add(cpeExecResult.getString(FIELD_WORKFLOW_ID))
             );
         }
     };

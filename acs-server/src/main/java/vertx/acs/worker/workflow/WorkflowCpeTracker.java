@@ -121,8 +121,8 @@ public class WorkflowCpeTracker {
 
         // CPE Matcher
         JsonObject matcher = new JsonObject()
-                .putString(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID, cpeId)
-                .putObject(Cpe.DB_FIELD_NAME_WORKFLOW_EXEC + "." + workflow.id, VertxMongoUtils.EXISTS_FALSE);
+                .put(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID, cpeId)
+                .put(Cpe.DB_FIELD_NAME_WORKFLOW_EXEC + "." + workflow.id, VertxMongoUtils.EXISTS_FALSE);
 
         // Update CPE DB as we start
         cpeDbWorkflowExecPrefix = Cpe.DB_FIELD_NAME_WORKFLOW_EXEC + "." + workflow.id + ".";

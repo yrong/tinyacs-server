@@ -121,11 +121,11 @@ public class GroupService extends AbstractAcNbiCrudService {
                 /**
                  * Validate the Filter Content.
                  */
-                JsonObject cpeFilters = group.getObject(AcsConstants.FIELD_NAME_CPE_FILTER);
+                JsonObject cpeFilters = group.getJsonObject(AcsConstants.FIELD_NAME_CPE_FILTER);
                 //VertxJsonUtils.validateFields(cpeFilter, null, cpeFilterOptionalFields);
                 if (cpeFilters != null) {
-                    for (String fieldName : cpeFilters.getFieldNames()) {
-                        Object aFilter = cpeFilters.getField(fieldName);
+                    for (String fieldName : cpeFilters.fieldNames()) {
+                        Object aFilter = cpeFilters.getValue(fieldName);
                         if (aFilter instanceof JsonObject) {
                             JsonObject jsonFilter = (JsonObject)aFilter;
                             String regex = jsonFilter.getString(CpeGroup.OPERATOR_REGEX);
@@ -181,9 +181,9 @@ public class GroupService extends AbstractAcNbiCrudService {
         switch (crudType) {
             case Create:
             case Update:
-                String filterString = nbiRequest.body.getObject(AcsConstants.FIELD_NAME_CPE_FILTER).encode();
-                nbiRequest.body.removeField(AcsConstants.FIELD_NAME_CPE_FILTER);
-                nbiRequest.body.putString(AcsConstants.FIELD_NAME_CPE_FILTER, filterString);
+                String filterString = nbiRequest.body.getJsonObject(AcsConstants.FIELD_NAME_CPE_FILTER).encode();
+                nbiRequest.body.remove(AcsConstants.FIELD_NAME_CPE_FILTER);
+                nbiRequest.body.put(AcsConstants.FIELD_NAME_CPE_FILTER, filterString);
                 break;
         }
     }
@@ -208,10 +208,10 @@ public class GroupService extends AbstractAcNbiCrudService {
              */
             JsonArray convertedResults = new JsonArray();
             for (int i = 0; i < queryResults.size(); i++) {
-                JsonObject aGroup = queryResults.get(i);
+                JsonObject aGroup = queryResults.getJsonObject(i);
                 String filterString = aGroup.getString(AcsConstants.FIELD_NAME_CPE_FILTER);
-                aGroup.removeField(AcsConstants.FIELD_NAME_CPE_FILTER);
-                aGroup.putObject(AcsConstants.FIELD_NAME_CPE_FILTER, new JsonObject(filterString));
+                aGroup.remove(AcsConstants.FIELD_NAME_CPE_FILTER);
+                aGroup.put(AcsConstants.FIELD_NAME_CPE_FILTER, new JsonObject(filterString));
                 convertedResults.add(aGroup);
             }
 
@@ -251,7 +251,7 @@ public class GroupService extends AbstractAcNbiCrudService {
      */
     @Override
     public List<CrossReferenceCheck> getAllCrossReferenceChecks(String id) {
-        JsonObject matcher = new JsonObject().putString(Workflow.FIELD_NAME_GROUPS, id);
+        JsonObject matcher = new JsonObject().put(Workflow.FIELD_NAME_GROUPS, id);
 
         final CrossReferenceCheck crossReferenceCheck = new CrossReferenceCheck(matcher, Workflow.DB_COLLECTION_NAME);
 

@@ -108,7 +108,7 @@ public class MaintenanceScheduleService extends AbstractAcNbiCrudService{
 
         crossReferenceChecks.add(
                 new CrossReferenceCheck(
-                        new JsonObject().putString(
+                        new JsonObject().put(
                                 Workflow.FIELD_NAME_EXEC_POLICY + "." + ExecPolicy.FIELD_NAME_MAINTENANCE_SCHEDULE,
                                 id
                         ),

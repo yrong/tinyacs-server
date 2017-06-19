@@ -99,10 +99,10 @@ public class AcsNbiRequest {
             // Build Vert.x Response
             JsonObject response;
             if (result != null) {
-                result.putString("status", status.toString());
+                result.put("status", status.toString());
                 response = result;
             } else {
-                response = new JsonObject().putString("status", status.toString());
+                response = new JsonObject().put("status", status.toString());
             }
 
             /**
@@ -135,10 +135,10 @@ public class AcsNbiRequest {
             // Build Vert.x Response
             JsonObject response;
             if (result != null) {
-                result.putString("status", status.toString());
+                result.put("status", status.toString());
                 response = result;
             } else {
-                response = new JsonObject().putString("status", status.toString());
+                response = new JsonObject().put("status", status.toString());
             }
 
             // Send Response via Vert.x event bus
@@ -167,9 +167,9 @@ public class AcsNbiRequest {
             }
         } else {
             // Build Vert.x Response
-            JsonObject response = new JsonObject().putString("status", status.toString());
+            JsonObject response = new JsonObject().put("status", status.toString());
             if (resultString != null) {
-                response.putString("result", resultString);
+                response.put("result", resultString);
             }
 
             // Send Response via Vert.x event bus
@@ -191,7 +191,7 @@ public class AcsNbiRequest {
             httpServerRequest.response().end();
         } else {
             // Build Vert.x Response
-            JsonObject response = new JsonObject().putString("status", status.toString());
+            JsonObject response = new JsonObject().put("status", status.toString());
 
             // Send Response via Vert.x event bus
             vertxRequestMessage.reply(response);
@@ -288,7 +288,7 @@ public class AcsNbiRequest {
             return null;
         }
 
-        return queryParameters.getField(paramName);
+        return queryParameters.getValue(paramName);
     }
 
     /**

@@ -1,5 +1,7 @@
 package vertx.acs.worker.workflow;
 
+import io.vertx.ext.mongo.MongoClient;
+import io.vertx.redis.RedisClient;
 import vertx.VertxException;
 import vertx.VertxMongoUtils;
 import vertx.VertxRedisUtils;
@@ -10,7 +12,6 @@ import vertx.taskmgmt.TaskConstants;
 import vertx.taskmgmt.TaskUtils;
 import vertx.taskmgmt.worker.AbstractSxaTaskImpl;
 import vertx.taskmgmt.worker.WorkerVertice;
-import io.vertx.java.redis.RedisClient;
 import net.greghaines.jesque.utils.ResqueConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -130,13 +131,13 @@ public class ActiveWorkflowTaskWorker extends AbstractSxaTaskImpl{
      * Static Query Keys that define the interesting DB fields when querying CPE devices collection.
      */
     public static JsonObject QUERY_KEYS = new JsonObject()
-            .putNumber(AcsConstants.FIELD_NAME_ID, 1)
-            .putNumber(AcsConstants.FIELD_NAME_ORG_ID, 1)
-            .putNumber(CpeDeviceType.FIELD_NAME_OUI, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_SN, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_CONNREQ_URL, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_CONNREQ_USERNAME, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_CONNREQ_PASSWORD, 1);
+            .put(AcsConstants.FIELD_NAME_ID, 1)
+            .put(AcsConstants.FIELD_NAME_ORG_ID, 1)
+            .put(CpeDeviceType.FIELD_NAME_OUI, 1)
+            .put(Cpe.DB_FIELD_NAME_SN, 1)
+            .put(Cpe.DB_FIELD_NAME_CONNREQ_URL, 1)
+            .put(Cpe.DB_FIELD_NAME_CONNREQ_USERNAME, 1)
+            .put(Cpe.DB_FIELD_NAME_CONNREQ_PASSWORD, 1);
 
     /**
      * Empty Constructor
@@ -145,11 +146,16 @@ public class ActiveWorkflowTaskWorker extends AbstractSxaTaskImpl{
         super();
     }
 
+    MongoClient mongoClient;
+
+
     /**
      * Constructor by JSON Object
      */
     public ActiveWorkflowTaskWorker(JsonObject taskArgs, WorkerVertice workerVertice) throws Exception {
         super((taskArgs), workerVertice);
+
+        mongoClient = MongoClient.createShared(vertx,VertxMongoUtils.getModMongoPersistorConfig());
 
         log.info("Processing a new " + getTaskName() + "task...");
 
@@ -159,7 +165,7 @@ public class ActiveWorkflowTaskWorker extends AbstractSxaTaskImpl{
         /**
          * Extract the workflow from task args
          */
-        workflow = Workflow.validateJsonObject(taskArgs.getObject(TASK_NAME));
+        workflow = Workflow.validateJsonObject(taskArgs.getJsonObject(TASK_NAME));
         if (workflow.id == null) {
             throw NO_ID_FOUND;
         }
@@ -187,7 +193,7 @@ public class ActiveWorkflowTaskWorker extends AbstractSxaTaskImpl{
                          */
                         if (nextScheduledTask != null) {
                             log.info("Cancelling the scheduled task for next window...");
-                            activeWorkflowWorkerVertice.redisClient.zrem(JESQUE_KEY, nextScheduledTask.toString());
+                            activeWorkflowWorkerVertice.redisClient.zrem(JESQUE_KEY, nextScheduledTask.toString(),(res)->{});
                         }
 
                         /**
@@ -224,7 +230,7 @@ public class ActiveWorkflowTaskWorker extends AbstractSxaTaskImpl{
                 }
             }
         };
-        vertx.eventBus().registerHandler(
+        vertx.eventBus().consumer(
                 AcsConstants.VERTX_ADDRESS_WORKFLOW_SUSPEND + "." + workflow.id,
                 remoteRequestHandler
         );
@@ -258,7 +264,7 @@ public class ActiveWorkflowTaskWorker extends AbstractSxaTaskImpl{
     /**
      * Query result handler
      */
-    public VertxMongoUtils.FindHandler queryResultHandler = null;
+    public Handler queryResultHandler = null;
 
     /**
      * Window Close Timer
@@ -270,13 +276,13 @@ public class ActiveWorkflowTaskWorker extends AbstractSxaTaskImpl{
      * Update workflow state to in-progress
      */
     public static final JsonObject START_PROGRESS =
-            new JsonObject().putString(Workflow.FIELD_NAME_STATE, Workflow.STATE_IN_PROGRESS);
+            new JsonObject().put(Workflow.FIELD_NAME_STATE, Workflow.STATE_IN_PROGRESS);
 
     /**
      * Update workflow state to in-progress
      */
     public static final JsonObject SCHEDULED =
-            new JsonObject().putString(Workflow.FIELD_NAME_STATE, Workflow.STATE_SCHEDULED);
+            new JsonObject().put(Workflow.FIELD_NAME_STATE, Workflow.STATE_SCHEDULED);
 
     /**
      * Main Engine.
@@ -297,18 +303,9 @@ public class ActiveWorkflowTaskWorker extends AbstractSxaTaskImpl{
                             index,
                             workflow.execPolicy.maintenanceWindow.recurringInterval,
                             activeWorkflowWorkerVertice.redisClient,
-                            new Handler<Message<JsonObject>>() {
+                            new Handler<Long>() {
                                 @Override
-                                public void handle(Message<JsonObject> enqueueResult) {
-                                    JsonObject result = enqueueResult.body();
-                                    if (result == null ||
-                                            !("ok".equals(result.getString("status")))
-                                            ) {
-                                        log.error("Received unexpected result when scheduling a new workflow task!\n"
-                                                + "Workflow:\n" + workflow.rawJsonObject.encodePrettily()
-                                                + "\nEnqueue Result:\n"
-                                                + (result == null ? "(null)" : result.encodePrettily()));
-                                    }
+                                public void handle(Long enqueueResult) {
                                     log.info("Scheduled the task for the next window with delay="
                                             + workflow.execPolicy.maintenanceWindow.recurringInterval + " second(s).");
                                 }
@@ -329,10 +326,10 @@ public class ActiveWorkflowTaskWorker extends AbstractSxaTaskImpl{
                         @Override
                         public void handle(Long aLong) {
                             // Unregister SAR event handler
-                            vertx.eventBus().unregisterHandler(
-                                    AcsConstants.VERTX_ADDRESS_WORKFLOW_SUSPEND + "." + workflow.id,
-                                    remoteRequestHandler
-                            );
+//                            vertx.eventBus().unregisterHandler(
+//                                    AcsConstants.VERTX_ADDRESS_WORKFLOW_SUSPEND + "." + workflow.id,
+//                                    remoteRequestHandler
+//                            );
 
                             log.info(VertxUtils.highlightWithHashes(workflow.id + ": Window is closed."));
                             bWindowClosed = true;
@@ -345,7 +342,7 @@ public class ActiveWorkflowTaskWorker extends AbstractSxaTaskImpl{
                             // Change workflow state to "scheduled"
                             try {
                                 VertxMongoUtils.update(
-                                        vertx.eventBus(),
+                                        mongoClient,
                                         Workflow.DB_COLLECTION_NAME,
                                         workflow.id,
                                         VertxMongoUtils.getUpdatesObject(
@@ -370,7 +367,7 @@ public class ActiveWorkflowTaskWorker extends AbstractSxaTaskImpl{
          */
         try {
             VertxMongoUtils.update(
-                    vertx.eventBus(),
+                    mongoClient,
                     Workflow.DB_COLLECTION_NAME,
                     workflow.id,
                     VertxMongoUtils.getUpdatesObject(
@@ -416,7 +413,7 @@ public class ActiveWorkflowTaskWorker extends AbstractSxaTaskImpl{
         log.info("Running Query with matcher " + queryMatcher);
         try {
             VertxMongoUtils.find(
-                    vertx.eventBus(),
+                    mongoClient,
                     Cpe.CPE_COLLECTION_NAME,
                     queryMatcher,
                     null,
@@ -445,14 +442,14 @@ public class ActiveWorkflowTaskWorker extends AbstractSxaTaskImpl{
             int index,
             long delay,
             RedisClient redisClient,
-            Handler<Message<JsonObject>> handler) {
+            Handler<Long> handler) {
         // Build a raw task
         JsonObject rawTask = buildRawTask(
                 TaskConstants.INTERNAL_ACS_API_TASK_NS_WORKFLOW,
                 TASK_NAME,
                 new JsonObject()
-                        .putObject(TASK_NAME, workflow.rawJsonObject)
-                        .putString("_id", workflow.id + "." + index)
+                        .put(TASK_NAME, workflow.rawJsonObject)
+                        .put("_id", workflow.id + "." + index)
         );
 
         // Enqueue to Redis directly
@@ -497,7 +494,7 @@ public class ActiveWorkflowTaskWorker extends AbstractSxaTaskImpl{
                         String task = null;
                         if (allWorkflowTasks != null && allWorkflowTasks.size() > 0) {
                             for (int i = 0; i < allWorkflowTasks.size(); i ++) {
-                                String aTask = allWorkflowTasks.get(i).toString();
+                                String aTask = allWorkflowTasks.getValue(i).toString();
                                 if (aTask.contains(workflowId)) {
                                     // Found it
                                     // Delete it
@@ -557,19 +554,19 @@ public class ActiveWorkflowTaskWorker extends AbstractSxaTaskImpl{
 
                         final ArrayList<Workflow> workflowArrayList = new ArrayList<Workflow>();
                         for (int i = 0; i < allWorkflowTasks.size(); i ++) {
-                            String aTask = allWorkflowTasks.get(i).toString();
+                            String aTask = allWorkflowTasks.getValue(i).toString();
                             if (aTask.contains("\"" + fileId + "\"")) {
                                 // Found one
                                 try {
                                     JsonObject taskJsonObj = new JsonObject(aTask);
-                                    JsonArray args = taskJsonObj.getArray("args");
-                                    JsonObject firstArg = args.get(0);
-                                    JsonObject workflowJsonObj = firstArg.getObject("workflow");
-                                    JsonArray actions = workflowJsonObj.getArray(Workflow.FIELD_NAME_ACTIONS);
-                                    for (JsonObject action : (JsonObject[])actions.toArray()) {
-                                        if (fileId.equals(action.getString(WorkflowAction.FIELD_NAME_FILE_ID))) {
-                                            action.removeField(WorkflowAction.FIELD_NAME_FILE_STRUCT);
-                                            action.putObject(WorkflowAction.FIELD_NAME_FILE_STRUCT, newFileStruct);
+                                    JsonArray args = taskJsonObj.getJsonArray("args");
+                                    JsonObject firstArg = args.getJsonObject(0);
+                                    JsonObject workflowJsonObj = firstArg.getJsonObject("workflow");
+                                    JsonArray actions = workflowJsonObj.getJsonArray(Workflow.FIELD_NAME_ACTIONS);
+                                    for (Object action : actions.getList()) {
+                                        if (fileId.equals(((JsonObject) action).getString(WorkflowAction.FIELD_NAME_FILE_ID))) {
+                                            ((JsonObject) action).remove(WorkflowAction.FIELD_NAME_FILE_STRUCT);
+                                            ((JsonObject) action).put(WorkflowAction.FIELD_NAME_FILE_STRUCT, newFileStruct);
                                         }
                                     }
                                     Workflow workflowPojo = Workflow.validateJsonObject(workflowJsonObj);
@@ -609,7 +606,7 @@ public class ActiveWorkflowTaskWorker extends AbstractSxaTaskImpl{
         ArrayList<Workflow> workflowArrayList;
         int numberOfTasks;
         Handler<Integer> finalHandler;
-        Handler<Message<JsonObject>> zaddHandler;
+        Handler<Long> zaddHandler;
 
         /**
          * Constructor.
@@ -623,9 +620,9 @@ public class ActiveWorkflowTaskWorker extends AbstractSxaTaskImpl{
                 final Handler<Integer> finalHandler) {
             this.workflowArrayList = workflowArrayList;
             numberOfTasks = workflowArrayList.size();
-            zaddHandler = new Handler<Message<JsonObject>>() {
+            zaddHandler = new Handler<Long>() {
                 @Override
-                public void handle(Message<JsonObject> event) {
+                public void handle(Long event) {
                     // Add the next task from list if any
                     workflowArrayList .remove(0);
                     if (workflowArrayList.size() > 0) {
@@ -657,15 +654,15 @@ public class ActiveWorkflowTaskWorker extends AbstractSxaTaskImpl{
     /**
      * Extending/Overwriting the VertxMongoUtils.FindHandler
      */
-    public VertxMongoUtils.FindHandler getCpeQueryResultHandler() {
+    public Handler getCpeQueryResultHandler() {
         try {
-            return new VertxMongoUtils.FindHandler(new Handler<JsonArray>() {
+            return new Handler<JsonArray>() {
                 @Override
                 public void handle(JsonArray queryResults) {
                     if (queryResults != null || queryResults.size() == 0) {
                         // Iterate all CPEs in the result
                         for (int i = 0; i < queryResults.size(); i++) {
-                            JsonObject aCpe = queryResults.get(i);
+                            JsonObject aCpe = queryResults.getJsonObject(i);
 
                             /**
                              * First make sure this CPE is not currently in the cpeTrackers
@@ -707,8 +704,8 @@ public class ActiveWorkflowTaskWorker extends AbstractSxaTaskImpl{
                         done();
                     }
                 }
-            });
-        } catch (VertxException e) {
+            };
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
@@ -771,7 +768,7 @@ public class ActiveWorkflowTaskWorker extends AbstractSxaTaskImpl{
      * Method to be called when the workflow task is done
      */
     public static final JsonObject ALL_DONE =
-            new JsonObject().putString(Workflow.FIELD_NAME_STATE, Workflow.STATE_COMPLETED);
+            new JsonObject().put(Workflow.FIELD_NAME_STATE, Workflow.STATE_COMPLETED);
     public void done() {
         String taskState = this.taskJsonObject.getString("state");
         if (TaskConstants.TASK_STATE_SUCCEEDED.equals(taskState)) {
@@ -811,7 +808,7 @@ public class ActiveWorkflowTaskWorker extends AbstractSxaTaskImpl{
              */
             if (nextScheduledTask != null) {
                 log.info("Cancelling the scheduled task for next window...");
-                activeWorkflowWorkerVertice.redisClient.zrem(JESQUE_KEY, nextScheduledTask.toString());
+                activeWorkflowWorkerVertice.redisClient.zrem(JESQUE_KEY, nextScheduledTask.toString(),(res)->{});
                 nextScheduledTask = null;
             }
 
@@ -823,7 +820,7 @@ public class ActiveWorkflowTaskWorker extends AbstractSxaTaskImpl{
         // Update workflow state
         try {
             VertxMongoUtils.update(
-                    vertx.eventBus(),
+                    mongoClient,
                     Workflow.DB_COLLECTION_NAME,
                     workflow.id,
                     VertxMongoUtils.getUpdatesObject(

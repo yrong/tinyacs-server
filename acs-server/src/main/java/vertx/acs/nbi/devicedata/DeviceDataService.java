@@ -122,14 +122,14 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
      * Static Errors
      */
     private static final JsonObject MISSING_ID_ON_DELETES =
-            new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR, "Device Id is required for deletes");
+            new JsonObject().put(AcsConstants.FIELD_NAME_ERROR, "Device Id is required for deletes");
     private static final JsonObject INVALID_CPE_ID =
-            new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR, "Invalid Device Id!");
+            new JsonObject().put(AcsConstants.FIELD_NAME_ERROR, "Invalid Device Id!");
     public static final JsonObject FAILED_TO_UPDATE_SEARCH_ENGINE =
-            new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR,
+            new JsonObject().put(AcsConstants.FIELD_NAME_ERROR,
                     "Internal Server Error! (failed to update the search engine)");
     public static final JsonObject FAILED_TO_UPDATE_SUBSCRIBER_DB =
-            new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR,
+            new JsonObject().put(AcsConstants.FIELD_NAME_ERROR,
                     "Internal Server Error! (failed to update the subscriber database)");
     public static VertxException MISSING_ORG_ID = new VertxException("Missing Org Id!");
 
@@ -137,7 +137,7 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
      * Other Static Constants
      */
     public static final JsonObject NON_EQUAL_TO_TRUE = new JsonObject()
-            .putBoolean(VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_NOT_EQUAL, true);
+            .put(VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_NOT_EQUAL, true);
 
     /**
      * Start the service
@@ -211,7 +211,7 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
                 );
 
                 // add "_id"
-                nbiRequest.body.putString(
+                nbiRequest.body.put(
                         AcsConstants.FIELD_NAME_ID,
                         Cpe.getCpeKey(
                                 nbiRequest.body.getString(AcsConstants.FIELD_NAME_ORG_ID),
@@ -243,7 +243,7 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
                             RETRIEVE_OPTIONAL_FIELDS_EXTERNAL
                     );
                 }
-                if (nbiRequest.body.containsField(QUERY_UNLINKED)) {
+                if (nbiRequest.body.containsKey(QUERY_UNLINKED)) {
                     /**
                      * Querying unlinked devices (i.e. not associated with any subscriber)
                      */
@@ -257,7 +257,7 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
                         }
                         nbiRequest.serviceData = reqTracker;
                     }
-                    nbiRequest.body.removeField(QUERY_UNLINKED);
+                    nbiRequest.body.remove(QUERY_UNLINKED);
                 }
                 break;
         }
@@ -290,13 +290,13 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
         switch (crudType) {
             case Create:
                 // add create time
-                nbiRequest.body.putObject(AcsConstants.FIELD_NAME_CREATE_TIME, VertxMongoUtils.getDateObject());
+                nbiRequest.body.put(AcsConstants.FIELD_NAME_CREATE_TIME, VertxMongoUtils.getDateObject());
                 break;
 
             case Retrieve:
                 // When retrieving by regId, only return the active one (exclude the decommissioned device)
-                if (nbiRequest.body.containsField(Cpe.DB_FIELD_NAME_REGISTRATION_ID)) {
-                    nbiRequest.body.putObject(Cpe.DB_FIELD_NAME_DECOMMISSIONED, NON_EQUAL_TO_TRUE);
+                if (nbiRequest.body.containsKey(Cpe.DB_FIELD_NAME_REGISTRATION_ID)) {
+                    nbiRequest.body.put(Cpe.DB_FIELD_NAME_DECOMMISSIONED, NON_EQUAL_TO_TRUE);
                 }
                 break;
         }
@@ -315,21 +315,21 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
     private static final String HW_SN_PREFIX = "UnitSerialNumber=";     // (see CWMP-649)
     @Override
     public JsonObject additionalPostRetrievePerRecordHandler(AcsNbiRequest nbiRequest, JsonObject aRecord) {
-        if (aRecord.containsField(Cpe.DB_FIELD_NAME_PERIODIC_INFORM_ENABLE)) {
+        if (aRecord.containsKey(Cpe.DB_FIELD_NAME_PERIODIC_INFORM_ENABLE)) {
             boolean bPeriodicInformEnabled = aRecord.getBoolean(Cpe.DB_FIELD_NAME_PERIODIC_INFORM_ENABLE);
             if (bPeriodicInformEnabled == false) {
-                aRecord.putNumber(Cpe.DB_FIELD_NAME_PERIODIC_INFORM_INTERVAL, 0);
+                aRecord.put(Cpe.DB_FIELD_NAME_PERIODIC_INFORM_INTERVAL, 0);
             }
-            aRecord.removeField(Cpe.DB_FIELD_NAME_PERIODIC_INFORM_ENABLE);
+            aRecord.remove(Cpe.DB_FIELD_NAME_PERIODIC_INFORM_ENABLE);
         }
 
         // Extract HW Serial # from "AdditionalHardwareVersion" (see CWMP-649)
-        if (aRecord.containsField(Cpe.DB_FIELD_NAME_ADDITIONAL_HW_VER)) {
+        if (aRecord.containsKey(Cpe.DB_FIELD_NAME_ADDITIONAL_HW_VER)) {
             String additionalHwVersion = aRecord.getString(Cpe.DB_FIELD_NAME_ADDITIONAL_HW_VER);
-            aRecord.removeField(Cpe.DB_FIELD_NAME_ADDITIONAL_HW_VER);
+            aRecord.remove(Cpe.DB_FIELD_NAME_ADDITIONAL_HW_VER);
 
             if (additionalHwVersion != null && additionalHwVersion.startsWith(HW_SN_PREFIX)) {
-                aRecord.putString("hardwareSerialNumber", additionalHwVersion.substring(HW_SN_PREFIX.length()));
+                aRecord.put("hardwareSerialNumber", additionalHwVersion.substring(HW_SN_PREFIX.length()));
             /*
             } else {
                 log.info(aRecord.getString(Cpe.DB_FIELD_NAME_SN) + ": no HW SN found in additionalHwVer ("
@@ -357,16 +357,16 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
             JsonObject newRecord,
             JsonObject oldRecord) {
         // Update initial provisioning
-        if (newRecord.containsField(Cpe.DB_FIELD_NAME_INITIAL_PROVISIONING)) {
+        if (newRecord.containsKey(Cpe.DB_FIELD_NAME_INITIAL_PROVISIONING)) {
             // send a conn-req to the CPE to apply immediately if the CPE is already known
-            if (oldRecord.containsField(Cpe.DB_FIELD_NAME_CONNREQ_URL)) {
+            if (oldRecord.containsKey(Cpe.DB_FIELD_NAME_CONNREQ_URL)) {
                 RequestTracker requestTracker = new RequestTracker();
                 requestTracker.oldRecord = oldRecord;
                 nbiRequest.serviceData = requestTracker;
 
                 // Set the force flag
-                newRecord.getObject(Cpe.DB_FIELD_NAME_INITIAL_PROVISIONING)
-                        .putBoolean(Cpe.DB_FIELD_NAME_INITIAL_PROVISIONING_FORCE_APPLY, true);
+                newRecord.getJsonObject(Cpe.DB_FIELD_NAME_INITIAL_PROVISIONING)
+                        .put(Cpe.DB_FIELD_NAME_INITIAL_PROVISIONING_FORCE_APPLY, true);
             }
         }
 
@@ -394,7 +394,7 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
             // send a conn-req to the CPE to apply immediately if the CPE is already known
             RequestTracker reqTracker = nbiRequest.getServiceData();
             JsonObject queryResult = reqTracker.oldRecord;
-            if (queryResult != null && queryResult.containsField(Cpe.DB_FIELD_NAME_CONNREQ_URL)) {
+            if (queryResult != null && queryResult.containsKey(Cpe.DB_FIELD_NAME_CONNREQ_URL)) {
                 ConnectionRequestUtils.sendNewConnectionRequestRequest(vertx, queryResult);
             }
         }
@@ -408,54 +408,54 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
      * Default to null (return everything)
      */
     private static final JsonObject QUERY_KEYS = new JsonObject()
-            .putNumber(AcsConstants.FIELD_NAME_ORG_ID, 0)
-            .putNumber(Cpe.DB_FIELD_NAME_LAST_UPDATE_TIME, 0)
-            .putNumber(Cpe.DB_FIELD_NAME_WAN_CONNECTION_PATH, 0)
-            .putNumber(Cpe.DB_FIELD_NAME_CONNREQ_PASSWORD, 0)
-            .putNumber(Cpe.DB_FIELD_NAME_CONNREQ_URL, 0)
-            .putNumber(Cpe.DB_FIELD_NAME_WORKFLOW_EXEC, 0)
-            .putNumber(Cpe.DB_FIELD_NAME_CONNREQ_USERNAME, 0)
-            .putNumber(Cpe.DB_FIELD_NAME_INITIAL_PROVISIONING + "." + Cpe.DB_FIELD_NAME_INITIAL_PROVISIONING_FORCE_APPLY, 0)
-            .putNumber(Cpe.DB_FIELD_NAME_PARAM_VALUES, 0)
-            .putNumber(Cpe.DB_FIELD_NAME_PARAM_ATTRIBUTES, 0);
+            .put(AcsConstants.FIELD_NAME_ORG_ID, 0)
+            .put(Cpe.DB_FIELD_NAME_LAST_UPDATE_TIME, 0)
+            .put(Cpe.DB_FIELD_NAME_WAN_CONNECTION_PATH, 0)
+            .put(Cpe.DB_FIELD_NAME_CONNREQ_PASSWORD, 0)
+            .put(Cpe.DB_FIELD_NAME_CONNREQ_URL, 0)
+            .put(Cpe.DB_FIELD_NAME_WORKFLOW_EXEC, 0)
+            .put(Cpe.DB_FIELD_NAME_CONNREQ_USERNAME, 0)
+            .put(Cpe.DB_FIELD_NAME_INITIAL_PROVISIONING + "." + Cpe.DB_FIELD_NAME_INITIAL_PROVISIONING_FORCE_APPLY, 0)
+            .put(Cpe.DB_FIELD_NAME_PARAM_VALUES, 0)
+            .put(Cpe.DB_FIELD_NAME_PARAM_ATTRIBUTES, 0);
     private static final JsonObject QUERY_KEY_BRIEF = new JsonObject()
-            .putNumber(AcsConstants.FIELD_NAME_ORG_ID, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_SN, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_REGISTRATION_ID, 1)
-            .putNumber(CpeDeviceType.FIELD_NAME_MANUFACTURER, 1)
-            .putNumber(CpeDeviceType.FIELD_NAME_MODEL_NAME, 1)
-            .putNumber(CpeDeviceType.FIELD_NAME_SW_VER, 1)
-            .putNumber(CpeDeviceType.FIELD_NAME_HW_VER, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_ADDITIONAL_HW_VER, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_LAST_INFORM_TIME, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_PERIODIC_INFORM_INTERVAL, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_PERIODIC_INFORM_ENABLE, 1);
+            .put(AcsConstants.FIELD_NAME_ORG_ID, 1)
+            .put(Cpe.DB_FIELD_NAME_SN, 1)
+            .put(Cpe.DB_FIELD_NAME_REGISTRATION_ID, 1)
+            .put(CpeDeviceType.FIELD_NAME_MANUFACTURER, 1)
+            .put(CpeDeviceType.FIELD_NAME_MODEL_NAME, 1)
+            .put(CpeDeviceType.FIELD_NAME_SW_VER, 1)
+            .put(CpeDeviceType.FIELD_NAME_HW_VER, 1)
+            .put(Cpe.DB_FIELD_NAME_ADDITIONAL_HW_VER, 1)
+            .put(Cpe.DB_FIELD_NAME_LAST_INFORM_TIME, 1)
+            .put(Cpe.DB_FIELD_NAME_PERIODIC_INFORM_INTERVAL, 1)
+            .put(Cpe.DB_FIELD_NAME_PERIODIC_INFORM_ENABLE, 1);
     private static final JsonObject QUERY_KEY_UNLINKED = new JsonObject()
-            .putNumber(AcsConstants.FIELD_NAME_ID, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_SN, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_IP_ADDRESS, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_LAST_INFORM_TIME, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_PREV_SUBSCRIBER, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_REGISTRATION_ID, 1)
-            .putNumber(CpeDeviceType.FIELD_NAME_MODEL_NAME, 1)
-            .putNumber(CpeDeviceType.FIELD_NAME_SW_VER, 1)
-            .putNumber(CpeDeviceType.FIELD_NAME_HW_VER, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_ADDITIONAL_HW_VER, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_DECOMMISSIONED, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_PREV_SUBSCRIBER, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_CREATE_TIME, 1);
+            .put(AcsConstants.FIELD_NAME_ID, 1)
+            .put(Cpe.DB_FIELD_NAME_SN, 1)
+            .put(Cpe.DB_FIELD_NAME_IP_ADDRESS, 1)
+            .put(Cpe.DB_FIELD_NAME_LAST_INFORM_TIME, 1)
+            .put(Cpe.DB_FIELD_NAME_PREV_SUBSCRIBER, 1)
+            .put(Cpe.DB_FIELD_NAME_REGISTRATION_ID, 1)
+            .put(CpeDeviceType.FIELD_NAME_MODEL_NAME, 1)
+            .put(CpeDeviceType.FIELD_NAME_SW_VER, 1)
+            .put(CpeDeviceType.FIELD_NAME_HW_VER, 1)
+            .put(Cpe.DB_FIELD_NAME_ADDITIONAL_HW_VER, 1)
+            .put(Cpe.DB_FIELD_NAME_DECOMMISSIONED, 1)
+            .put(Cpe.DB_FIELD_NAME_PREV_SUBSCRIBER, 1)
+            .put(Cpe.DB_FIELD_NAME_CREATE_TIME, 1);
     private static final JsonObject QUERY_KEY_UNLINKED_COUNT = new JsonObject()
-            .putNumber(AcsConstants.FIELD_NAME_ID, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_SN, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_REGISTRATION_ID, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_DECOMMISSIONED, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_PREV_SUBSCRIBER, 1);
+            .put(AcsConstants.FIELD_NAME_ID, 1)
+            .put(Cpe.DB_FIELD_NAME_SN, 1)
+            .put(Cpe.DB_FIELD_NAME_REGISTRATION_ID, 1)
+            .put(Cpe.DB_FIELD_NAME_DECOMMISSIONED, 1)
+            .put(Cpe.DB_FIELD_NAME_PREV_SUBSCRIBER, 1);
 
     /**
      * Query Key when querying Subscribers for unlinked devices
      */
     private static final JsonObject QUERY_KEY_UNLINKED_SUBSCRIBERS = new JsonObject()
-            .putNumber(Subscriber.FIELD_NAME_LOCATIONS + "." + Subscriber.FIELD_NAME_LOCATIONS_DEVICES, 1);
+            .put(Subscriber.FIELD_NAME_LOCATIONS + "." + Subscriber.FIELD_NAME_LOCATIONS_DEVICES, 1);
 
     @Override
     public JsonObject buildRetrieveQueryKeys(AcsNbiRequest nbiRequest) {
@@ -470,11 +470,11 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
      */
     @Override
     public boolean bReturnRetrieveResultInChunkMode(AcsNbiRequest nbiRequest) {
-        if (nbiRequest.body.containsField(AcsConstants.FIELD_NAME_ID) ||
-                nbiRequest.body.containsField(Cpe.DB_FIELD_NAME_SN) ||
-                nbiRequest.body.containsField(Cpe.DB_FIELD_NAME_REGISTRATION_ID) ||
-                nbiRequest.body.containsField(Cpe.DB_FIELD_NAME_MAC_ADDRESS) ||
-                nbiRequest.body.containsField(Cpe.DB_FIELD_NAME_IP_ADDRESS)) {
+        if (nbiRequest.body.containsKey(AcsConstants.FIELD_NAME_ID) ||
+                nbiRequest.body.containsKey(Cpe.DB_FIELD_NAME_SN) ||
+                nbiRequest.body.containsKey(Cpe.DB_FIELD_NAME_REGISTRATION_ID) ||
+                nbiRequest.body.containsKey(Cpe.DB_FIELD_NAME_MAC_ADDRESS) ||
+                nbiRequest.body.containsKey(Cpe.DB_FIELD_NAME_IP_ADDRESS)) {
             return false;
         } else {
             return true;
@@ -539,7 +539,7 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
              */
             try {
                 VertxMongoUtils.find(
-                        vertx.eventBus(),
+                        mongoClient,
                         getDbCollectionName(),
                         buildRetrieveMatcher(nbiRequest),
                         getDefaultQuerySort(nbiRequest),
@@ -564,7 +564,7 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
     /**
      * Retrieve Unlinked Devices Result Handler
      */
-    public class RetrieveUnlinkedResultHandler extends VertxMongoUtils.FindHandler{
+    public class RetrieveUnlinkedResultHandler implements Handler<List<JsonObject>>{
         AcsNbiRequest nbiRequest;
         RequestTracker reqTracker;
 
@@ -578,21 +578,15 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
 
         /**
          * The handler method body.
-         * @param jsonObjectMessage
+         * @param queryResults
          */
         @Override
-        public void handle(Message<JsonObject> jsonObjectMessage) {
+        public void handle(List<JsonObject> queryResults) {
             if (reqTracker.bSentResponse) {
                 return;
             }
 
             // Call super
-            super.handle(jsonObjectMessage);
-
-            if (VertxMongoUtils.FIND_TIMED_OUT.equals(queryResults)) {
-                nbiRequest.sendResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR, MONGODB_TIMED_OUT);
-                return;
-            }
 
             if (reqTracker.unlinkedDevices != null &&
                     reqTracker.unlinkedDevices.size() >= (getQuerySkipCount(nbiRequest) + getQueryLimitCount(nbiRequest))) {
@@ -603,7 +597,7 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
                 return;
             }
 
-            reqTracker.bQueryMoreExist = moreExist;
+            reqTracker.bQueryMoreExist = false;
 
             /**
              * Process a result batch
@@ -618,7 +612,7 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
                     // Decommissioned Devices are always unlinked
                     if (aDevice.getBoolean(Cpe.DB_FIELD_NAME_DECOMMISSIONED, false) ||
                             // Device is unlinked if its "prevSubscriber" field is set
-                            aDevice.containsField(Cpe.DB_FIELD_NAME_PREV_SUBSCRIBER)) {
+                            aDevice.containsKey(Cpe.DB_FIELD_NAME_PREV_SUBSCRIBER)) {
                         if (reqTracker.unlinkedDevices == null) {
                             reqTracker.unlinkedDevices = new JsonArray();
                         }
@@ -627,7 +621,7 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
                         // Add internal-id/FSAN/RegId to device-id string array
                         deviceIdStrings.add(aDevice.getString(AcsConstants.FIELD_NAME_ID));
                         deviceIdStrings.add(aDevice.getString(Cpe.DB_FIELD_NAME_SN));
-                        if (aDevice.containsField(Cpe.DB_FIELD_NAME_REGISTRATION_ID)) {
+                        if (aDevice.containsKey(Cpe.DB_FIELD_NAME_REGISTRATION_ID)) {
                             deviceIdStrings.add(aDevice.getString(Cpe.DB_FIELD_NAME_REGISTRATION_ID));
                         }
                         devices.add(aDevice);
@@ -647,7 +641,7 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
                 // Query Subscribers with deviceId strings
                 try {
                     VertxMongoUtils.find(
-                            vertx.eventBus(),
+                            mongoClient,
                             Subscriber.DB_COLLECTION_NAME,
                             Subscriber.getDeviceMatcherByDeviceIdArray(reqTracker.orgId, deviceIdStrings),
                             new RetrieveSubscriberResultHandlerForUnlinked(nbiRequest, batchIndex),
@@ -661,7 +655,7 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
                 /**
                  * Last Batch???
                  */
-                if (!moreExist &&
+                if (true &&
                         (reqTracker.rawDeviceQueryResults == null
                                 || reqTracker.rawDeviceQueryResults.size() == 0)) {
                     /**
@@ -676,7 +670,7 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
     /**
      * Subscriber Retrieve Result Handler used when retrieving Unlinked Devices.
      */
-    public class RetrieveSubscriberResultHandlerForUnlinked extends VertxMongoUtils.FindHandler {
+    public class RetrieveSubscriberResultHandlerForUnlinked implements Handler<List<JsonObject>> {
         AcsNbiRequest nbiRequest;
         RequestTracker reqTracker;
         int batchIndex;
@@ -695,20 +689,14 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
         /**
          * The handler method body.
          *
-         * @param jsonObjectMessage
+         * @param queryResults
          */
         @Override
-        public void handle(Message<JsonObject> jsonObjectMessage) {
+        public void handle(List<JsonObject> queryResults) {
             if (reqTracker.bSentResponse) {
                 return;
             }
-            // Call super
-            super.handle(jsonObjectMessage);
 
-            if (VertxMongoUtils.FIND_TIMED_OUT.equals(queryResults)) {
-                nbiRequest.sendResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR, MONGODB_TIMED_OUT);
-                return;
-            }
 
             log.debug("Processing subscriber query. batchIndex: " + batchIndex);
             /**
@@ -720,16 +708,16 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
 
                 for (int i = 0; i < queryResults.size(); i++) {
                     JsonObject aSubscriber = queryResults.get(i);
-                    JsonArray locations = aSubscriber.getArray(Subscriber.FIELD_NAME_LOCATIONS);
+                    JsonArray locations = aSubscriber.getJsonArray(Subscriber.FIELD_NAME_LOCATIONS);
                     if (locations != null) {
                         // Validate all locations (and the associated devices per location)
                         for (int j = 0; j < locations.size(); j++) {
-                            JsonObject aLocation = locations.get(j);
+                            JsonObject aLocation = locations.getJsonObject(j);
                             // Add the associated devices to Array
-                            JsonArray deviceIdArray = aLocation.getArray(Subscriber.FIELD_NAME_LOCATIONS_DEVICES);
+                            JsonArray deviceIdArray = aLocation.getJsonArray(Subscriber.FIELD_NAME_LOCATIONS_DEVICES);
                             if (deviceIdArray != null) {
                                 for (int k = 0; k < deviceIdArray.size(); k++) {
-                                    allAssociatedDeviceIdStrings.add((String) deviceIdArray.get(k));
+                                    allAssociatedDeviceIdStrings.add((String) deviceIdArray.getValue(k));
                                 }
                             }
                         }
@@ -740,7 +728,7 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
             // Check all devices in the raw batch
             JsonArray rawDeviceBatch = reqTracker.rawDeviceQueryResults.get(batchIndex);
             for (int i = 0; i < rawDeviceBatch.size(); i ++) {
-                JsonObject aDevice = rawDeviceBatch.get(i);
+                JsonObject aDevice = rawDeviceBatch.getJsonObject(i);
 
                 if (allAssociatedDeviceIdStrings != null && (
                         allAssociatedDeviceIdStrings.contains(aDevice.getString(AcsConstants.FIELD_NAME_ID)) ||
@@ -826,7 +814,7 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
             nbiRequest.httpServerRequest.response().putHeader("Content-Type", "application/json");
             nbiRequest.sendResponse(
                     HttpResponseStatus.OK,
-                    new JsonObject().putNumber(
+                    new JsonObject().put(
                             QUERY_KEYWORD_COUNT,
                             reqTracker.unlinkedDevices == null ? 0 : reqTracker.unlinkedDevices.size()
                     )
@@ -879,13 +867,13 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
      * @param nbiRequest
      */
     private static final JsonObject QUERY_KEY_DELETE = new JsonObject()
-            .putNumber(AcsConstants.FIELD_NAME_ID, 1)
-            .putNumber(AcsConstants.FIELD_NAME_ORG_ID, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_SN, 1)
-            .putNumber(CpeDeviceType.FIELD_NAME_MANUFACTURER, 1)
-            .putNumber(CpeDeviceType.FIELD_NAME_MODEL_NAME, 1)
-            .putNumber(CpeDeviceType.FIELD_NAME_SW_VER, 1)
-            .putNumber(CpeDeviceType.FIELD_NAME_HW_VER, 1);
+            .put(AcsConstants.FIELD_NAME_ID, 1)
+            .put(AcsConstants.FIELD_NAME_ORG_ID, 1)
+            .put(Cpe.DB_FIELD_NAME_SN, 1)
+            .put(CpeDeviceType.FIELD_NAME_MANUFACTURER, 1)
+            .put(CpeDeviceType.FIELD_NAME_MODEL_NAME, 1)
+            .put(CpeDeviceType.FIELD_NAME_SW_VER, 1)
+            .put(CpeDeviceType.FIELD_NAME_HW_VER, 1);
     @Override
     public void handleDelete(final AcsNbiRequest nbiRequest) {
         final String orgId = nbiRequest.body.getString(AcsConstants.FIELD_NAME_ORG_ID);
@@ -922,7 +910,7 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
                         nbiRequest.sendResponse(
                                 HttpResponseStatus.BAD_REQUEST,
                                 new JsonObject().
-                                        putString(
+                                        put(
                                                 AcsConstants.FIELD_NAME_ERROR,
                                                 "Device " + cpe.getString(Cpe.DB_FIELD_NAME_SN)
                                                         + " is associated with subscriber "
@@ -948,7 +936,7 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
                                         log.error("Failed to delete device " + cpeKey + " due to " + error);
                                         nbiRequest.sendResponse(
                                                 HttpResponseStatus.INTERNAL_SERVER_ERROR,
-                                                new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR, error)
+                                                new JsonObject().put(AcsConstants.FIELD_NAME_ERROR, error)
                                         );
                                         return;
                                     }
@@ -978,7 +966,7 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
                         if (cpeKey == null) {
                             // Save the CPE id string into request body
                             id = cpe.getString(AcsConstants.FIELD_NAME_ID);
-                            nbiRequest.body.putString(AcsConstants.FIELD_NAME_ID, id);
+                            nbiRequest.body.put(AcsConstants.FIELD_NAME_ID, id);
                         }
 
                         // Save the device data
@@ -986,7 +974,7 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
 
                         // Query Subscriber
                         Subscriber.querySubscriberData(
-                                vertx.eventBus(),
+                                mongoClient,
                                 cpe,
                                 subscriberQueryResultHandler
                         );
@@ -996,10 +984,10 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
 
             // Start with querying device
             VertxMongoUtils.findOne(
-                    vertx.eventBus(),
+                    mongoClient,
                     Cpe.CPE_COLLECTION_NAME,
                     nbiRequest.body,
-                    new VertxMongoUtils.FindOneHandler(deviceQueryResultHandler),
+                    deviceQueryResultHandler,
                     QUERY_KEY_DELETE
             );
         } catch (VertxException e) {
@@ -1024,9 +1012,9 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
              * 1. Delete all CWMP Messages for this device
              */
             VertxMongoUtils.deleteWithMatcher(
-                    vertx.eventBus(),
+                    mongoClient,
                     CwmpMessage.DB_COLLECTION_NAME,
-                    new JsonObject().putString(
+                    new JsonObject().put(
                             AcsConstants.FIELD_NAME_CPE_ID + "." + CpeIdentifier.FIELD_NAME_SN,
                             cpe.getString(Cpe.DB_FIELD_NAME_SN)),
                     null
@@ -1036,9 +1024,9 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
              * 2. Delete all Events for this device
              */
             VertxMongoUtils.deleteWithMatcher(
-                    vertx.eventBus(),
+                    mongoClient,
                     Event.DB_COLLECTION_NAME,
-                    new JsonObject().putString(
+                    new JsonObject().put(
                             Event.FIELD_NAME_DEVICE_SN,
                             cpe.getString(Cpe.DB_FIELD_NAME_SN)),
                     null
@@ -1048,9 +1036,9 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
              * 3. Delete all backup files for this device
              */
             VertxMongoUtils.deleteWithMatcher(
-                    vertx.eventBus(),
+                    mongoClient,
                     AcsFile.DB_COLLECTION_NAME,
-                    new JsonObject().putString(
+                    new JsonObject().put(
                             AcsConstants.FIELD_NAME_CPE_ID + "." + Cpe.DB_FIELD_NAME_SN,
                             cpe.getString(Cpe.DB_FIELD_NAME_SN)
                     ),
@@ -1094,17 +1082,17 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
                 // Query Subscriber that this device may be associated with
                 try {
                     VertxMongoUtils.findOne(
-                            vertx.eventBus(),
+                            mongoClient,
                             Subscriber.DB_COLLECTION_NAME,
                             //Subscriber.getDeviceMatcherByDeviceData()
                             // Matcher
-                            new JsonObject().putObject(
+                            new JsonObject().put(
                                     Subscriber.FIELD_NAME_LOCATIONS,
-                                    new JsonObject().putObject(
+                                    new JsonObject().put(
                                             VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_ELEM_MATCH,
-                                            new JsonObject().putObject(
+                                            new JsonObject().put(
                                                     Subscriber.FIELD_NAME_LOCATIONS_DEVICES,
-                                                    new JsonObject().putArray(
+                                                    new JsonObject().put(
                                                             VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_ALL,
                                                             new JsonArray().add(cpeKey)
                                                     )
@@ -1132,73 +1120,67 @@ public class DeviceDataService extends AbstractAcNbiCrudService{
      * @param cpeKey
      * @return
      */
-    private VertxMongoUtils.FindOneHandler getSubscriberFindOneHandler(
+    private Handler getSubscriberFindOneHandler(
             final AcsNbiRequest nbiRequest,
             final String cpeKey) {
-        try {
-            return new VertxMongoUtils.FindOneHandler(
-                    new Handler<JsonObject>() {
-                        @Override
-                        public void handle(JsonObject subscriber) {
-                            if (subscriber == null) {
-                                // This CPE is not associated with any subscriber
-                                // Continue on
-                                doDelete(nbiRequest);
-                            } else if (subscriber.equals(VertxMongoUtils.FIND_ONE_TIMED_OUT)) {
-                                log.error("Failed to delete device " + cpeKey
-                                        + " from Subscriber DB due to Internal MongoDB error!");
-                                nbiRequest.sendResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR,
-                                        FAILED_TO_UPDATE_SUBSCRIBER_DB);
-                            } else {
-                                // Remove this CPE from this Subscriber record
-                                log.info("Deleting CPE " + cpeKey + " from Subscriber "
-                                        + subscriber.getString(AcsConstants.FIELD_NAME_NAME));
-                                JsonArray locations = subscriber.getArray(Subscriber.FIELD_NAME_LOCATIONS);
-                                for (int i = 0; i < locations.size(); i ++) {
-                                    JsonObject aLocation = locations.get(i);
-                                    JsonArray devices = aLocation.getArray(Subscriber.FIELD_NAME_LOCATIONS_DEVICES);
-                                    if (devices.contains(cpeKey)) {
-                                        JsonArray updatedDevices = new JsonArray();
-                                        for (int j = 0; j < locations.size(); j++) {
-                                            String deviceId = devices.get(j);
-                                            if (!deviceId.equals(cpeKey)) {
-                                                updatedDevices.add(deviceId);
-                                            }
+            return new Handler<JsonObject>() {
+                    @Override
+                    public void handle(JsonObject subscriber) {
+                        if (subscriber == null) {
+                            // This CPE is not associated with any subscriber
+                            // Continue on
+                            doDelete(nbiRequest);
+                        } else if (subscriber.equals(VertxMongoUtils.FIND_ONE_TIMED_OUT)) {
+                            log.error("Failed to delete device " + cpeKey
+                                    + " from Subscriber DB due to Internal MongoDB error!");
+                            nbiRequest.sendResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR,
+                                    FAILED_TO_UPDATE_SUBSCRIBER_DB);
+                        } else {
+                            // Remove this CPE from this Subscriber record
+                            log.info("Deleting CPE " + cpeKey + " from Subscriber "
+                                    + subscriber.getString(AcsConstants.FIELD_NAME_NAME));
+                            JsonArray locations = subscriber.getJsonArray(Subscriber.FIELD_NAME_LOCATIONS);
+                            for (int i = 0; i < locations.size(); i ++) {
+                                JsonObject aLocation = locations.getJsonObject(i);
+                                JsonArray devices = aLocation.getJsonArray(Subscriber.FIELD_NAME_LOCATIONS_DEVICES);
+                                if (devices.contains(cpeKey)) {
+                                    JsonArray updatedDevices = new JsonArray();
+                                    for (int j = 0; j < locations.size(); j++) {
+                                        String deviceId = devices.getString(j);
+                                        if (!deviceId.equals(cpeKey)) {
+                                            updatedDevices.add(deviceId);
                                         }
-                                        aLocation.putArray(Subscriber.FIELD_NAME_LOCATIONS_DEVICES, updatedDevices);
                                     }
+                                    aLocation.put(Subscriber.FIELD_NAME_LOCATIONS_DEVICES, updatedDevices);
                                 }
-                                try {
-                                    VertxMongoUtils.update(
-                                            vertx.eventBus(),
-                                            Subscriber.DB_COLLECTION_NAME,
-                                            subscriber.getString(AcsConstants.FIELD_NAME_ID),
-                                            subscriber,
-                                            new Handler<Long>() {
-                                                @Override
-                                                public void handle(Long updateResult) {
-                                                    if (updateResult == null) {
-                                                        log.error("Failed to delete device " + cpeKey
-                                                                + " from Subscriber DB due to Internal MongoDB error!");
-                                                        nbiRequest.sendResponse(
-                                                                HttpResponseStatus.INTERNAL_SERVER_ERROR,
-                                                                FAILED_TO_UPDATE_SUBSCRIBER_DB);
-                                                    } else {
-                                                        // Continue on
-                                                        doDelete(nbiRequest);
-                                                    }
+                            }
+                            try {
+                                VertxMongoUtils.update(
+                                        mongoClient,
+                                        Subscriber.DB_COLLECTION_NAME,
+                                        subscriber.getString(AcsConstants.FIELD_NAME_ID),
+                                        subscriber,
+                                        new Handler<Long>() {
+                                            @Override
+                                            public void handle(Long updateResult) {
+                                                if (updateResult == null) {
+                                                    log.error("Failed to delete device " + cpeKey
+                                                            + " from Subscriber DB due to Internal MongoDB error!");
+                                                    nbiRequest.sendResponse(
+                                                            HttpResponseStatus.INTERNAL_SERVER_ERROR,
+                                                            FAILED_TO_UPDATE_SUBSCRIBER_DB);
+                                                } else {
+                                                    // Continue on
+                                                    doDelete(nbiRequest);
                                                 }
                                             }
-                                    );
-                                } catch (VertxException e) {
-                                    e.printStackTrace();
-                                }
+                                        }
+                                );
+                            } catch (VertxException e) {
+                                e.printStackTrace();
                             }
                         }
                     }
-            );
-        } catch (VertxException e) {
-            return null;
-        }
+            };
     }
 }

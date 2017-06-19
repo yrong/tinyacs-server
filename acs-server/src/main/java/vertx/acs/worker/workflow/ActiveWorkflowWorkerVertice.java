@@ -1,12 +1,14 @@
 package vertx.acs.worker.workflow;
 
+import io.vertx.redis.RedisClient;
+import io.vertx.redis.RedisOptions;
+import vertx.VertxConfigProperties;
 import vertx.VertxConstants;
 import vertx.VertxUtils;
 import vertx.cache.GroupCache;
 import vertx.model.CpeGroup;
 import vertx.util.AcsConstants;
 import vertx.taskmgmt.worker.WorkerVertice;
-import io.vertx.java.redis.RedisClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +45,9 @@ public class ActiveWorkflowWorkerVertice extends WorkerVertice {
         /**
          * Initialize Redis Client
          */
-        redisClient = new RedisClient(vertx.eventBus(), VertxConstants.VERTX_ADDRESS_REDIS);
+        RedisOptions options = new RedisOptions().setHost(VertxConfigProperties.redisHost).setPort(VertxConfigProperties.redisPort);
+        redisClient = RedisClient.create(vertx,options);
+
 
         /**
          * Initialize Group Cache
