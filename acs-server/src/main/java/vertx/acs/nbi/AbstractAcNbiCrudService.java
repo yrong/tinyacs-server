@@ -1,5 +1,7 @@
 package vertx.acs.nbi;
 
+import io.vertx.ext.mongo.MongoClient;
+import io.vertx.redis.RedisClient;
 import vertx.VertxException;
 import vertx.VertxJsonUtils;
 import vertx.VertxMongoUtils;
@@ -14,7 +16,6 @@ import vertx.model.AcsApiCrudTypeEnum;
 import vertx.util.AcsApiUtils;
 import vertx.util.AcsConstants;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.java.redis.RedisClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.Handler;
@@ -85,6 +86,8 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
      */
     public RedisClient redisClient;
 
+    public MongoClient mongoClient;
+
     /**
      * Query Parameter Keywords
      */
@@ -105,40 +108,40 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
      */
     public boolean VALIDATION_SUCCEEDED = true;
     public boolean VALIDATION_PENDING_OR_FAILED = false;
-    public static final JsonObject QUERY_KEY_ID_ONLY = new JsonObject().putNumber("_id", 1);
+    public static final JsonObject QUERY_KEY_ID_ONLY = new JsonObject().put("_id", 1);
     public static final JsonArray EMPTY_JSON_ARRAY = new JsonArray();
     public static final JsonObject BAD_REQUEST = new JsonObject()
-            .putString(AcsConstants.FIELD_NAME_ERROR, "Bad Request!");
+            .put(AcsConstants.FIELD_NAME_ERROR, "Bad Request!");
     public final JsonObject CONFLICT = new JsonObject()
-            .putString(AcsConstants.FIELD_NAME_ERROR,
+            .put(AcsConstants.FIELD_NAME_ERROR,
                     "One or more index fields contain values currently used by another " + getServiceName());
     public static final JsonObject INVALID_URL_PATH_OR_QUERY_PARAMETERS = new JsonObject()
-            .putString(AcsConstants.FIELD_NAME_ERROR, "Invalid URL Path and/or Query Parameter(s)!");
+            .put(AcsConstants.FIELD_NAME_ERROR, "Invalid URL Path and/or Query Parameter(s)!");
     public static final VertxException INVALID_URL_PATH_OR_QUERY_PARAMETERS_EXCEPTION =
             new VertxException("Invalid URL Path and/or Query Parameter(s)!");
     public static final JsonObject MISSING_REQUIRED_FIELD = new JsonObject()
-            .putString(AcsConstants.FIELD_NAME_ERROR, "Missing Required Field(s)!");
+            .put(AcsConstants.FIELD_NAME_ERROR, "Missing Required Field(s)!");
     public final JsonObject MISSING_ID = new JsonObject()
-            .putString(AcsConstants.FIELD_NAME_ERROR, "Missing " + getServiceName() +" Id!");
+            .put(AcsConstants.FIELD_NAME_ERROR, "Missing " + getServiceName() +" Id!");
     public final VertxException MISSING_ID_EXCEPTION =
             new VertxException("Missing " + getServiceName() +" Id!");
     public static final JsonObject MISSING_ID_OR_FILTER = new JsonObject()
-            .putString(AcsConstants.FIELD_NAME_ERROR, "Missing Document ID Or Filter(s)!");
+            .put(AcsConstants.FIELD_NAME_ERROR, "Missing Document ID Or Filter(s)!");
     public final JsonObject NO_MATCH_FOUND = new JsonObject()
-            .putString(AcsConstants.FIELD_NAME_ERROR,
+            .put(AcsConstants.FIELD_NAME_ERROR,
                     "No " + getServiceName() + " found with the given query filter!");
     public static final String INTERNAL_SERVER_ERROR_CONTACT_CALIX =
             "Internal server error! Please contact Calix Support Team.";
     public static final JsonObject RESOURCE_EXISTS = new JsonObject()
-            .putString(AcsConstants.FIELD_NAME_ERROR, "Trying to create resource that already exists!");
+            .put(AcsConstants.FIELD_NAME_ERROR, "Trying to create resource that already exists!");
     public static final VertxException MISSING_REQUIRED_FIELD_EXCEPTION =
             new VertxException("Missing Required Field(s)!");
     public static final String MONGODB_TIMED_OUT_STRING =
             "Internal Server Error (ACS DB Timed Out)! Please contact Calix Support Team.";
     public static final JsonObject MONGODB_TIMED_OUT =
-            new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR, MONGODB_TIMED_OUT_STRING);
+            new JsonObject().put(AcsConstants.FIELD_NAME_ERROR, MONGODB_TIMED_OUT_STRING);
     public final JsonObject CROSS_REF_CHECK_FAILED = new JsonObject()
-            .putString(AcsConstants.FIELD_NAME_ERROR,
+            .put(AcsConstants.FIELD_NAME_ERROR,
                     "Trying to delete a " + getServiceName() + " that is being referenced by other object(s)!");
     public static final VertxException INVALID_QUERY_PARAMETER =
             new VertxException("Invalid Query Parameter(s)!");
@@ -215,6 +218,9 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
         this.redisClient = redisClient;
     }
 
+
+    public void setMongoClient(MongoClient mongoClient) {this.mongoClient = mongoClient;}
+
     /**
      * Get the MongoDB Collection Name, for example "acs-event-subscriptions" or "acs-device-ops"
      * @return
@@ -253,7 +259,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
         }
 
         for (String anIndexField : getIndexFieldName()) {
-            if (!nbiRequest.body.containsField(anIndexField)) {
+            if (!nbiRequest.body.containsKey(anIndexField)) {
                 return false;
             }
         }
@@ -324,11 +330,11 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
         // Build the matcher
         JsonObject indexMatcher = new JsonObject();
         for (String anIndexField : getIndexFieldName()) {
-            if (!nbiRequest.body.containsField(anIndexField)) {
+            if (!nbiRequest.body.containsKey(anIndexField)) {
                 log.error("Missing index field " + anIndexField + "!");
                 throw MISSING_REQUIRED_FIELD_EXCEPTION;
             } else {
-                VertxJsonUtils.append(indexMatcher, anIndexField, nbiRequest.body.getField(anIndexField));
+                VertxJsonUtils.append(indexMatcher, anIndexField, nbiRequest.body.getValue(anIndexField));
             }
         }
 
@@ -387,7 +393,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
                     break;
 
                 default:
-                    nbiRequest.body.putString(AcsConstants.FIELD_NAME_ID, nbiRequest.urlPathParams[0]);
+                    nbiRequest.body.put(AcsConstants.FIELD_NAME_ID, nbiRequest.urlPathParams[0]);
             }
         }
     }
@@ -514,13 +520,13 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
         /**
          * Also Check for special query related fields in the request body such as "$sort"
          */
-        for (String fieldName : nbiRequest.body.getFieldNames().toArray(STRING_ARRAY)) {
+        for (String fieldName : nbiRequest.body.fieldNames().toArray(STRING_ARRAY)) {
             if (fieldName.startsWith(QUERY_OPERATOR_PREFIX)) {
                 if (nbiRequest.queryParameters == null) {
                     nbiRequest.queryParameters = new JsonObject();
                 }
-                nbiRequest.queryParameters.putValue(fieldName, nbiRequest.body.getValue(fieldName));
-                nbiRequest.body.removeField(fieldName);
+                nbiRequest.queryParameters.put(fieldName, nbiRequest.body.getValue(fieldName));
+                nbiRequest.body.remove(fieldName);
             }
         }
     }
@@ -571,7 +577,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
          * Reject if accessing internal service from outside
          */
         if (nbiRequest.bInternalRequest == false && bInternalServiceOnly()) {
-            log.error("Remote host " + nbiRequest.httpServerRequest.remoteAddress().getHostString()
+            log.error("Remote host " + nbiRequest.httpServerRequest.remoteAddress().host()
                     + " is trying to access internal service " + getServiceName() + "!");
 
             /**
@@ -588,16 +594,16 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
         String methodString;
         AcsApiCrudTypeEnum crudType;
         if (nbiRequest.httpServerRequest != null) {
-            methodString = nbiRequest.httpServerRequest.method();
+            methodString = nbiRequest.httpServerRequest.rawMethod();
         } else {
             methodString = nbiRequest.body.getString(AcsConstants.FIELD_NAME_METHOD);
-            nbiRequest.body.removeField(AcsConstants.FIELD_NAME_METHOD);
+            nbiRequest.body.remove(AcsConstants.FIELD_NAME_METHOD);
         }
         crudType = getCrudTypeByMethodString(methodString);
         if (crudType == AcsApiCrudTypeEnum.Unknown) {
             nbiRequest.sendResponse(
                     HttpResponseStatus.BAD_REQUEST,
-                    new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR, "Unexpected Method " + methodString));
+                    new JsonObject().put(AcsConstants.FIELD_NAME_ERROR, "Unexpected Method " + methodString));
             return;
         }
 
@@ -628,7 +634,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
                     + nbiRequest.body.encodePrettily());
             nbiRequest.sendResponse(
                     HttpResponseStatus.BAD_REQUEST,
-                    new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR, e.getMessage()));
+                    new JsonObject().put(AcsConstants.FIELD_NAME_ERROR, e.getMessage()));
             return;
         }
 
@@ -656,7 +662,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
                     + nbiRequest.body.encodePrettily());
             nbiRequest.sendResponse(
                     HttpResponseStatus.BAD_REQUEST,
-                    new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR, e.getMessage()));
+                    new JsonObject().put(AcsConstants.FIELD_NAME_ERROR, e.getMessage()));
             return;
         }
 
@@ -686,7 +692,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
      * Should the retrieve results be sent to clients in chunk mode?
      */
     public boolean bReturnRetrieveResultInChunkMode(AcsNbiRequest nbiRequest) {
-        if (nbiRequest.body.containsField(AcsConstants.FIELD_NAME_ID)) {
+        if (nbiRequest.body.containsKey(AcsConstants.FIELD_NAME_ID)) {
             // Return a single record if querying with ID
             return false;
         } else {
@@ -753,7 +759,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
              */
             try {
                 VertxMongoUtils.count(
-                        vertx.eventBus(),
+                        mongoClient,
                         getDbCollectionName(),
                         buildRetrieveMatcher(nbiRequest),
                         new Handler<Long>() {
@@ -765,7 +771,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
                                     nbiRequest.httpServerRequest.response().putHeader("Content-Type", "application/json");
                                     nbiRequest.sendResponse(
                                             HttpResponseStatus.OK,
-                                            new JsonObject().putNumber(QUERY_KEYWORD_COUNT, count)
+                                            new JsonObject().put(QUERY_KEYWORD_COUNT, count)
                                     );
                                 }
                             }
@@ -797,7 +803,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
              */
             try {
                 VertxMongoUtils.find(
-                        vertx.eventBus(),
+                        mongoClient,
                         getDbCollectionName(),
                         buildRetrieveMatcher(nbiRequest),
                         getQuerySort(nbiRequest),
@@ -844,7 +850,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
                  * First Query with the index field, so we will not overwrite existing document
                  */
                 VertxMongoUtils.findOne(
-                        vertx.eventBus(),
+                        mongoClient,
                         getDbCollectionName(),
                         indexMatcher,
                         getFindBeforeCreateResultHandler(nbiRequest),
@@ -857,7 +863,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
                  * Save without querying the DB.
                  */
                 VertxMongoUtils.save(
-                        vertx.eventBus(),
+                        mongoClient,
                         getDbCollectionName(),
                         nbiRequest.body,
                         getMongoSaveHandler(nbiRequest)
@@ -882,7 +888,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
             nbiRequest.sendResponse(HttpResponseStatus.BAD_REQUEST, MISSING_ID);
             return;
         }
-        JsonObject idMatcher = new JsonObject().putString(AcsConstants.FIELD_NAME_ID, id);
+        JsonObject idMatcher = new JsonObject().put(AcsConstants.FIELD_NAME_ID, id);
 
         // Get index matcher by index fields if any
         JsonObject indexMatcher = null;
@@ -901,16 +907,16 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
             matcher = idMatcher;
         } else {
             // Match by id OR index fields
-            if (indexMatcher.containsField(VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_OR)) {
+            if (indexMatcher.containsKey(VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_OR)) {
                 // The index matcher already has an "$or" array
                 // add the "_id" into the array
-                indexMatcher.getArray(VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_OR).add(idMatcher);
+                indexMatcher.getJsonArray(VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_OR).add(idMatcher);
                 matcher = indexMatcher;
             } else {
                 JsonArray or = new JsonArray()
                         .add(idMatcher)
                         .add(indexMatcher);
-                matcher = new JsonObject().putArray(VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_OR, or);
+                matcher = new JsonObject().put(VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_OR, or);
             }
         }
 
@@ -919,7 +925,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
          */
         try {
             VertxMongoUtils.find(
-                    vertx.eventBus(),
+                    mongoClient,
                     getDbCollectionName(),
                     matcher,
                     null,   // sort
@@ -953,7 +959,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
                 log.error(error);
                 nbiRequest.sendResponse(
                         HttpResponseStatus.BAD_REQUEST,
-                        new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR, error)
+                        new JsonObject().put(AcsConstants.FIELD_NAME_ERROR, error)
                 );
             } else {
 
@@ -988,39 +994,38 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
                 nbiRequest.sendResponse(HttpResponseStatus.BAD_REQUEST, MISSING_ID_OR_FILTER);
                 return;
             }
-            matcher = new JsonObject().putString(AcsConstants.FIELD_NAME_ID, id);
+            matcher = new JsonObject().put(AcsConstants.FIELD_NAME_ID, id);
 
             if (bFindOneBeforeDelete()) {
                 // Find before delete
                 try {
                     VertxMongoUtils.findOne(
-                            vertx.eventBus(),
+                            mongoClient,
                             getDbCollectionName(),
                             matcher,
-                            new VertxMongoUtils.FindOneHandler(
-                                    new Handler<JsonObject>() {
-                                        @Override
-                                        public void handle(JsonObject queryResult) {
-                                            if (queryResult == null || queryResult.size() == 0) {
-                                                getMongoDeleteHandler(nbiRequest).handle(null);
-                                            } else {
-                                                // Save the to-be-deleted record as the request body
-                                                nbiRequest.body = queryResult;
+                            new Handler<JsonObject>() {
+                                @Override
+                                public void handle(JsonObject queryResult) {
+                                    if (queryResult == null || queryResult.size() == 0) {
+                                        getMongoDeleteHandler(nbiRequest).handle(null);
+                                    } else {
+                                        // Save the to-be-deleted record as the request body
+                                        nbiRequest.body = queryResult;
 
-                                                // Perform service specific process before delete
-                                                boolean pending = processToBeDeletedRecord(
-                                                        nbiRequest,
-                                                        matcher,
-                                                        queryResult);
+                                        // Perform service specific process before delete
+                                        boolean pending = processToBeDeletedRecord(
+                                                nbiRequest,
+                                                matcher,
+                                                queryResult);
 
-                                                // Delete it
-                                                if (pending == false) {
-                                                    doDeleteNow(nbiRequest, matcher);
-                                                }
-                                            }
+                                        // Delete it
+                                        if (pending == false) {
+                                            doDeleteNow(nbiRequest, matcher);
                                         }
                                     }
-                            ),
+                                }
+                            }
+                            ,
                             null
                     );
                 } catch (VertxException e) {
@@ -1035,7 +1040,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
         // Delete it
         try {
             VertxMongoUtils.deleteWithMatcher(
-                    vertx.eventBus(),
+                    mongoClient,
                     getDbCollectionName(),
                     matcher,
                     getMongoDeleteHandler(nbiRequest)
@@ -1055,7 +1060,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
         // Delete it
         try {
             VertxMongoUtils.deleteWithMatcher(
-                    vertx.eventBus(),
+                    mongoClient,
                     getDbCollectionName(),
                     matcher,
                     getMongoDeleteHandler(nbiRequest)
@@ -1088,14 +1093,14 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
      * @param nbiRequest
      * @return
      */
-    public VertxMongoUtils.FindHandler getMongoFindHandler(AcsNbiRequest nbiRequest) {
+    public Handler getMongoFindHandler(AcsNbiRequest nbiRequest) {
         return new RetrieveResultHandler(nbiRequest);
     }
 
     /**
      * Retrieve Result Handler
      */
-    public class RetrieveResultHandler extends VertxMongoUtils.FindHandler{
+    public class RetrieveResultHandler implements Handler<List<JsonObject>>{
         AcsNbiRequest nbiRequest;
 
         /**
@@ -1107,33 +1112,28 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
 
         /**
          * The handler method body.
-         * @param jsonObjectMessage
+         * @param mongo_query_results
          */
         @Override
-        public void handle(Message<JsonObject> jsonObjectMessage) {
+        public void handle(List<JsonObject> mongo_query_results) {
             // Call super
-            super.handle(jsonObjectMessage);
-
-            if (VertxMongoUtils.FIND_TIMED_OUT.equals(queryResults)) {
-                nbiRequest.sendResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR, MONGODB_TIMED_OUT);
-            } else {
-                queryResults = postRetrieve(nbiRequest, queryResults, moreExist);
-                if (queryResults != null) {
-                    // send response
-                    if (bReturnRetrieveResultInChunkMode(nbiRequest)) {
-                        nbiRequest.sendResponseChunk(HttpResponseStatus.OK, queryResults, moreExist);
-                    } else {
-                        if (queryResults.size() == 0) {
-                            if (nbiRequest.bInternalRequest) {
-                                // Return additional error message for internal requests
-                                nbiRequest.sendResponse(HttpResponseStatus.NOT_FOUND, NO_MATCH_FOUND);
-                            } else {
-                                nbiRequest.sendResponse(HttpResponseStatus.NOT_FOUND);
-                            }
+            JsonArray queryResults = new JsonArray(mongo_query_results);
+            queryResults = postRetrieve(nbiRequest, queryResults, false);
+            if (queryResults != null) {
+                // send response
+                if (bReturnRetrieveResultInChunkMode(nbiRequest)) {
+                    nbiRequest.sendResponseChunk(HttpResponseStatus.OK, queryResults, false);
+                } else {
+                    if (queryResults.size() == 0) {
+                        if (nbiRequest.bInternalRequest) {
+                            // Return additional error message for internal requests
+                            nbiRequest.sendResponse(HttpResponseStatus.NOT_FOUND, NO_MATCH_FOUND);
                         } else {
-                            JsonObject firstResult = queryResults.get(0);
-                            nbiRequest.sendResponse(HttpResponseStatus.OK, firstResult);
+                            nbiRequest.sendResponse(HttpResponseStatus.NOT_FOUND);
                         }
+                    } else {
+                        JsonObject firstResult = queryResults.getJsonObject(0);
+                        nbiRequest.sendResponse(HttpResponseStatus.OK, firstResult);
                     }
                 }
             }
@@ -1156,18 +1156,18 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
                 queryResults.size() > 0) {
             JsonArray newResults = new JsonArray();
             for (int i=0; i < queryResults.size(); i ++) {
-                JsonObject aRecord = queryResults.get(i);
+                JsonObject aRecord = queryResults.getJsonObject(i);
 
                 if (getDateTimeFieldName() != null) {
                     // Convert the timestamp JSON Object to string
                     for (String dateTimeFieldName : getDateTimeFieldName()) {
-                        if (aRecord.containsField(dateTimeFieldName)) {
+                        if (aRecord.containsKey(dateTimeFieldName)) {
                             try {
                                 VertxJsonUtils.convertMongoDateToString(aRecord, dateTimeFieldName);
                             } catch (Exception ex) {
                                 log.error("Field " + dateTimeFieldName
                                         + " does not contain a MongoDB \"$date\"! ("
-                                        + aRecord.getField(dateTimeFieldName).toString() + ")");
+                                        + aRecord.getValue(dateTimeFieldName).toString() + ")");
                             }
                         }
                     }
@@ -1216,15 +1216,16 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
      * @param nbiRequest
      * @return
      */
-    public VertxMongoUtils.SaveHandler getMongoSaveHandler(AcsNbiRequest nbiRequest) {
+    public Handler getMongoSaveHandler(AcsNbiRequest nbiRequest) {
         return new CreateResultHandler(nbiRequest);
     }
 
     /**
      * Create Result Handler
      */
-    public class CreateResultHandler extends VertxMongoUtils.SaveHandler{
+    public class CreateResultHandler implements Handler<String>{
         AcsNbiRequest nbiRequest;
+        JsonObject newDoc;
 
         /**
          * Constructor that requires an AcsNbiRequest POJO
@@ -1245,35 +1246,19 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
          * @param saveResult
          */
         @Override
-        public void handle(Message<JsonObject> saveResult) {
+        public void handle(String saveResult) {
             // Call super
-            super.handle(saveResult);
 
-            boolean bSucceeded = status.equals(VertxMongoUtils.MOD_MONGO_FIELD_NAME_STATUS_VALUE_OK);
 
             String id = null;
-            if (bSucceeded) {
-                // Extract auto generated id if any
-                if (saveResult.body().containsField(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID)) {
-                    id = saveResult.body().getString(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID);
-                    nbiRequest.body.putString(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID, id);
-                } else {
-                    id = nbiRequest.body.getString(AcsConstants.FIELD_NAME_ID);
-                }
-            }
+
+
+            nbiRequest.body.put(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID, saveResult);
+
 
             // Get Response Status Code and Error Message (if any)
             HttpResponseStatus responseStatus = HttpResponseStatus.OK;
             String error = null;
-            if (bSucceeded == false) {
-                if (VertxMongoUtils.TIMED_OUT.equals(status)) {
-                    responseStatus = HttpResponseStatus.INTERNAL_SERVER_ERROR;
-                    error = MONGODB_TIMED_OUT_STRING;
-                } else {
-                    responseStatus = HttpResponseStatus.BAD_REQUEST;
-                    error = saveResult.body().getString("message");
-                }
-            }
 
             if (postCreate(nbiRequest, responseStatus, id, error) == false) {
                 // send response
@@ -1298,12 +1283,12 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
         if (HttpResponseStatus.OK.equals(responseStatus)) {
             if (nbiRequest.bInternalRequest) {
                 nbiRequest.sendResponse(HttpResponseStatus.OK,
-                        new JsonObject().putString(AcsConstants.FIELD_NAME_ID, id));
+                        new JsonObject().put(AcsConstants.FIELD_NAME_ID, id));
             } else {
                 nbiRequest.sendResponse(HttpResponseStatus.OK, id);
             }
         } else {
-            nbiRequest.sendResponse(responseStatus, new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR, error));
+            nbiRequest.sendResponse(responseStatus, new JsonObject().put(AcsConstants.FIELD_NAME_ERROR, error));
         }
     }
 
@@ -1341,15 +1326,16 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
      * @param nbiRequest
      * @return
      */
-    public VertxMongoUtils.SaveHandler getMongoUpdateHandler(AcsNbiRequest nbiRequest) {
+    public Handler getMongoUpdateHandler(AcsNbiRequest nbiRequest) {
         return new UpdateResultHandler(nbiRequest);
     }
 
     /**
      * Update Result Handler
      */
-    public class UpdateResultHandler extends VertxMongoUtils.SaveHandler{
+    public class UpdateResultHandler implements Handler<String>{
         AcsNbiRequest nbiRequest;
+        JsonObject newDoc;
 
         /**
          * Constructor that requires an AcsNbiRequest POJO
@@ -1364,35 +1350,13 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
          * @param saveResult
          */
         @Override
-        public void handle(Message<JsonObject> saveResult) {
+        public void handle(String saveResult) {
             // Call super
-            super.handle(saveResult);
 
-            boolean bSucceeded = status.equals(VertxMongoUtils.MOD_MONGO_FIELD_NAME_STATUS_VALUE_OK);
 
-            // Set Response Status and Error Message if applicable
-            HttpResponseStatus responseStatus;
-            String error;
-            switch (status) {
-                case VertxMongoUtils.MOD_MONGO_FIELD_NAME_STATUS_VALUE_OK:
-                    responseStatus = HttpResponseStatus.OK;
-                    error = null;
-                    break;
-
-                case VertxMongoUtils.TIMED_OUT:
-                    responseStatus = HttpResponseStatus.INTERNAL_SERVER_ERROR;
-                    error = MONGODB_TIMED_OUT_STRING;
-                    break;
-
-                default:
-                    responseStatus = HttpResponseStatus.BAD_REQUEST;
-                    error = saveResult.body().getString("message");
-                    break;
-            }
-
-            if (postUpdate(nbiRequest, responseStatus, error) == false) {
+            if (postUpdate(nbiRequest, HttpResponseStatus.OK, null) == false) {
                 // send response
-                sendUpdateResponse(nbiRequest, responseStatus, error);
+                sendUpdateResponse(nbiRequest, HttpResponseStatus.OK, null);
             }
         }
     }
@@ -1411,7 +1375,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
         if (HttpResponseStatus.OK.equals(responseStatus)) {
             nbiRequest.sendResponse(HttpResponseStatus.OK);
         } else {
-            nbiRequest.sendResponse(responseStatus, new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR, error));
+            nbiRequest.sendResponse(responseStatus, new JsonObject().put(AcsConstants.FIELD_NAME_ERROR, error));
         }
     }
 
@@ -1445,14 +1409,14 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
      * @param nbiRequest
      * @return
      */
-    public VertxMongoUtils.DeleteHandler getMongoDeleteHandler(AcsNbiRequest nbiRequest) {
+    public Handler getMongoDeleteHandler(AcsNbiRequest nbiRequest) {
         return new DeleteResultHandler(nbiRequest);
     }
 
     /**
      * Delete Result Handler
      */
-    public class DeleteResultHandler extends VertxMongoUtils.DeleteHandler{
+    public class DeleteResultHandler implements Handler<JsonObject>{
         AcsNbiRequest nbiRequest;
 
         /**
@@ -1467,16 +1431,12 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
          * @param jsonObjectMessage
          */
         @Override
-        public void handle(Message<JsonObject> jsonObjectMessage) {
-            if (jsonObjectMessage != null) {
-                // Call super
-                super.handle(jsonObjectMessage);
-            }
+        public void handle(JsonObject jsonObjectMessage) {
+
 
             // Determine succeed/fail by checking the number of record
-            boolean bSucceeded = false;
-            if (numberOfRecords != null && numberOfRecords.intValue() >= 1)
-                bSucceeded = true;
+            boolean bSucceeded = true;
+
 
             if (postDelete(nbiRequest, bSucceeded) == false) {
                 // send response
@@ -1484,7 +1444,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
                     if (bReturnNumberOfRecordsDeleted(nbiRequest)) {
                         nbiRequest.sendResponse(
                                 HttpResponseStatus.OK,
-                                new JsonObject().putNumber(AcsConstants.FIELD_NAME_NBR_OF_RECORDS, numberOfRecords)
+                                new JsonObject().put(AcsConstants.FIELD_NAME_NBR_OF_RECORDS, 1)
                         );
                     } else {
                         nbiRequest.sendResponse(HttpResponseStatus.OK);
@@ -1533,14 +1493,14 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
      * @param nbiRequest
      * @return
      */
-    public VertxMongoUtils.FindOneHandler getFindBeforeCreateResultHandler(AcsNbiRequest nbiRequest) {
+    public Handler getFindBeforeCreateResultHandler(AcsNbiRequest nbiRequest) {
         return new FindBeforeCreateResultHandler(nbiRequest);
     }
 
     /**
      * Find Result Handler (used by Create)
      */
-    public class FindBeforeCreateResultHandler extends VertxMongoUtils.FindOneHandler{
+    public class FindBeforeCreateResultHandler implements Handler<JsonObject>{
         AcsNbiRequest nbiRequest;
 
         /**
@@ -1552,18 +1512,16 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
 
         /**
          * The handler method body.
-         * @param jsonObjectMessage
+         * @param queryResult
          */
         @Override
-        public void handle(Message<JsonObject> jsonObjectMessage) {
-            // Call super
-            super.handle(jsonObjectMessage);
+        public void handle(JsonObject queryResult) {
 
             // Any match found?
             if (VertxMongoUtils.FIND_ONE_TIMED_OUT.equals(queryResult)) {
                 // MongoDB Timed Out
                 nbiRequest.sendResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR, MONGODB_TIMED_OUT);
-            } else if (queryResult != null && queryResult.containsField(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID)) {
+            } else if (queryResult != null && queryResult.containsKey(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID)) {
                 // Found existing document, respond with error
                 log.error("Found an existing document with the same index fields!\n" + queryResult.encodePrettily());
                 nbiRequest.sendResponse(
@@ -1575,7 +1533,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
                 log.info("Creating new document with\n" + nbiRequest.body.encodePrettily());
                 try {
                     VertxMongoUtils.save(
-                            vertx.eventBus(),
+                            mongoClient,
                             getDbCollectionName(),
                             nbiRequest.body,
                             getMongoSaveHandler(nbiRequest)
@@ -1594,14 +1552,14 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
      * @param nbiRequest
      * @return
      */
-    public VertxMongoUtils.FindHandler getFindBeforeUpdateResultHandler(AcsNbiRequest nbiRequest) {
+    public Handler getFindBeforeUpdateResultHandler(AcsNbiRequest nbiRequest) {
         return new FindBeforeUpdateResultHandler(nbiRequest);
     }
 
     /**
      * Find Result Handler (used by update)
      */
-    public class FindBeforeUpdateResultHandler extends VertxMongoUtils.FindHandler{
+    public class FindBeforeUpdateResultHandler implements Handler<List<JsonObject>>{
         AcsNbiRequest nbiRequest;
 
         /**
@@ -1613,12 +1571,11 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
 
         /**
          * The handler method body.
-         * @param jsonObjectMessage
+         * @param queryResults
          */
         @Override
-        public void handle(Message<JsonObject> jsonObjectMessage) {
+        public void handle(List<JsonObject> queryResults) {
             // Call super
-            super.handle(jsonObjectMessage);
 
             String id = nbiRequest.body.getString(AcsConstants.FIELD_NAME_ID);
 
@@ -1640,14 +1597,14 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
 
                 // Check if the client is trying to update read-only fields
                 String error = null;
-                for (String aFieldName : nbiRequest.body.getFieldNames()) {
+                for (String aFieldName : nbiRequest.body.fieldNames()) {
                     // Process a field in the new record
-                    if (oldRecord.containsField(aFieldName)) {
+                    if (oldRecord.containsKey(aFieldName)) {
                         // Same field shows up in both existing record and the new record
                         if (!getEditableFields().contains(aFieldName)) {
                              // Read-only field, make sure no change is being made
-                            Object newValue = nbiRequest.body.getField(aFieldName);
-                            Object oldValue = oldRecord.getField(aFieldName);
+                            Object newValue = nbiRequest.body.getValue(aFieldName);
+                            Object oldValue = oldRecord.getValue(aFieldName);
                             if (!newValue.equals(oldValue)) {
                                 error = "Field \"" + aFieldName + "\" is read-only thus cannot be edited.";
                                 break;
@@ -1668,15 +1625,15 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
                             + "\nOld Record:\n" + oldRecord.encodePrettily()
                             + "\nNew Record:\n" + nbiRequest.body.encodePrettily() + "\n");
                     nbiRequest.sendResponse(HttpResponseStatus.BAD_REQUEST,
-                            new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR, error));
+                            new JsonObject().put(AcsConstants.FIELD_NAME_ERROR, error));
                 } else {
                     // Add the missing read-only fields to the new record
-                    for (String aFieldName : oldRecord.getFieldNames()) {
+                    for (String aFieldName : oldRecord.fieldNames()) {
                         // Process a field in the old record
                         if (!getEditableFields().contains(aFieldName)) {
-                            if (!nbiRequest.body.containsField(aFieldName)) {
+                            if (!nbiRequest.body.containsKey(aFieldName)) {
                                 // this read-only field is not in the new record
-                                VertxJsonUtils.append(nbiRequest.body, aFieldName, oldRecord.getField(aFieldName));
+                                VertxJsonUtils.append(nbiRequest.body, aFieldName, oldRecord.getValue(aFieldName));
                             }
                         }
                     }
@@ -1705,7 +1662,6 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
                     }
                 }
             } else if (queryResults.size() == 0) {
-                log.error("No match found!\n" + jsonObjectMessage.body().encodePrettily());
                 nbiRequest.sendResponse(HttpResponseStatus.NOT_FOUND, NO_MATCH_FOUND);
             } else {
                 log.error("One or more index fields contain values currently used by another "
@@ -1748,14 +1704,14 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
         Object conflictValue = null;
 
         // Compare this and other record
-        if (indexMatcher.containsField(VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_OR)) {
-            JsonArray allFields = indexMatcher.getArray(VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_OR);
+        if (indexMatcher.containsKey(VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_OR)) {
+            JsonArray allFields = indexMatcher.getJsonArray(VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_OR);
 
             String elemMatchField = null;
             for (int i = 0; i < allFields.size(); i ++) {
-                JsonObject aField = allFields.get(i);
-                String fieldName = aField.getFieldNames().iterator().next();
-                Object value = aField.getField(fieldName);
+                JsonObject aField = allFields.getJsonObject(i);
+                String fieldName = aField.fieldNames().iterator().next();
+                Object value = aField.getValue(fieldName);
                 if (value instanceof JsonObject) {
                     // Must be "$elemMatch" for now
                     elemMatchField = fieldName;
@@ -1777,7 +1733,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
                 conflictField = elemMatchField;
             }
         } else {
-            Set<String> allFields = indexMatcher.getFieldNames();
+            Set<String> allFields = indexMatcher.fieldNames();
             for (String fieldName : allFields) {
                 if (!fieldName.equals(AcsConstants.FIELD_NAME_ID) &&
                         !fieldName.equals(AcsConstants.FIELD_NAME_ORG_ID)) {
@@ -1805,7 +1761,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
                     + " that conflicts with another "
                     + getServiceName().replace("-", " ");
             return new JsonObject()
-                    .putString(
+                    .put(
                             AcsConstants.FIELD_NAME_ERROR,
                             error
                     );
@@ -1839,7 +1795,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
         try {
             // Overwrite it
             VertxMongoUtils.save(
-                    vertx.eventBus(),
+                    mongoClient,
                     getDbCollectionName(),
                     nbiRequest.body,
                     getMongoUpdateHandler(nbiRequest)
@@ -1887,7 +1843,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
         String address = getPublishCrudEventsAddress();
         if (address != null) {
             // Build a new Event with CRUD Type
-            nbiRequest.body.putString(AcsConstants.FIELD_NAME_ACS_CRUD_TYPE, crudType.name());
+            nbiRequest.body.put(AcsConstants.FIELD_NAME_ACS_CRUD_TYPE, crudType.name());
 
             // Send it
             vertx.eventBus().publish(address, nbiRequest.body);
@@ -1961,7 +1917,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
                         + "(s) thus cannot be " + crudType.name() + "d.";
                 nbiRequest.sendResponse(
                         HttpResponseStatus.BAD_REQUEST,
-                        new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR, error)
+                        new JsonObject().put(AcsConstants.FIELD_NAME_ERROR, error)
                 );
             } else {
                 // Remove this cross reference check from the list
@@ -2006,7 +1962,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
             log.info("Cross Checking " + dbCollectionName + " with matcher\n" + matcher.encodePrettily());
             try {
                 VertxMongoUtils.count(
-                        vertx.eventBus(),
+                        mongoClient,
                         dbCollectionName,
                         matcher,
                         handler
@@ -2015,7 +1971,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
                 e.printStackTrace();
                 handler.nbiRequest.sendResponse(
                         HttpResponseStatus.INTERNAL_SERVER_ERROR,
-                        new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR, e.getMessage())
+                        new JsonObject().put(AcsConstants.FIELD_NAME_ERROR, e.getMessage())
                 );
             }
         }
@@ -2030,7 +1986,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
                 + "~" + new Date().toString() + "~" + System.currentTimeMillis();
         log.error("Returning an internal error to frontend or API client. error details: " + errorDetails);
         return new JsonObject()
-                .putString(AcsConstants.FIELD_NAME_ERROR,
+                .put(AcsConstants.FIELD_NAME_ERROR,
                         AbstractAcNbiCrudService.INTERNAL_SERVER_ERROR_CONTACT_CALIX
                                 + " (error detail: " + errorDetails + ")"
                 );

@@ -114,8 +114,8 @@ public class CwmpLogService extends AbstractAcNbiCrudService{
         VertxJsonUtils.validateFields(nbiRequest.body, MANDATORY_FIELDS, OPTIONAL_FIELDS);
 
         // Either cpeId or "_id" is required
-        if (!nbiRequest.body.containsField(AcsConstants.FIELD_NAME_CPE_ID) &&
-                !nbiRequest.body.containsField(AcsConstants.FIELD_NAME_ID)) {
+        if (!nbiRequest.body.containsKey(AcsConstants.FIELD_NAME_CPE_ID) &&
+                !nbiRequest.body.containsKey(AcsConstants.FIELD_NAME_ID)) {
             throw MISSING_REQUIRED_FIELD_EXCEPTION;
         }
         return true;
@@ -146,9 +146,9 @@ public class CwmpLogService extends AbstractAcNbiCrudService{
     private static final JsonObject SORT_BY_TIME =
             new JsonObject()
                     // Descending Order for Timestamp, so newest first
-                    .putNumber(CwmpMessage.DB_FIELD_NAME_TIMESTAMP, -1)
+                    .put(CwmpMessage.DB_FIELD_NAME_TIMESTAMP, -1)
                     // If multiple entries have the same timestamp, further sort with sn in descending order
-                    .putNumber(CwmpMessage.DB_FIELD_NAME_SN, -1);
+                    .put(CwmpMessage.DB_FIELD_NAME_SN, -1);
     @Override
     public JsonObject getDefaultQuerySort(AcsNbiRequest nbiRequest) {
         return SORT_BY_TIME;
@@ -168,16 +168,16 @@ public class CwmpLogService extends AbstractAcNbiCrudService{
      * Default to null (return everything)
      */
     private static final JsonObject INCLUDE_XML_TEXT = new JsonObject()
-            .putNumber(AcsConstants.FIELD_NAME_ORG_ID, 0)
-            .putNumber(AcsConstants.FIELD_NAME_CPE_ID, 0)
-            .putNumber(CwmpMessage.DB_FIELD_NAME_EXPIRE_AT, 0)
-            .putNumber(CwmpMessage.DB_FIELD_NAME_SN, 0);
+            .put(AcsConstants.FIELD_NAME_ORG_ID, 0)
+            .put(AcsConstants.FIELD_NAME_CPE_ID, 0)
+            .put(CwmpMessage.DB_FIELD_NAME_EXPIRE_AT, 0)
+            .put(CwmpMessage.DB_FIELD_NAME_SN, 0);
     private static final JsonObject DEFAULT_QUERY_KEY = INCLUDE_XML_TEXT.copy()
-            .putNumber(CwmpMessage.DB_FIELD_NAME_XML_TEXT, 0);
+            .put(CwmpMessage.DB_FIELD_NAME_XML_TEXT, 0);
     @Override
     public JsonObject buildRetrieveQueryKeys(AcsNbiRequest nbiRequest) {
         boolean includeXmlText = nbiRequest.body.getBoolean(FIELD_NAME_INCLUDE_XML_TEXT, false);
-        if (includeXmlText || nbiRequest.body.containsField(AcsConstants.FIELD_NAME_ID)) {
+        if (includeXmlText || nbiRequest.body.containsKey(AcsConstants.FIELD_NAME_ID)) {
             return INCLUDE_XML_TEXT;
         } else {
             return DEFAULT_QUERY_KEY;
@@ -191,24 +191,24 @@ public class CwmpLogService extends AbstractAcNbiCrudService{
      */
     private JsonObject convertRequestBodyToMatcher(AcsNbiRequest nbiRequest) {
         JsonObject matcher = nbiRequest.body.copy();
-        matcher.removeField(AcsConstants.FIELD_NAME_CPE_ID);
-        matcher.removeField(FIELD_NAME_INCLUDE_XML_TEXT);
+        matcher.remove(AcsConstants.FIELD_NAME_CPE_ID);
+        matcher.remove(FIELD_NAME_INCLUDE_XML_TEXT);
 
         // Convert CPE Identifier Struct to Mongo Matcher
         String id = nbiRequest.body.getString(AcsConstants.FIELD_NAME_ID);
         if (id == null) {
-            JsonObject cpeId = nbiRequest.body.getObject(AcsConstants.FIELD_NAME_CPE_ID);
+            JsonObject cpeId = nbiRequest.body.getJsonObject(AcsConstants.FIELD_NAME_CPE_ID);
             String sn = cpeId.getString(CpeIdentifier.FIELD_NAME_SN);
             String mac = cpeId.getString(CpeIdentifier.FIELD_NAME_MAC_ADDRESS);
             String oui = cpeId.getString(CpeIdentifier.FIELD_NAME_OUI);
             if (sn != null) {
-                matcher.putString(AcsConstants.FIELD_NAME_CPE_ID + "." + CpeIdentifier.FIELD_NAME_SN, sn);
+                matcher.put(AcsConstants.FIELD_NAME_CPE_ID + "." + CpeIdentifier.FIELD_NAME_SN, sn);
             }
             if (mac != null) {
-                matcher.putString(AcsConstants.FIELD_NAME_CPE_ID + "." + CpeIdentifier.FIELD_NAME_MAC_ADDRESS, mac);
+                matcher.put(AcsConstants.FIELD_NAME_CPE_ID + "." + CpeIdentifier.FIELD_NAME_MAC_ADDRESS, mac);
             }
             if (oui != null) {
-                matcher.putString(AcsConstants.FIELD_NAME_CPE_ID + "." + CpeIdentifier.FIELD_NAME_OUI, oui);
+                matcher.put(AcsConstants.FIELD_NAME_CPE_ID + "." + CpeIdentifier.FIELD_NAME_OUI, oui);
             }
         }
 
@@ -251,7 +251,7 @@ public class CwmpLogService extends AbstractAcNbiCrudService{
              * Convert the "$DOT" in parameter names to "." in summary
              */
 
-            JsonObject summary = aRecord.getObject(CwmpMessage.DB_FIELD_NAME_SUMMARY);
+            JsonObject summary = aRecord.getJsonObject(CwmpMessage.DB_FIELD_NAME_SUMMARY);
             if (summary != null) {
                 VertxJsonUtils.convertDotInFieldNames(summary, false);
             }

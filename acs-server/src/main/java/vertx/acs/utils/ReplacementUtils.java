@@ -1,5 +1,7 @@
 package vertx.acs.utils;
 
+import io.vertx.ext.mongo.MongoClient;
+import io.vertx.redis.RedisClient;
 import vertx.VertxException;
 import vertx.VertxMongoUtils;
 import vertx.model.*;
@@ -7,7 +9,6 @@ import vertx.util.AcsApiUtils;
 import vertx.util.AcsConstants;
 import vertx.util.AutoBackupUtils;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.java.redis.RedisClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.AsyncResult;
@@ -41,6 +42,7 @@ public class ReplacementUtils {
      */
     public static void doReplacement(
             final EventBus eventBus,
+            final MongoClient mongoClient,
             final RedisClient redisClient,
             final TreeMap<String, Workflow> discoveryWorkFlowHashMap,
             final JsonObject cpe,
@@ -60,7 +62,7 @@ public class ReplacementUtils {
              */
             try {
                 VertxMongoUtils.update(
-                        eventBus,
+                        mongoClient,
                         Cpe.CPE_COLLECTION_NAME,
                         oldDeviceKey,
                         VertxMongoUtils.getUpdatesObject(
@@ -117,15 +119,15 @@ public class ReplacementUtils {
 
         if (upgradeAction != null) {
             log.info(cpeKey + ": Replacement: Upgrading new device to "
-                    + upgradeAction.file.getField(AcsFile.FIELD_NAME_VERSION));
+                    + upgradeAction.file.getValue(AcsFile.FIELD_NAME_VERSION));
 
             // Build a device-op API request
             JsonObject requestBody = new JsonObject()
-                    .putObject(CpeDeviceOp.FIELD_NAME_CPE_DB_OBJECT, cpe)
-                    .putString(CpeDeviceOp.FIELD_NAME_OPERATION, CpeDeviceOpTypeEnum.Download.name())
-                    .putObject(CpeDeviceOp.FIELD_NAME_EXEC_POLICY, ExecPolicy.EXEC_POLICY_WITH_DOWNLOAD_TIMEOUT)
-                    .putString(CpeDeviceOp.FIELD_NAME_FILE_TYPE, AcsFileType.Image.tr069DownloadFileTypeString)
-                    .putObject(CpeDeviceOp.FIELD_NAME_FILE_STRUCT, upgradeAction.file);
+                    .put(CpeDeviceOp.FIELD_NAME_CPE_DB_OBJECT, cpe)
+                    .put(CpeDeviceOp.FIELD_NAME_OPERATION, CpeDeviceOpTypeEnum.Download.name())
+                    .put(CpeDeviceOp.FIELD_NAME_EXEC_POLICY, ExecPolicy.EXEC_POLICY_WITH_DOWNLOAD_TIMEOUT)
+                    .put(CpeDeviceOp.FIELD_NAME_FILE_TYPE, AcsFileType.Image.tr069DownloadFileTypeString)
+                    .put(CpeDeviceOp.FIELD_NAME_FILE_STRUCT, upgradeAction.file);
 
             /**
              * Send the device-op request
@@ -151,6 +153,7 @@ public class ReplacementUtils {
                                  */
                                 restoreBackupConfigFile(
                                         eventBus,
+                                        mongoClient,
                                         redisClient,
                                         cpe,
                                         orgId,
@@ -167,6 +170,7 @@ public class ReplacementUtils {
              */
             restoreBackupConfigFile(
                     eventBus,
+                    mongoClient,
                     redisClient,
                     cpe,
                     orgId,
@@ -186,6 +190,7 @@ public class ReplacementUtils {
      */
     public static void restoreBackupConfigFile(
             final EventBus eventBus,
+            final MongoClient mongoClient,
             final RedisClient redisClient,
             final JsonObject cpe,
             final String orgId,
@@ -198,9 +203,9 @@ public class ReplacementUtils {
          */
         try {
             VertxMongoUtils.count(
-                    eventBus,
+                    mongoClient,
                     AcsFile.DB_COLLECTION_NAME,
-                    new JsonObject().putString(AcsConstants.FIELD_NAME_ID, AcsFile.getAutoBackupConfigFileId(oldDeviceKey)),
+                    new JsonObject().put(AcsConstants.FIELD_NAME_ID, AcsFile.getAutoBackupConfigFileId(oldDeviceKey)),
                     new Handler<Long>() {
                         @Override
                         public void handle(Long count) {
@@ -209,33 +214,34 @@ public class ReplacementUtils {
                                         + "query the auto backup record for " + oldDeviceKey + "!");
                                 // Save event
                                 Event.saveEvent(
-                                        eventBus,
+                                        mongoClient,
                                         orgId,
                                         Cpe.getSnByCpeKey(cpeKey),
                                         EventTypeEnum.ReplacementFailure,
                                         EventSourceEnum.System,
                                         new JsonObject()
-                                                .putString("old device", Cpe.getSnByCpeKey(oldDeviceKey))
-                                                .putString("cause", "Internal DB Error")
+                                                .put("old device", Cpe.getSnByCpeKey(oldDeviceKey))
+                                                .put("cause", "Internal DB Error")
                                 );
                             } else if (count == 0) {
                                 log.error("Replacement Failed due to no auto backup found for the old device "
                                         + oldDeviceKey + "!");
                                 // Save event
                                 Event.saveEvent(
-                                        eventBus,
+                                        mongoClient,
                                         orgId,
                                         Cpe.getSnByCpeKey(cpeKey),
                                         EventTypeEnum.ReplacementFailure,
                                         EventSourceEnum.System,
                                         new JsonObject()
-                                                .putString("old device", Cpe.getSnByCpeKey(oldDeviceKey))
-                                                .putString("cause", "No auto backup found for the old device")
+                                                .put("old device", Cpe.getSnByCpeKey(oldDeviceKey))
+                                                .put("cause", "No auto backup found for the old device")
                                 );
                             } else {
                                 // Send the "Download" device op
                                 sendBackupDeviceOp(
                                         eventBus,
+                                        mongoClient,
                                         redisClient,
                                         cpe,
                                         orgId,
@@ -262,6 +268,7 @@ public class ReplacementUtils {
      */
     public static void sendBackupDeviceOp(
             final EventBus eventBus,
+            final MongoClient mongoClient,
             final RedisClient redisClient,
             final JsonObject cpe,
             final String orgId,
@@ -269,11 +276,11 @@ public class ReplacementUtils {
             final String oldDeviceKey) {
         // Build a device-op API request
         JsonObject requestBody = new JsonObject()
-                .putObject(CpeDeviceOp.FIELD_NAME_CPE_DB_OBJECT, cpe)
-                .putString(CpeDeviceOp.FIELD_NAME_OPERATION, CpeDeviceOpTypeEnum.Download.name())
-                .putString(CpeDeviceOp.FIELD_NAME_FILE_TYPE, AcsFileType.ConfigFile.tr069DownloadFileTypeString)
-                .putObject(CpeDeviceOp.FIELD_NAME_EXEC_POLICY, ExecPolicy.EXEC_POLICY_WITH_DOWNLOAD_TIMEOUT)
-                .putObject(
+                .put(CpeDeviceOp.FIELD_NAME_CPE_DB_OBJECT, cpe)
+                .put(CpeDeviceOp.FIELD_NAME_OPERATION, CpeDeviceOpTypeEnum.Download.name())
+                .put(CpeDeviceOp.FIELD_NAME_FILE_TYPE, AcsFileType.ConfigFile.tr069DownloadFileTypeString)
+                .put(CpeDeviceOp.FIELD_NAME_EXEC_POLICY, ExecPolicy.EXEC_POLICY_WITH_DOWNLOAD_TIMEOUT)
+                .put(
                         CpeDeviceOp.FIELD_NAME_FILE_STRUCT,
                         AcsFile.buildAutoBackupFileRecordWithUploadURL(oldDeviceKey)
                 );
@@ -292,7 +299,7 @@ public class ReplacementUtils {
                     @Override
                     public void handle(AsyncResult<Message<JsonObject>> asyncResult) {
                         EventTypeEnum eventType;
-                        JsonObject details = new JsonObject().putString(
+                        JsonObject details = new JsonObject().put(
                                 "old device",
                                 Cpe.getSnByCpeKey(oldDeviceKey)
                         );
@@ -301,7 +308,7 @@ public class ReplacementUtils {
                             log.error(cpeKey + ": Replacement Failed due to "
                                     + (asyncResult == null? "(null)" : asyncResult.cause().getMessage() + "!"));
                             if (asyncResult != null && asyncResult.cause() != null) {
-                                details.putString("cause", asyncResult.cause().getMessage());
+                                details.put("cause", asyncResult.cause().getMessage());
                             }
                             eventType = EventTypeEnum.ReplacementFailure;
                         } else if (asyncResult.succeeded()) {
@@ -325,8 +332,8 @@ public class ReplacementUtils {
                                  * Device Op Failed
                                  */
                                 if (deviceOpResult != null &&
-                                        deviceOpResult.containsField(AcsConstants.FIELD_NAME_ERROR)) {
-                                    details.putString("cause", deviceOpResult.getString(AcsConstants.FIELD_NAME_ERROR));
+                                        deviceOpResult.containsKey(AcsConstants.FIELD_NAME_ERROR)) {
+                                    details.put("cause", deviceOpResult.getString(AcsConstants.FIELD_NAME_ERROR));
                                 }
                                 eventType = EventTypeEnum.ReplacementFailure;
                             }
@@ -335,7 +342,7 @@ public class ReplacementUtils {
                              * Save Replacement Event
                              */
                             Event.saveEvent(
-                                    eventBus,
+                                    mongoClient,
                                     orgId,
                                     Cpe.getSnByCpeKey(cpeKey),
                                     eventType,

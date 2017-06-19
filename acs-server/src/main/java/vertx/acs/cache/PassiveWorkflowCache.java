@@ -55,7 +55,7 @@ public class PassiveWorkflowCache extends AbstractMultiOrgLocalCache {
      * Get DB Query Matcher
      */
     public static final JsonObject DEFAULT_MATCHER = new JsonObject()
-            .putString(
+            .put(
                     Workflow.FIELD_NAME_EXEC_POLICY + "." + ExecPolicy.FIELD_NAME_INITIAL_TRIGGER + "."
                             + WorkflowTrigger.FIELD_NAME_TRIGGER_TYPE,
                     WorkflowTrigger.TriggerTypeEnum.CPE_EVENT.typeString
@@ -107,9 +107,9 @@ public class PassiveWorkflowCache extends AbstractMultiOrgLocalCache {
      */
     @Override
     public JsonObject convertRawJsonObject(JsonObject rawJsonObject) {
-        rawJsonObject.removeField(Workflow.FIELD_NAME_TOTAL_COUNT);
-        rawJsonObject.removeField(Workflow.FIELD_NAME_SUCCESS_COUNT);
-        rawJsonObject.removeField(Workflow.FIELD_NAME_FAILURE_COUNT);
+        rawJsonObject.remove(Workflow.FIELD_NAME_TOTAL_COUNT);
+        rawJsonObject.remove(Workflow.FIELD_NAME_SUCCESS_COUNT);
+        rawJsonObject.remove(Workflow.FIELD_NAME_FAILURE_COUNT);
 
         return rawJsonObject;
     }
@@ -125,8 +125,8 @@ public class PassiveWorkflowCache extends AbstractMultiOrgLocalCache {
                 JsonObject workflow1 = rawJsonObjectHashMap.get(o1);
                 JsonObject workflow2 = rawJsonObjectHashMap.get(o2);
 
-                JsonObject dateObject1 = workflow1 == null? null : workflow1.getObject(AcsConstants.FIELD_NAME_CREATE_TIME);
-                JsonObject dateObject2 = workflow2 == null? null : workflow2.getObject(AcsConstants.FIELD_NAME_CREATE_TIME);
+                JsonObject dateObject1 = workflow1 == null? null : workflow1.getJsonObject(AcsConstants.FIELD_NAME_CREATE_TIME);
+                JsonObject dateObject2 = workflow2 == null? null : workflow2.getJsonObject(AcsConstants.FIELD_NAME_CREATE_TIME);
 
                 if (dateObject1 == null) {
                     if (dateObject2 == null) {
@@ -138,8 +138,8 @@ public class PassiveWorkflowCache extends AbstractMultiOrgLocalCache {
                     if (dateObject2 == null) {
                         return 1;
                     } else {
-                        String time1 = dateObject1.getField(VertxMongoUtils.MOD_MONGO_DATE).toString();
-                        String time2 = dateObject2.getField(VertxMongoUtils.MOD_MONGO_DATE).toString();
+                        String time1 = dateObject1.getValue(VertxMongoUtils.MOD_MONGO_DATE).toString();
+                        String time2 = dateObject2.getValue(VertxMongoUtils.MOD_MONGO_DATE).toString();
                         return time1.compareTo(time2);
                     }
                 }

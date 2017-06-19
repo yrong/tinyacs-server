@@ -1,7 +1,11 @@
 package vertx.acs;
 
+import io.vertx.core.AbstractVerticle;
+import io.vertx.core.DeploymentOptions;
+import io.vertx.redis.RedisClient;
+import io.vertx.redis.RedisOptions;
+import vertx.VertxConfigProperties;
 import vertx.VertxConstants;
-import vertx.VertxDeployUtils;
 import vertx.VertxUtils;
 import vertx.acs.cache.PassiveWorkflowCache;
 import vertx.acs.nbi.AbstractAcNbiCrudService;
@@ -45,19 +49,16 @@ import vertx.taskmgmt.worker.TaskPollerVertice;
 import vertx.taskmgmt.worker.WorkerUtils;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.util.internal.StringUtil;
-import io.vertx.java.redis.RedisClient;
 import org.apache.http.auth.AUTH;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.AsyncResultHandler;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.json.JsonObject;
-import io.vertx.platform.Verticle;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -68,7 +69,7 @@ import java.util.Map;
  *
  * @author: ronyang
  */
-public class AcsMainVertice extends Verticle {
+public class AcsMainVertice extends AbstractVerticle {
     private static final Logger log = LoggerFactory.getLogger(AcsMainVertice.class.getName());
 
     /**
@@ -119,136 +120,130 @@ public class AcsMainVertice extends Verticle {
         /**
          * Build the list of sub modules/vertices to be deployed
          */
-        VertxDeployUtils.Deployments deployments = new VertxDeployUtils.Deployments();
-        // Add Mod MongoDB
-        deployments.add(VertxConstants.MOD_MONGO_PERSISTOR_DEPLOYMENT);
-        // Add Mod MongoDB-GridFS
-        deployments.add(VertxConstants.MOD_MONGO_GRIDFS_DEPLOYMENT);
-        // Add Mod Redis
-        deployments.add(VertxConstants.MOD_REDIS_DEPLOYMENT);
-        // Add Workflow Worker/Poller Vertice
+//        VertxDeployUtils.Deployments deployments = new VertxDeployUtils.Deployments();
+//        // Add Mod MongoDB
+//        deployments.add(VertxConstants.MOD_MONGO_PERSISTOR_DEPLOYMENT);
+//        // Add Mod MongoDB-GridFS
+//        deployments.add(VertxConstants.MOD_MONGO_GRIDFS_DEPLOYMENT);
+//        // Add Mod Redis
+//        deployments.add(VertxConstants.MOD_REDIS_DEPLOYMENT);
+//        // Add Workflow Worker/Poller Vertice
         JsonObject workerConfig = WorkerUtils.buildConfig(
                 new String[]{ActiveWorkflowTaskWorker.class.getName()},
                 ActiveWorkflowTaskWorker.MAX_NBR_OF_OUTSTANDING_TASKS
         );
-        deployments.add(VertxUtils.buildNewDeployment(ActiveWorkflowWorkerVertice.class.getName(), workerConfig));
-        deployments.add(VertxUtils.buildNewDeployment(TaskPollerVertice.class.getName(), workerConfig));
-        // Add Passive Workflow Worker Vertice(s)
-        deployments.add(
-                VertxUtils.buildNewDeployment(
-                        PassiveWorkflowWorkerVertice.class.getName(),
-                        null,
-                        AcsConfigProperties.NBR_OF_PASSIVE_WORKFLOW_WORKER_VERTICES)
-        );
-        // Add Auto Backup Worker Vertice(s)
-        deployments.add(
-                VertxUtils.buildNewDeployment(AutoBackupWorkerVertice.class.getName(),null)
-        );
+//        deployments.add(VertxUtils.buildNewDeployment(ActiveWorkflowWorkerVertice.class.getName(), workerConfig));
+//        deployments.add(VertxUtils.buildNewDeployment(TaskPollerVertice.class.getName(), workerConfig));
+//        // Add Passive Workflow Worker Vertice(s)
+//        deployments.add(
+//                VertxUtils.buildNewDeployment(
+//                        PassiveWorkflowWorkerVertice.class.getName(),
+//                        null,
+//                        AcsConfigProperties.NBR_OF_PASSIVE_WORKFLOW_WORKER_VERTICES)
+//        );
+//        // Add Auto Backup Worker Vertice(s)
+//        deployments.add(
+//                VertxUtils.buildNewDeployment(AutoBackupWorkerVertice.class.getName(),null)
+//        );
 
-        /**
-         * Start all ACS server specific items after all sub modules have been deployed
-         */
-        deployments.finalHandler = new AsyncResultHandler<String>() {
-            @Override
-            public void handle(AsyncResult<String> deployResult) {
-                if (deployResult.succeeded()) {
-                    log.info("All external and sub modules have been successfully installed.");
+        DeploymentOptions options = new DeploymentOptions().setConfig(workerConfig);
+        vertx.deployVerticle(ActiveWorkflowWorkerVertice.class.getName(),options);
+        vertx.deployVerticle(TaskPollerVertice.class.getName(),options);
+        vertx.deployVerticle(PassiveWorkflowWorkerVertice.class.getName(), options, res -> {
+            if (res.succeeded()) {
+                log.info("All external and sub modules have been successfully installed.");
 
-                    /**
-                     * Create a local cache of all organization for authentication
-                     */
-                    perOrgNbiAuthenticatorCache = new PerOrgNbiAuthenticatorCache(vertx);
+                /**
+                 * Create a local cache of all organization for authentication
+                 */
+                perOrgNbiAuthenticatorCache = new PerOrgNbiAuthenticatorCache(vertx);
 
-                    /**
-                     * Create common objects to be shared by all services
-                     */
-                    OrganizationCache organizationCache = new OrganizationCache(
-                            vertx,
-                            AcsConstants.VERTX_ADDRESS_ACS_ORGANIZATION_CRUD,
-                            Organization.DB_COLLECTION_NAME,
-                            Organization.class.getSimpleName()
-                    );
-                    PassiveWorkflowCache passiveWorkflowCache = new PassiveWorkflowCache(
-                            vertx,
-                            AcsConstants.VERTX_ADDRESS_WORKFLOW_CRUD,
-                            Workflow.DB_COLLECTION_NAME,
-                            "passive-workflow"
-                    );
-                    ConfigurationProfileCache configurationProfileCache = new ConfigurationProfileCache(
-                            vertx,
-                            AcsConstants.VERTX_ADDRESS_ACS_CONFIG_PROFILE_CRUD,
-                            ConfigurationProfile.DB_COLLECTION_NAME,
-                            ConfigurationProfile.class.getSimpleName()
-                    );
-                    DialPlanCache dialPlanCache = new DialPlanCache(vertx);
-                    GroupCache groupCache = new GroupCache(
-                            vertx,
-                            AcsConstants.VERTX_ADDRESS_ACS_GROUP_CRUD,
-                            CpeGroup.DB_COLLECTION_NAME,
-                            CpeGroup.class.getSimpleName()
-                    );
-                    RedisClient redisClient = new RedisClient(vertx.eventBus(), VertxConstants.VERTX_ADDRESS_REDIS);
+                /**
+                 * Create common objects to be shared by all services
+                 */
+                OrganizationCache organizationCache = new OrganizationCache(
+                        vertx,
+                        AcsConstants.VERTX_ADDRESS_ACS_ORGANIZATION_CRUD,
+                        Organization.DB_COLLECTION_NAME,
+                        Organization.class.getSimpleName()
+                );
+                PassiveWorkflowCache passiveWorkflowCache = new PassiveWorkflowCache(
+                        vertx,
+                        AcsConstants.VERTX_ADDRESS_WORKFLOW_CRUD,
+                        Workflow.DB_COLLECTION_NAME,
+                        "passive-workflow"
+                );
+                ConfigurationProfileCache configurationProfileCache = new ConfigurationProfileCache(
+                        vertx,
+                        AcsConstants.VERTX_ADDRESS_ACS_CONFIG_PROFILE_CRUD,
+                        ConfigurationProfile.DB_COLLECTION_NAME,
+                        ConfigurationProfile.class.getSimpleName()
+                );
+                DialPlanCache dialPlanCache = new DialPlanCache(vertx);
+                GroupCache groupCache = new GroupCache(
+                        vertx,
+                        AcsConstants.VERTX_ADDRESS_ACS_GROUP_CRUD,
+                        CpeGroup.DB_COLLECTION_NAME,
+                        CpeGroup.class.getSimpleName()
+                );
+                RedisOptions redis_config = new RedisOptions()
+                        .setHost(VertxConfigProperties.redisHost).setPort(VertxConfigProperties.redisPort).setSelect(VertxConfigProperties.redisDbIndex);
+                RedisClient redisClient = RedisClient.create(vertx,redis_config);
 
-                    /**
-                     * Initialize service map
-                     *
-                     * TODO: Add release version to the URL path.
-                     */
-                    for (AcsApiService service : allCWMPApiServices) {
-                        log.info("Installing " + service.getServiceName() + " service...");
-                        // Setup HTTP URL path for this service
-                        serviceMap.put(service.getServiceName(), service);
-                        // Install event bus handler for this service
-                        vertx.eventBus().registerHandler(
-                                AcsApiUtils.getServiceVertxAddress(service.getServiceName()),
-                                new VertxRequestHandler(service));
-                        // Set the Cache Objects
-                        service.setOrganizationCache(organizationCache);
-                        service.setPassiveWorkflowCache(passiveWorkflowCache);
-                        service.setDialPlanCache(dialPlanCache);
-                        service.setConfigurationProfileCache(configurationProfileCache);
-                        service.setGroupCache(groupCache);
-                        service.setRedisClient(redisClient);
-                        // Start this service
-                        service.start(vertx);
-                    }
-
-                    /**
-                     * Start the cwmp Internal API HTTP server
-                     */
-                    HttpServer CWMPApiServer = vertx.createHttpServer();
-                    CWMPApiServer.requestHandler(internalApiHttpRequestHandler);
-                    CWMPApiServer.listen(AcsConfigProperties.ACS_INTERNAL_API_PORT);
-                    log.info(VertxUtils.highlightWithHashes(
-                            "Internal API Port #: " + AcsConfigProperties.ACS_INTERNAL_API_PORT));
-
-                    /**
-                     * Start the External API HTTP server
-                     */
-                    HttpServer externalApiServer = vertx.createHttpServer();
-                    externalApiServer.requestHandler(externalApiHttpRequestHandler);
-                    externalApiServer.listen(AcsConfigProperties.ACS_EXTERNAL_API_PORT);
-                    log.info(VertxUtils.highlightWithHashes(
-                            "External API Port #: " + AcsConfigProperties.ACS_EXTERNAL_API_PORT));
-
-                    log.info(VertxUtils.highlightWithHashes(
-                            "File Server Base URL: " + AcsConfigProperties.BASE_FILE_SERVER_URL));
-
-                    /**
-                     * We are now up and running
-                     */
-                    log.info(VertxUtils.highlightWithHashes("ACS Server is now up and running."));
-
-                    // Print Build Info
-                    VertxUtils.displayBuildInfo(vertx);
+                /**
+                 * Initialize service map
+                 *
+                 * TODO: Add release version to the URL path.
+                 */
+                for (AcsApiService service : allCWMPApiServices) {
+                    log.info("Installing " + service.getServiceName() + " service...");
+                    // Setup HTTP URL path for this service
+                    serviceMap.put(service.getServiceName(), service);
+                    // Install event bus handler for this service
+                    vertx.eventBus().consumer(
+                            AcsApiUtils.getServiceVertxAddress(service.getServiceName()),
+                            new VertxRequestHandler(service));
+                    // Set the Cache Objects
+                    service.setOrganizationCache(organizationCache);
+                    service.setPassiveWorkflowCache(passiveWorkflowCache);
+                    service.setDialPlanCache(dialPlanCache);
+                    service.setConfigurationProfileCache(configurationProfileCache);
+                    service.setGroupCache(groupCache);
+                    service.setRedisClient(redisClient);
+                    // Start this service
+                    service.start(vertx);
                 }
-            }
-        };
 
-        /**
-         * Start the Deployments
-         */
-        VertxUtils.deployModsVertices(container, deployments);
+                /**
+                 * Start the cwmp Internal API HTTP server
+                 */
+                HttpServer CWMPApiServer = vertx.createHttpServer();
+                CWMPApiServer.requestHandler(internalApiHttpRequestHandler);
+                CWMPApiServer.listen(AcsConfigProperties.ACS_INTERNAL_API_PORT);
+                log.info(VertxUtils.highlightWithHashes(
+                        "Internal API Port #: " + AcsConfigProperties.ACS_INTERNAL_API_PORT));
+
+                /**
+                 * Start the External API HTTP server
+                 */
+                HttpServer externalApiServer = vertx.createHttpServer();
+                externalApiServer.requestHandler(externalApiHttpRequestHandler);
+                externalApiServer.listen(AcsConfigProperties.ACS_EXTERNAL_API_PORT);
+                log.info(VertxUtils.highlightWithHashes(
+                        "External API Port #: " + AcsConfigProperties.ACS_EXTERNAL_API_PORT));
+
+                log.info(VertxUtils.highlightWithHashes(
+                        "File Server Base URL: " + AcsConfigProperties.BASE_FILE_SERVER_URL));
+
+                /**
+                 * We are now up and running
+                 */
+                log.info(VertxUtils.highlightWithHashes("ACS Server is now up and running."));
+
+                // Print Build Info
+                VertxUtils.displayBuildInfo(vertx);
+            }
+        });
     }
 
     /**
@@ -300,7 +295,7 @@ public class AcsMainVertice extends Verticle {
          */
         @Override
         public void handle(final HttpServerRequest request) {
-            log.debug("Received a new request from Remote host: " + request.remoteAddress().getHostString()
+            log.debug("Received a new request from Remote host: " + request.remoteAddress().host()
                     + ", URL path: " + request.path());
 
             /**
@@ -313,7 +308,7 @@ public class AcsMainVertice extends Verticle {
                  */
 
                 log.error("Received an external request without " + AUTH.WWW_AUTH_RESP + " header! URL path: "
-                        + request.path() + ", remote host: " + request.remoteAddress().getHostString());
+                        + request.path() + ", remote host: " + request.remoteAddress().host());
                 request.response().putHeader("Content-Type", "text/html");
                 VertxUtils.setResponseStatus(request, HttpResponseStatus.UNAUTHORIZED);
 
@@ -340,7 +335,7 @@ public class AcsMainVertice extends Verticle {
                  */
 
                 log.error("Received an NBI request with invalid " + AUTH.WWW_AUTH_RESP + " header! URL path: "
-                        + request.path() + ", remote host: " + request.remoteAddress().getHostString());
+                        + request.path() + ", remote host: " + request.remoteAddress().host());
                 VertxUtils.setResponseStatus(request, HttpResponseStatus.UNAUTHORIZED);
                 request.response().end();
                 return;
@@ -370,7 +365,7 @@ public class AcsMainVertice extends Verticle {
          * Lookup service instance by URL path which must be in the format of
          * "/[context root]/[service name]{/[]optional path parameters]}"
          */
-        final String[] pathSegments = StringUtil.split(request.path(), '/');
+        final String[] pathSegments = request.path().split("/");
         if (pathSegments.length < 3 || !pathSegments[1].equals(contextRoot)) {
             /**
              * Invalid Request Path
@@ -427,7 +422,7 @@ public class AcsMainVertice extends Verticle {
                     }
 
                     if (orgId != null) {
-                        body.putString(AcsConstants.FIELD_NAME_ORG_ID, orgId);
+                        body.put(AcsConstants.FIELD_NAME_ORG_ID, orgId);
                     }
 
                     // Create a new AcsNbiRequest POJO and Call the service's handler

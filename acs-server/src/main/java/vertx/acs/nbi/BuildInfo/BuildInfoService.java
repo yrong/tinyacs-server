@@ -1,5 +1,7 @@
 package vertx.acs.nbi.BuildInfo;
 
+import io.vertx.core.Handler;
+import io.vertx.redis.RedisClient;
 import vertx.VertxUtils;
 import vertx.acs.cache.PassiveWorkflowCache;
 import vertx.acs.nbi.AcsApiService;
@@ -9,11 +11,9 @@ import vertx.cache.DialPlanCache;
 import vertx.cache.GroupCache;
 import vertx.cache.OrganizationCache;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.java.redis.RedisClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.AsyncResultHandler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 
@@ -46,7 +46,7 @@ public class BuildInfoService implements AcsApiService{
         final String filePath = "build-info.txt";
         vertx.fileSystem().readFile(
                 filePath,
-                new AsyncResultHandler<Buffer>() {
+                new Handler<AsyncResult<Buffer>>() {
                     public void handle(AsyncResult<Buffer> ar) {
                         if (ar.succeeded()) {
                             if (ar.result() != null) {

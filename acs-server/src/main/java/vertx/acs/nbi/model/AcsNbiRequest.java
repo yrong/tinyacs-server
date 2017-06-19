@@ -242,7 +242,7 @@ public class AcsNbiRequest {
                         // Do not overflow the array
                         break;
                     }
-                    JsonObject oneElement = results.get(i);
+                    JsonObject oneElement = results.getJsonObject(i);
                     if (i < (results.size() - 1)) {
                         chunk.append(oneElement.encodePrettily() + ",");
                     } else {
@@ -265,12 +265,12 @@ public class AcsNbiRequest {
             }
         } else {
             // Build Vert.x Response
-            JsonObject response = new JsonObject().putString(AcsConstants.FIELD_NAME_STATUS_CODE, status.toString());
+            JsonObject response = new JsonObject().put(AcsConstants.FIELD_NAME_STATUS_CODE, status.toString());
             if (hasMore) {
-                response.putBoolean(AcsConstants.FIELD_NAME_MORE_EXIST, true);
+                response.put(AcsConstants.FIELD_NAME_MORE_EXIST, true);
             }
             if (results != null) {
-                response.putArray(AcsConstants.FIELD_NAME_RESULT, results);
+                response.put(AcsConstants.FIELD_NAME_RESULT, results);
             }
 
             // Send Response via Vert.x event bus

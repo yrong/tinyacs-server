@@ -1,5 +1,6 @@
 package vertx.acs.nbi.configurationcategory;
 
+import io.vertx.core.Handler;
 import vertx.VertxException;
 import vertx.VertxMongoUtils;
 import vertx.acs.nbi.AbstractAcNbiCrudService;
@@ -103,9 +104,9 @@ public class ConfigurationCategoryService extends AbstractAcNbiCrudService {
      * Default to null (return everything)
      */
     private static final JsonObject QUERY_KEY_BRIEF = new JsonObject()
-            .putNumber(AcsConstants.FIELD_NAME_ID, 1)
-            .putNumber(AcsConstants.FIELD_NAME_NAME, 1)
-            .putNumber(AcsConstants.FIELD_NAME_DESCRIPTION, 1);
+            .put(AcsConstants.FIELD_NAME_ID, 1)
+            .put(AcsConstants.FIELD_NAME_NAME, 1)
+            .put(AcsConstants.FIELD_NAME_DESCRIPTION, 1);
     public JsonObject buildRetrieveQueryKeys(AcsNbiRequest nbiRequest) {
         if (nbiRequest.getQueryBrief()) {
             return QUERY_KEY_BRIEF;
@@ -121,7 +122,7 @@ public class ConfigurationCategoryService extends AbstractAcNbiCrudService {
      * @return  Default to null (let MongoDB to sort it)
      */
     private static final JsonObject SORT_BY_NAME =
-            new JsonObject().putNumber(AcsConstants.FIELD_NAME_NAME, 1);
+            new JsonObject().put(AcsConstants.FIELD_NAME_NAME, 1);
     @Override
     public JsonObject getDefaultQuerySort(AcsNbiRequest nbiRequest) {
         return SORT_BY_NAME;
@@ -148,14 +149,14 @@ public class ConfigurationCategoryService extends AbstractAcNbiCrudService {
      * @return
      */
     @Override
-    public VertxMongoUtils.FindOneHandler getFindBeforeCreateResultHandler(AcsNbiRequest nbiRequest) {
+    public Handler getFindBeforeCreateResultHandler(AcsNbiRequest nbiRequest) {
         return new CustomFindBeforeCreateResultHandler(nbiRequest);
     }
 
     /**
      * Custom Find Result Handler (used by Create)
      */
-    public class CustomFindBeforeCreateResultHandler extends VertxMongoUtils.FindOneHandler{
+    public class CustomFindBeforeCreateResultHandler implements Handler<JsonObject>{
         AcsNbiRequest nbiRequest;
 
         /**
@@ -167,21 +168,13 @@ public class ConfigurationCategoryService extends AbstractAcNbiCrudService {
 
         /**
          * The handler method body.
-         * @param jsonObjectMessage
+         * @param queryResult
          */
         @Override
-        public void handle(Message<JsonObject> jsonObjectMessage) {
-            // Call super
-            super.handle(jsonObjectMessage);
-
-            // Any match found?
-            if (VertxMongoUtils.FIND_ONE_TIMED_OUT.equals(queryResult)) {
-                // MongoDB Timed Out
-                nbiRequest.sendResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR, MONGODB_TIMED_OUT);
-                return;
-            } else if (queryResult != null && queryResult.containsField(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID)) {
+        public void handle(JsonObject queryResult) {
+            if (queryResult != null && queryResult.containsKey(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID)) {
                 // Found existing document, overwrite
-                nbiRequest.body.putString(
+                nbiRequest.body.put(
                         AcsConstants.FIELD_NAME_ID,
                         queryResult.getString(AcsConstants.FIELD_NAME_ID)
                 );
@@ -194,7 +187,7 @@ public class ConfigurationCategoryService extends AbstractAcNbiCrudService {
                 log.info("Creating new document with\n" + nbiRequest.body.encodePrettily());
                 try {
                     VertxMongoUtils.save(
-                            vertx.eventBus(),
+                            mongoClient,
                             getDbCollectionName(),
                             nbiRequest.body,
                             getMongoSaveHandler(nbiRequest)

@@ -1,12 +1,12 @@
 package vertx.acs.nbi;
 
+import io.vertx.redis.RedisClient;
 import vertx.acs.cache.PassiveWorkflowCache;
 import vertx.acs.nbi.model.AcsNbiRequest;
 import vertx.cache.ConfigurationProfileCache;
 import vertx.cache.DialPlanCache;
 import vertx.cache.GroupCache;
 import vertx.cache.OrganizationCache;
-import io.vertx.java.redis.RedisClient;
 import io.vertx.core.Vertx;
 
 /**
