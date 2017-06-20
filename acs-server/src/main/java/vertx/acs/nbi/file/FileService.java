@@ -1,5 +1,6 @@
 package vertx.acs.nbi.file;
 
+import io.vertx.core.json.JsonArray;
 import vertx.*;
 import vertx.acs.nbi.AbstractAcNbiCrudService;
 import vertx.acs.nbi.model.AcsNbiRequest;
@@ -9,11 +10,9 @@ import vertx.util.AcsConstants;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.bson.types.ObjectId;
 import io.vertx.core.AsyncResult;
-import io.vertx.core.AsyncResultHandler;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 
 import java.util.ArrayList;
@@ -163,24 +162,24 @@ public class FileService extends AbstractAcNbiCrudService{
         switch (crudType) {
             case Create:
                 // Initialize the file-size and number-of-downloads to 0
-                if (!nbiRequest.body.containsField(AcsFile.FIELD_NAME_TEXT_CONTENT)) {
-                    nbiRequest.body.putNumber(AcsFile.FIELD_NAME_SIZE, 0);
+                if (!nbiRequest.body.containsKey(AcsFile.FIELD_NAME_TEXT_CONTENT)) {
+                    nbiRequest.body.put(AcsFile.FIELD_NAME_SIZE, 0);
                 } else {
-                    nbiRequest.body.putNumber(AcsFile.FIELD_NAME_SIZE,
+                    nbiRequest.body.put(AcsFile.FIELD_NAME_SIZE,
                             nbiRequest.body.getString(AcsFile.FIELD_NAME_TEXT_CONTENT).length());
                 }
 
                 // Generate Real MongoDB ObjectId (otherwise an UUID will be generated)
                 // ObjectId is required by mod-gridfs
-                nbiRequest.body.putString(AcsConstants.FIELD_NAME_ID, ObjectId.get().toString());
+                nbiRequest.body.put(AcsConstants.FIELD_NAME_ID, ObjectId.get().toString());
 
                 // Initialize # of downloads to 0
-                nbiRequest.body.putNumber(AcsFile.FIELD_NAME_NUMBER_OF_DOWNLOADS, 0);
+                nbiRequest.body.put(AcsFile.FIELD_NAME_NUMBER_OF_DOWNLOADS, 0);
 
                 // Generate Username/Password for Internal File Server.
                 nbiRequest.body
-                        .putString(AcsFile.FIELD_NAME_USERNAME, AcsFile.getUsername(nbiRequest.body))
-                        .putString(AcsFile.FIELD_NAME_PASSWORD, AcsFile.getPassword(nbiRequest.body));
+                        .put(AcsFile.FIELD_NAME_USERNAME, AcsFile.getUsername(nbiRequest.body))
+                        .put(AcsFile.FIELD_NAME_PASSWORD, AcsFile.getPassword(nbiRequest.body));
                 break;
         }
     }
@@ -207,14 +206,14 @@ public class FileService extends AbstractAcNbiCrudService{
         // Send Response
         if (HttpResponseStatus.OK.equals(httpResponseStatus)) {
             JsonObject customResponse = new JsonObject()
-                    .putString(AcsConstants.FIELD_NAME_ID, id);
+                    .put(AcsConstants.FIELD_NAME_ID, id);
             /**
              * Respond with id and upload URL and credentials
              */
             customResponse
-                    .putString(AcsFile.FIELD_NAME_UPLOAD_URL, AcsFile.getUploadUrl(id))
-                    .putString(AcsFile.FIELD_NAME_USERNAME, nbiRequest.body.getString(AcsFile.FIELD_NAME_USERNAME))
-                    .putString(AcsFile.FIELD_NAME_PASSWORD, nbiRequest.body.getString(AcsFile.FIELD_NAME_PASSWORD));
+                    .put(AcsFile.FIELD_NAME_UPLOAD_URL, AcsFile.getUploadUrl(id))
+                    .put(AcsFile.FIELD_NAME_USERNAME, nbiRequest.body.getString(AcsFile.FIELD_NAME_USERNAME))
+                    .put(AcsFile.FIELD_NAME_PASSWORD, nbiRequest.body.getString(AcsFile.FIELD_NAME_PASSWORD));
 
             /**
              * Is it a SW Image which requires upload?
@@ -227,18 +226,18 @@ public class FileService extends AbstractAcNbiCrudService{
                     /**
                      * External File Server
                      */
-                    customResponse.putString(
+                    customResponse.put(
                             AcsFile.FIELD_NAME_EXTERNAL_URL,
                             org.extImageServer.baseUrl + AcsFile.getExternalFilePath(nbiRequest.body)
                     );
                     if (org.extImageServer.username != null) {
-                        customResponse.putString(
+                        customResponse.put(
                                 AcsFile.FIELD_NAME_EXTERNAL_USERNAME,
                                 org.extImageServer.username
                         );
                     }
                     if (org.extImageServer.password != null) {
-                        customResponse.putString(
+                        customResponse.put(
                                 AcsFile.FIELD_NAME_EXTERNAL_PASSWORD,
                                 org.extImageServer.password
                         );
@@ -271,27 +270,27 @@ public class FileService extends AbstractAcNbiCrudService{
                  * Try to delete image from GridFS
                  */
                 final String filename = nbiRequest.body.getString(AcsConstants.FIELD_NAME_NAME);
-                VertxMongoGridFsFile.deleteFile(
-                        vertx.eventBus(),
-                        nbiRequest.body.getString(AcsConstants.FIELD_NAME_ID),
-                        new Handler<AsyncResult<Message<JsonObject>>>() {
-
-                            public void handle(AsyncResult<Message<JsonObject>> deleteResult) {
-                                if (deleteResult.failed()) {
-                                    // Send Timeout Response
-                                    log.error(filename + ": Failed to delete from GridFS!");
-                                    nbiRequest.sendResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR, MONGODB_TIMED_OUT);
-                                } else {
-                                    // Send "OK" response
-                                    if (deleteResult.result().body()
-                                            .getNumber(VertxMongoUtils.MOD_MONGO_FIELD_NAME_NUMBER, 0).intValue() == 1) {
-                                        log.debug(filename + ": Deleted from GridFS.");
-                                    }
-                                    nbiRequest.sendResponse(HttpResponseStatus.OK);
-                                }
-                            }
-                        }
-                );
+//                VertxMongoGridFsFile.deleteFile(
+//                        vertx.eventBus(),
+//                        nbiRequest.body.getString(AcsConstants.FIELD_NAME_ID),
+//                        new Handler<AsyncResult<Message<JsonObject>>>() {
+//
+//                            public void handle(AsyncResult<Message<JsonObject>> deleteResult) {
+//                                if (deleteResult.failed()) {
+//                                    // Send Timeout Response
+//                                    log.error(filename + ": Failed to delete from GridFS!");
+//                                    nbiRequest.sendResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR, MONGODB_TIMED_OUT);
+//                                } else {
+//                                    // Send "OK" response
+//                                    if (deleteResult.result().body()
+//                                            .getNumber(VertxMongoUtils.MOD_MONGO_FIELD_NAME_NUMBER, 0).intValue() == 1) {
+//                                        log.debug(filename + ": Deleted from GridFS.");
+//                                    }
+//                                    nbiRequest.sendResponse(HttpResponseStatus.OK);
+//                                }
+//                            }
+//                        }
+//                );
             } else {
                 /**
                  * Try to delete from local file system
@@ -324,42 +323,42 @@ public class FileService extends AbstractAcNbiCrudService{
      */
     @Override
     public JsonObject buildRetrieveMatcher(AcsNbiRequest nbiRequest) throws VertxException {
-        if (nbiRequest.body.containsField(AcsConstants.FIELD_NAME_ID)) {
+        if (nbiRequest.body.containsKey(AcsConstants.FIELD_NAME_ID)) {
             return nbiRequest.body;
         }
 
         // Convert the CPE Identifier to matcher
-        JsonObject cpeIdJsonObject = nbiRequest.body.getObject(AcsConstants.FIELD_NAME_CPE_ID);
+        JsonObject cpeIdJsonObject = nbiRequest.body.getJsonObject(AcsConstants.FIELD_NAME_CPE_ID);
         if (cpeIdJsonObject != null) {
             JsonObject matcher = nbiRequest.body.copy();
             String sn = cpeIdJsonObject.getString(CpeIdentifier.FIELD_NAME_SN);
             String oui = cpeIdJsonObject.getString(CpeIdentifier.FIELD_NAME_OUI);
             String mac = cpeIdJsonObject.getString(CpeIdentifier.FIELD_NAME_MAC_ADDRESS);
 
-            matcher.removeField(AcsConstants.FIELD_NAME_CPE_ID);
+            matcher.remove(AcsConstants.FIELD_NAME_CPE_ID);
             if (sn != null) {
-                matcher.putString(AcsConstants.FIELD_NAME_CPE_ID + "." + CpeIdentifier.FIELD_NAME_SN, sn);
+                matcher.put(AcsConstants.FIELD_NAME_CPE_ID + "." + CpeIdentifier.FIELD_NAME_SN, sn);
             }
             if (oui != null) {
-                matcher.putString(AcsConstants.FIELD_NAME_CPE_ID + "." + CpeIdentifier.FIELD_NAME_OUI, oui);
+                matcher.put(AcsConstants.FIELD_NAME_CPE_ID + "." + CpeIdentifier.FIELD_NAME_OUI, oui);
             }
             if (mac != null) {
-                matcher.putString(AcsConstants.FIELD_NAME_CPE_ID + "." + CpeIdentifier.FIELD_NAME_MAC_ADDRESS, mac);
+                matcher.put(AcsConstants.FIELD_NAME_CPE_ID + "." + CpeIdentifier.FIELD_NAME_MAC_ADDRESS, mac);
             }
 
             if (AcsFileType.ConfigFile.typeString.equals(matcher.getString(AcsFile.FIELD_NAME_TYPE))) {
-                matcher.putObject(AcsFile.FIELD_NAME_UPLOAD_TIME, VertxMongoUtils.EXISTS);
-                matcher.putObject(AcsFile.FIELD_NAME_SIZE, VertxMongoUtils.GREATER_THAN_ZERO);
+                matcher.put(AcsFile.FIELD_NAME_UPLOAD_TIME, VertxMongoUtils.EXISTS);
+                matcher.put(AcsFile.FIELD_NAME_SIZE, VertxMongoUtils.GREATER_THAN_ZERO);
             }
             return matcher;
         } else {
-            if (nbiRequest.body.containsField(AcsConstants.FIELD_NAME_CPE_ID + "." + CpeIdentifier.FIELD_NAME_SN)) {
+            if (nbiRequest.body.containsKey(AcsConstants.FIELD_NAME_CPE_ID + "." + CpeIdentifier.FIELD_NAME_SN)) {
                 return nbiRequest.body.copy()
-                        .putObject(AcsFile.FIELD_NAME_UPLOAD_TIME, VertxMongoUtils.EXISTS)
-                        .putObject(AcsFile.FIELD_NAME_SIZE, VertxMongoUtils.GREATER_THAN_ZERO);
+                        .put(AcsFile.FIELD_NAME_UPLOAD_TIME, VertxMongoUtils.EXISTS)
+                        .put(AcsFile.FIELD_NAME_SIZE, VertxMongoUtils.GREATER_THAN_ZERO);
             } else {
                 // exclude individual CPE files
-                return nbiRequest.body.putObject(AcsConstants.FIELD_NAME_CPE_ID, VertxMongoUtils.EXISTS_FALSE);
+                return nbiRequest.body.put(AcsConstants.FIELD_NAME_CPE_ID, VertxMongoUtils.EXISTS_FALSE);
             }
         }
     }
@@ -370,10 +369,10 @@ public class FileService extends AbstractAcNbiCrudService{
      * Default to return everything except the file content.
      */
     private static final JsonObject DEFAULT_QUERY_KEY = new JsonObject()
-            .putNumber(AcsFile.FIELD_NAME_TEXT_CONTENT, 0)
-            .putNumber(AcsFile.FIELD_NAME_BINARY_CONTENT, 0);
+            .put(AcsFile.FIELD_NAME_TEXT_CONTENT, 0)
+            .put(AcsFile.FIELD_NAME_BINARY_CONTENT, 0);
     private static final JsonObject QUERY_KEY_WITH_CONTENT = new JsonObject()
-            .putNumber(AcsFile.FIELD_NAME_BINARY_CONTENT, 0);
+            .put(AcsFile.FIELD_NAME_BINARY_CONTENT, 0);
 
     /**
      * Build MongoDB Query Keys for Retrieve.
@@ -397,7 +396,7 @@ public class FileService extends AbstractAcNbiCrudService{
      * @param nbiRequest
      */
     public static final JsonObject SORT_BY_UPLOAD_TIME =
-            new JsonObject().putNumber(AcsFile.FIELD_NAME_UPLOAD_TIME, -1);
+            new JsonObject().put(AcsFile.FIELD_NAME_UPLOAD_TIME, -1);
     @Override
     public JsonObject getDefaultQuerySort(AcsNbiRequest nbiRequest) {
         return SORT_BY_UPLOAD_TIME;
@@ -418,7 +417,7 @@ public class FileService extends AbstractAcNbiCrudService{
         /**
          * Add upload URL
          */
-        aRecord.putString(
+        aRecord.put(
                 AcsFile.FIELD_NAME_UPLOAD_URL,
                 AcsFile.getUploadUrl(aRecord.getString(AcsConstants.FIELD_NAME_ID))
         );
@@ -431,14 +430,14 @@ public class FileService extends AbstractAcNbiCrudService{
      * @param nbiRequest
      * @return
      */
-    public VertxMongoUtils.FindHandler getMongoFindHandler(AcsNbiRequest nbiRequest) {
+    public Handler getMongoFindHandler(AcsNbiRequest nbiRequest) {
         return new FileRetrieveResultHandler(nbiRequest);
     }
 
     /**
      * Retrieve Result Handler
      */
-    public class FileRetrieveResultHandler extends VertxMongoUtils.FindHandler{
+    public class FileRetrieveResultHandler implements Handler<List<JsonObject>>{
         AcsNbiRequest nbiRequest;
 
         /**
@@ -450,21 +449,19 @@ public class FileService extends AbstractAcNbiCrudService{
 
         /**
          * The handler method body.
-         * @param jsonObjectMessage
+         * @param queryResultsList
          */
         @Override
-        public void handle(Message<JsonObject> jsonObjectMessage) {
-            // Call super
-            super.handle(jsonObjectMessage);
+        public void handle(List<JsonObject> queryResultsList) {
 
-            if (VertxMongoUtils.FIND_TIMED_OUT.equals(queryResults)) {
-                nbiRequest.sendResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR, MONGODB_TIMED_OUT);
-            } else {
-                queryResults = postRetrieve(nbiRequest, queryResults, moreExist);
+
+            {
+                JsonArray queryResults = new JsonArray(queryResultsList);
+                queryResults = postRetrieve(nbiRequest, queryResults, false);
                 if (queryResults != null) {
                     // send response
                     if (bReturnRetrieveResultInChunkMode(nbiRequest)) {
-                        nbiRequest.sendResponseChunk(HttpResponseStatus.OK, queryResults, moreExist);
+                        nbiRequest.sendResponseChunk(HttpResponseStatus.OK, queryResults, false);
                     } else {
                         if (queryResults.size() == 0) {
                             if (nbiRequest.bInternalRequest) {
@@ -474,22 +471,22 @@ public class FileService extends AbstractAcNbiCrudService{
                                 nbiRequest.sendResponse(HttpResponseStatus.NOT_FOUND);
                             }
                         } else {
-                            final JsonObject aFile = queryResults.get(0);
+                            final JsonObject aFile = queryResults.getJsonObject(0);
 
                             if (aFile.getInteger(AcsFile.FIELD_NAME_SIZE, 0) > 0 &&
-                                    !aFile.containsField(AcsFile.FIELD_NAME_EXTERNAL_URL) &&
-                                    !aFile.containsField(AcsFile.FIELD_NAME_TEXT_CONTENT) &&
+                                    !aFile.containsKey(AcsFile.FIELD_NAME_EXTERNAL_URL) &&
+                                    !aFile.containsKey(AcsFile.FIELD_NAME_TEXT_CONTENT) &&
                                     buildRetrieveQueryKeys(nbiRequest) == QUERY_KEY_WITH_CONTENT &&
                                     !aFile.getString(AcsFile.FIELD_NAME_TYPE).equals(AcsFileType.Image.typeString)) {
                                 // Read Config/Log file content from File System
                                 final String filePath = AcsFile.getFullFilePath(aFile);
                                 vertx.fileSystem().readFile(
                                         filePath,
-                                        new AsyncResultHandler<Buffer>() {
+                                        new Handler<AsyncResult<Buffer>>() {
                                             public void handle(AsyncResult<Buffer> ar) {
                                                 if (ar.succeeded()) {
                                                     if (ar.result() != null) {
-                                                        aFile.putString(AcsFile.FIELD_NAME_TEXT_CONTENT, ar.result().toString());
+                                                        aFile.put(AcsFile.FIELD_NAME_TEXT_CONTENT, ar.result().toString());
                                                     }
                                                 } else {
                                                     log.error("File " + filePath + " does not exist!");
@@ -543,21 +540,21 @@ public class FileService extends AbstractAcNbiCrudService{
     @Override
     public List<CrossReferenceCheck> getAllCrossReferenceChecks(String id) {
         JsonObject matcher = new JsonObject()
-                .putObject(
+                .put(
                         Workflow.FIELD_NAME_ACTIONS,
-                        new JsonObject().putObject(
+                        new JsonObject().put(
                                 VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_ELEM_MATCH,
-                                new JsonObject().putString(WorkflowAction.FIELD_NAME_FILE_ID, id)
+                                new JsonObject().put(WorkflowAction.FIELD_NAME_FILE_ID, id)
                         )
                 )
                 // Do not allow editing if used by a running scheduled workflow
-                .putString(
+                .put(
                         Workflow.FIELD_NAME_EXEC_POLICY + "."
                                 + ExecPolicy.FIELD_NAME_INITIAL_TRIGGER
                                 + WorkflowTrigger.FIELD_NAME_TRIGGER_TYPE,
                         WorkflowTrigger.TriggerTypeEnum.MAINTENANCE_WINDOW.typeString
                 )
-                .putString(Workflow.FIELD_NAME_STATE, Workflow.STATE_IN_PROGRESS);
+                .put(Workflow.FIELD_NAME_STATE, Workflow.STATE_IN_PROGRESS);
 
         final CrossReferenceCheck crossReferenceCheck = new CrossReferenceCheck(matcher, Workflow.DB_COLLECTION_NAME);
 
@@ -587,13 +584,13 @@ public class FileService extends AbstractAcNbiCrudService{
         log.info("Performing daily log file cleanup...");
         try {
             VertxMongoUtils.deleteWithMatcher(
-                    vertx.eventBus(),
+                    mongoClient,
                     AcsFile.DB_COLLECTION_NAME,
                     new JsonObject()
-                            .putString(AcsFile.FIELD_NAME_TYPE, AcsFileType.LogFile.typeString)
-                            .putObject(
+                            .put(AcsFile.FIELD_NAME_TYPE, AcsFileType.LogFile.typeString)
+                            .put(
                                     AcsFile.FIELD_NAME_UPLOAD_TIME,
-                                    new JsonObject().putObject(
+                                    new JsonObject().put(
                                             VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_LESS_THAN,
                                             VertxMongoUtils.getDateObject(
                                                     System.currentTimeMillis() - VertxUtils.ONE_DAY

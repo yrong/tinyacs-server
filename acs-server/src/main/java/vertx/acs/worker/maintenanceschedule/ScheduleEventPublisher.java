@@ -1,8 +1,8 @@
 package vertx.acs.worker.maintenanceschedule;
 
+import io.vertx.core.AbstractVerticle;
 import vertx.model.MaintenanceSchedule;
 import vertx.util.AcsConstants;
-import io.vertx.platform.Verticle;
 
 /**
  * Project:  cwmp
@@ -12,7 +12,7 @@ import io.vertx.platform.Verticle;
  *
  * @author: ronyang
  */
-public class ScheduleEventPublisher extends Verticle {
+public class ScheduleEventPublisher extends AbstractVerticle {
     /**
      * A local cache of all the Maintenance Schedules.
      */

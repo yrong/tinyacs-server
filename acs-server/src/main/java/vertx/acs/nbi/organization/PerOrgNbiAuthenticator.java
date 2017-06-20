@@ -4,7 +4,8 @@ import vertx.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.json.impl.Base64;
+
+import java.util.Base64;
 
 /**
  * Project:  cwmp
@@ -37,6 +38,6 @@ public class PerOrgNbiAuthenticator extends Organization{
     public static String getBasicAuthString(JsonObject jsonObject) {
         String authString = jsonObject.getString(FIELD_NAME_API_CLIENT_USERNAME)
                 + ":" + jsonObject.getString(FIELD_NAME_API_CLIENT_PASSWORD);
-        return "Basic " + Base64.encodeBytes(authString.getBytes());
+        return "Basic " + Base64.getEncoder().encodeToString(authString.getBytes());
     }
 }

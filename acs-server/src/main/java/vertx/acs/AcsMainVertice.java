@@ -120,32 +120,10 @@ public class AcsMainVertice extends AbstractVerticle {
         /**
          * Build the list of sub modules/vertices to be deployed
          */
-//        VertxDeployUtils.Deployments deployments = new VertxDeployUtils.Deployments();
-//        // Add Mod MongoDB
-//        deployments.add(VertxConstants.MOD_MONGO_PERSISTOR_DEPLOYMENT);
-//        // Add Mod MongoDB-GridFS
-//        deployments.add(VertxConstants.MOD_MONGO_GRIDFS_DEPLOYMENT);
-//        // Add Mod Redis
-//        deployments.add(VertxConstants.MOD_REDIS_DEPLOYMENT);
-//        // Add Workflow Worker/Poller Vertice
         JsonObject workerConfig = WorkerUtils.buildConfig(
                 new String[]{ActiveWorkflowTaskWorker.class.getName()},
                 ActiveWorkflowTaskWorker.MAX_NBR_OF_OUTSTANDING_TASKS
         );
-//        deployments.add(VertxUtils.buildNewDeployment(ActiveWorkflowWorkerVertice.class.getName(), workerConfig));
-//        deployments.add(VertxUtils.buildNewDeployment(TaskPollerVertice.class.getName(), workerConfig));
-//        // Add Passive Workflow Worker Vertice(s)
-//        deployments.add(
-//                VertxUtils.buildNewDeployment(
-//                        PassiveWorkflowWorkerVertice.class.getName(),
-//                        null,
-//                        AcsConfigProperties.NBR_OF_PASSIVE_WORKFLOW_WORKER_VERTICES)
-//        );
-//        // Add Auto Backup Worker Vertice(s)
-//        deployments.add(
-//                VertxUtils.buildNewDeployment(AutoBackupWorkerVertice.class.getName(),null)
-//        );
-
         DeploymentOptions options = new DeploymentOptions().setConfig(workerConfig);
         vertx.deployVerticle(ActiveWorkflowWorkerVertice.class.getName(),options);
         vertx.deployVerticle(TaskPollerVertice.class.getName(),options);

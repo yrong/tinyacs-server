@@ -1,5 +1,6 @@
 package vertx.acs.nbi.serviceplan;
 
+import io.vertx.ext.mongo.MongoClient;
 import vertx.VertxException;
 import vertx.VertxMongoUtils;
 import vertx.acs.cache.PassiveWorkflowCache;
@@ -42,7 +43,7 @@ public class ServicePlanService extends AbstractAcNbiCrudService {
     /**
      * Static Errors
      */
-    public static final JsonObject CANNOT_ASSIGN_MULTIPLE_SERVICE_PLANS = new JsonObject().putString(
+    public static final JsonObject CANNOT_ASSIGN_MULTIPLE_SERVICE_PLANS = new JsonObject().put(
             AcsConstants.FIELD_NAME_ERROR,
             "Cannot Assign Multiple Service Plans to the Same Device!"
     );
@@ -88,17 +89,17 @@ public class ServicePlanService extends AbstractAcNbiCrudService {
      * Static Query Keys that define the interesting DB fields when querying CPE devices collection.
      */
     public static JsonObject DEVICE_QUERY_KEYS = new JsonObject()
-            .putNumber(AcsConstants.FIELD_NAME_ID, 1)
-            .putNumber(AcsConstants.FIELD_NAME_ORG_ID, 1)
-            .putNumber(CpeDeviceType.FIELD_NAME_MANUFACTURER, 1)
-            .putNumber(CpeDeviceType.FIELD_NAME_OUI, 1)
-            .putNumber(CpeDeviceType.FIELD_NAME_SW_VER, 1)
-            .putNumber(CpeDeviceType.FIELD_NAME_HW_VER, 1)
-            .putNumber(CpeDeviceType.FIELD_NAME_MODEL_NAME, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_SN, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_CONNREQ_URL, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_CONNREQ_USERNAME, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_CONNREQ_PASSWORD, 1);
+            .put(AcsConstants.FIELD_NAME_ID, 1)
+            .put(AcsConstants.FIELD_NAME_ORG_ID, 1)
+            .put(CpeDeviceType.FIELD_NAME_MANUFACTURER, 1)
+            .put(CpeDeviceType.FIELD_NAME_OUI, 1)
+            .put(CpeDeviceType.FIELD_NAME_SW_VER, 1)
+            .put(CpeDeviceType.FIELD_NAME_HW_VER, 1)
+            .put(CpeDeviceType.FIELD_NAME_MODEL_NAME, 1)
+            .put(Cpe.DB_FIELD_NAME_SN, 1)
+            .put(Cpe.DB_FIELD_NAME_CONNREQ_URL, 1)
+            .put(Cpe.DB_FIELD_NAME_CONNREQ_USERNAME, 1)
+            .put(Cpe.DB_FIELD_NAME_CONNREQ_PASSWORD, 1);
 
     /**
      * Validate an NBI Request.
@@ -133,7 +134,7 @@ public class ServicePlanService extends AbstractAcNbiCrudService {
                 /**
                  * Define a subscriber query result handler
                  */
-                VertxMongoUtils.FindOneHandler subscriberQueryResultHandler = new VertxMongoUtils.FindOneHandler(
+                Handler subscriberQueryResultHandler =
                         new Handler<JsonObject>() {
                             @Override
                             public void handle(JsonObject result) {
@@ -142,7 +143,7 @@ public class ServicePlanService extends AbstractAcNbiCrudService {
                                             + "subscriber id " + subscriberId + " is invalid!";
                                     nbiRequest.sendResponse(
                                             HttpResponseStatus.BAD_REQUEST,
-                                            new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR, error)
+                                            new JsonObject().put(AcsConstants.FIELD_NAME_ERROR, error)
                                     );
                                 } else if(result.equals(VertxMongoUtils.FIND_ONE_TIMED_OUT)) {
                                     nbiRequest.sendResponse(
@@ -154,8 +155,8 @@ public class ServicePlanService extends AbstractAcNbiCrudService {
                                      * Define a device query result handler
                                      */
                                     try {
-                                        VertxMongoUtils.FindOneHandler deviceQueryResultHandler =
-                                            new VertxMongoUtils.FindOneHandler(
+                                        Handler deviceQueryResultHandler =
+
                                                 new Handler<JsonObject>() {
                                                     @Override
                                                     public void handle(JsonObject result) {
@@ -179,10 +180,10 @@ public class ServicePlanService extends AbstractAcNbiCrudService {
                                                             postValidation(nbiRequest, crudType);
                                                         }
                                                     }
-                                                }
-                                        );
+                                                };
+
                                         VertxMongoUtils.findOne(
-                                                vertx.eventBus(),
+                                                mongoClient,
                                                 Cpe.CPE_COLLECTION_NAME,
                                                 Subscriber.getDeviceMatcherByDeviceId(
                                                         reqTracker.orgId,
@@ -199,16 +200,16 @@ public class ServicePlanService extends AbstractAcNbiCrudService {
                                     }
                                 }
                             }
-                        }
-                );
+                        };
+
 
                 /**
                  * Make sure the Subscriber Id is valid
                  */
                 VertxMongoUtils.findOne(
-                        vertx.eventBus(),
+                        mongoClient,
                         Subscriber.DB_COLLECTION_NAME,
-                        new JsonObject().putString(AcsConstants.FIELD_NAME_ID, subscriberId),
+                        new JsonObject().put(AcsConstants.FIELD_NAME_ID, subscriberId),
                         subscriberQueryResultHandler,
                         null
                 );
@@ -283,6 +284,7 @@ public class ServicePlanService extends AbstractAcNbiCrudService {
             applyServicePlan(
                     log,
                     vertx.eventBus(),
+                    mongoClient,
                     nbiRequest.body,
                     passiveWorkflowCache,
                     reqTracker.orgId,
@@ -322,6 +324,7 @@ public class ServicePlanService extends AbstractAcNbiCrudService {
                 applyServicePlan(
                         log,
                         vertx.eventBus(),
+                        mongoClient,
                         nbiRequest.body,
                         passiveWorkflowCache,
                         reqTracker.orgId,
@@ -340,8 +343,8 @@ public class ServicePlanService extends AbstractAcNbiCrudService {
      */
     public void disableOldDevice(final AcsNbiRequest nbiRequest, final ServerPlanReqTracker reqTracker) {
         try {
-            VertxMongoUtils.FindOneHandler deviceQueryResultHandler =
-                    new VertxMongoUtils.FindOneHandler(
+            Handler deviceQueryResultHandler =
+
                             new Handler<JsonObject>() {
                                 @Override
                                 public void handle(JsonObject result) {
@@ -360,6 +363,7 @@ public class ServicePlanService extends AbstractAcNbiCrudService {
                                         applyServicePlan(
                                                 log,
                                                 vertx.eventBus(),
+                                                mongoClient,
                                                 ServicePlan.SERVICE_PLAN_ALL_DISABLED,
                                                 passiveWorkflowCache,
                                                 reqTracker.orgId,
@@ -367,10 +371,10 @@ public class ServicePlanService extends AbstractAcNbiCrudService {
                                         );
                                     }
                                 }
-                            }
-                    );
+                            };
+
             VertxMongoUtils.findOne(
-                    vertx.eventBus(),
+                    mongoClient,
                     Cpe.CPE_COLLECTION_NAME,
                     Subscriber.getDeviceMatcherByDeviceId(
                             reqTracker.orgId,
@@ -390,18 +394,18 @@ public class ServicePlanService extends AbstractAcNbiCrudService {
     /**
      * Update the service-plan provisioning status of a device.
      *
-     * @param eventBus
+     * @param mongoClient
      * @param cpeKey
      * @param status
      */
     public static void updateDeviceServicePlanStatus(
-            final EventBus eventBus,
+            final MongoClient mongoClient,
             final String cpeKey,
             final String status,
             final Handler<Long> handler) {
         try {
             VertxMongoUtils.update(
-                    eventBus,
+                    mongoClient,
                     Cpe.CPE_COLLECTION_NAME,
                     cpeKey,
                     VertxMongoUtils.getUpdatesObject(
@@ -429,6 +433,7 @@ public class ServicePlanService extends AbstractAcNbiCrudService {
     public static void applyServicePlan(
             final Logger log,
             final EventBus eventBus,
+            final MongoClient mongoClient,
             final JsonObject servicePlan,
             PassiveWorkflowCache passiveWorkflowCache,
             final String orgId,
@@ -459,7 +464,7 @@ public class ServicePlanService extends AbstractAcNbiCrudService {
                 for (WorkflowAction anAction : aWorkflow.actionChain) {
                     if (anAction.services != null) {
                         for (int i = 0; i < anAction.services.size(); i++) {
-                            JsonObject aService = anAction.services.get(i);
+                            JsonObject aService = anAction.services.getJsonObject(i);
                             switch (aService.getString(ConfigurationCategory.PARAM_NAME_SERVICE_NAME)) {
                                 case ConfigurationCategory.VIDEO_SERVICE:
                                     videoServiceProfile = aService;
@@ -500,10 +505,10 @@ public class ServicePlanService extends AbstractAcNbiCrudService {
             serviceArray.add(voiceServiceProfile);
         }
         JsonObject requestBody = new JsonObject()
-                .putObject(CpeDeviceOp.FIELD_NAME_CPE_DB_OBJECT, cpe)
-                .putArray(CpeDeviceOp.FIELD_NAME_SERVICES, serviceArray)
-                .putObject(CpeDeviceOp.FIELD_NAME_SERVICE_PLAN, servicePlan)
-                .putString(CpeDeviceOp.FIELD_NAME_OPERATION, CpeDeviceOpTypeEnum.SetParameterValues.name());
+                .put(CpeDeviceOp.FIELD_NAME_CPE_DB_OBJECT, cpe)
+                .put(CpeDeviceOp.FIELD_NAME_SERVICES, serviceArray)
+                .put(CpeDeviceOp.FIELD_NAME_SERVICE_PLAN, servicePlan)
+                .put(CpeDeviceOp.FIELD_NAME_OPERATION, CpeDeviceOpTypeEnum.SetParameterValues.name());
         log.debug("Applying service(s) to " + cpeKey  + "...");
         AcsApiUtils.sendApiRequest(
                 eventBus,
@@ -535,7 +540,7 @@ public class ServicePlanService extends AbstractAcNbiCrudService {
                                  * Device Op Failed
                                  */
                                 error = " due to Internal server error";
-                                if (deviceOpResult.containsField(AcsConstants.FIELD_NAME_ERROR)) {
+                                if (deviceOpResult.containsKey(AcsConstants.FIELD_NAME_ERROR)) {
                                     error += " (" + deviceOpResult.getString(AcsConstants.FIELD_NAME_ERROR) + ")";
                                 }
                             }
@@ -549,14 +554,14 @@ public class ServicePlanService extends AbstractAcNbiCrudService {
                         if (error != null) {
                             log.error(cpeKey + "Failed to apply service(s)" + error);
                             updateDeviceServicePlanStatus(
-                                    eventBus,
+                                    mongoClient,
                                     cpeKey,
                                     "Failed" + error,
                                     null
                             );
                         } else {
                             updateDeviceServicePlanStatus(
-                                    eventBus,
+                                    mongoClient,
                                     cpeKey,
                                     "Succeeded",
                                     null
@@ -567,7 +572,7 @@ public class ServicePlanService extends AbstractAcNbiCrudService {
                          * Save Event
                          */
                         Event.saveEvent(
-                                eventBus,
+                                mongoClient,
                                 orgId,
                                 cpe.getString(Cpe.DB_FIELD_NAME_SN),
                                 error == null?
@@ -578,7 +583,7 @@ public class ServicePlanService extends AbstractAcNbiCrudService {
                                 error == null?
                                         null
                                         :
-                                        new JsonObject().putString("cause", error)
+                                        new JsonObject().put("cause", error)
                         );
                     }
                 }
@@ -589,23 +594,23 @@ public class ServicePlanService extends AbstractAcNbiCrudService {
      * Attach an existing service plan to a new device id without applying the service plan (DB change only).
      *
      * @param log
-     * @param eventBus
+     * @param mongoClient
      * @param servicePlanId
      * @param deviceId
      */
     public static void attachServicePlanToDevice(
             final Logger log,
-            final EventBus eventBus,
+            final MongoClient mongoClient,
             final String servicePlanId,
             final String deviceId) {
         log.info("Attaching Service Plan " + servicePlanId + " to " + deviceId + "...");
         try {
             VertxMongoUtils.update(
-                    eventBus,
+                    mongoClient,
                     ServicePlan.DB_COLLECTION_NAME,
                     servicePlanId,
                     VertxMongoUtils.getUpdatesObject(
-                            new JsonObject().putString(
+                            new JsonObject().put(
                                     ServicePlan.FIELD_NAME_DEVICE_ID,
                                     deviceId
                             ),
@@ -637,7 +642,7 @@ public class ServicePlanService extends AbstractAcNbiCrudService {
 
         if (details != null &&
                 !details.equals(CONFLICT) &&
-                details.containsField(AcsConstants.FIELD_NAME_ERROR)) {
+                details.containsKey(AcsConstants.FIELD_NAME_ERROR)) {
             String error = details.getString(AcsConstants.FIELD_NAME_ERROR);
 
             if (error.contains(ServicePlan.FIELD_NAME_DEVICE_ID)) {

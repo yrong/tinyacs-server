@@ -95,7 +95,7 @@ public class EventService extends AbstractAcNbiCrudService {
      */
     private static final JsonObject SORT_BY_TIME =
             // Descending Order for Timestamp, so newest first
-            new JsonObject().putNumber(Event.FIELD_NAME_TIMESTAMP, -1);
+            new JsonObject().put(Event.FIELD_NAME_TIMESTAMP, -1);
     @Override
     public JsonObject getDefaultQuerySort(AcsNbiRequest nbiRequest) {
         return SORT_BY_TIME;

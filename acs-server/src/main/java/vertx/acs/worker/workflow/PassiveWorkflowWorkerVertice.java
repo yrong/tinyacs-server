@@ -359,6 +359,7 @@ public class PassiveWorkflowWorkerVertice extends AbstractVerticle{
                 // Found a match
                 new WorkflowCpeTracker(
                         vertx,
+                        mongoClient,
                         cpe.put(FIELD_WORKFLOW_ID, aWorkflow.id)
                                 .put(FIELD_SKIP_WORKFLOWS, skip == null ? new JsonArray() : skip.add(aWorkflow.id)),
                         aWorkflow,

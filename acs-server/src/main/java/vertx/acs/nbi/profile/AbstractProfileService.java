@@ -56,19 +56,19 @@ public abstract class AbstractProfileService extends AbstractAcNbiCrudService{
                 validateFieldTypes(nbiRequest.body);
 
                 // Validate Child Profile ID Strings if any
-                final JsonArray childProfiles = nbiRequest.body.getArray(AcsConstants.FIELD_NAME_INCLUDES);
+                final JsonArray childProfiles = nbiRequest.body.getJsonArray(AcsConstants.FIELD_NAME_INCLUDES);
                 if (childProfiles != null && childProfiles.size() > 0) {
                     // Build a query matcher with this array
-                    JsonObject matcher = new JsonObject().putObject(
+                    JsonObject matcher = new JsonObject().put(
                             VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID,
-                            new JsonObject().putArray("$in", childProfiles)
+                            new JsonObject().put("$in", childProfiles)
                     );
 
                     // Query the DB and make sure all child profiles exist
                     log.info("Querying DB with matcher:\n" + matcher.encodePrettily());
                     bPendingDbQuery = true;
                     VertxMongoUtils.count(
-                            vertx.eventBus(),
+                            mongoClient,
                             getDbCollectionName(),
                             matcher,
                             new Handler<Long>() {
@@ -80,7 +80,7 @@ public abstract class AbstractProfileService extends AbstractAcNbiCrudService{
                                                 + ", got " + count + ")");
                                         nbiRequest.sendResponse(
                                                 HttpResponseStatus.BAD_REQUEST,
-                                                new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR, error)
+                                                new JsonObject().put(AcsConstants.FIELD_NAME_ERROR, error)
                                         );
                                     } else {
                                         // Continue the handling process
@@ -119,9 +119,9 @@ public abstract class AbstractProfileService extends AbstractAcNbiCrudService{
         List<CrossReferenceCheck> allChecks = new ArrayList<>();
 
         // By default only checks this DB collection
-        JsonObject matcher = new JsonObject().putObject(
+        JsonObject matcher = new JsonObject().put(
                 AcsConstants.FIELD_NAME_INCLUDES,
-                new JsonObject().putArray("$all", new JsonArray().add(id))
+                new JsonObject().put("$all", new JsonArray().add(id))
         );
         allChecks.add(new CrossReferenceCheck(matcher, getDbCollectionName()));
 

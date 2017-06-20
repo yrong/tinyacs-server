@@ -34,13 +34,13 @@ public class SubscriberService extends AbstractAcNbiCrudService {
      */
     public static final String ERROR_STRING_UNKNOWN_DEVICE = "Not All Associated Devices are found in the DB!";
     public static final JsonObject UNKNOWN_DEVICE = new JsonObject()
-            .putString(AcsConstants.FIELD_NAME_ERROR, ERROR_STRING_UNKNOWN_DEVICE);
+            .put(AcsConstants.FIELD_NAME_ERROR, ERROR_STRING_UNKNOWN_DEVICE);
     public static final JsonObject ACCT_NUMBER_IN_USE = new JsonObject()
-            .putString(AcsConstants.FIELD_NAME_ERROR, "The account number conflicts with another subscriber!");
+            .put(AcsConstants.FIELD_NAME_ERROR, "The account number conflicts with another subscriber!");
     public static final String ERROR_STRING_MULTI_DEVICE_ALREADY_ASSOCIATED =
             "One or more device(s) have already been associated with other Subscriber(s)!";
     public static final JsonObject MULTI_DEVICE_ALREADY_ASSOCIATED  = new JsonObject()
-            .putString(AcsConstants.FIELD_NAME_ERROR, ERROR_STRING_MULTI_DEVICE_ALREADY_ASSOCIATED);
+            .put(AcsConstants.FIELD_NAME_ERROR, ERROR_STRING_MULTI_DEVICE_ALREADY_ASSOCIATED);
     public static final VertxException INVALID_SERVICE_PREFIX =
             new VertxException("The max length of \"servicePrefix\" is 20 chars and can only contain letters"
                     + " and/or digits (0-9) and/or dots (\".\")!");
@@ -53,20 +53,20 @@ public class SubscriberService extends AbstractAcNbiCrudService {
     public static final String FAILED_TO_UPDATE_SEARCH_ENGINE_STRING =
             "Internal Error ! (Failed to update search engine)";
     public static final JsonObject FAILED_TO_UPDATED_SEARCH_ENGINE = new JsonObject()
-            .putString(AcsConstants.FIELD_NAME_ERROR, FAILED_TO_UPDATE_SEARCH_ENGINE_STRING);
+            .put(AcsConstants.FIELD_NAME_ERROR, FAILED_TO_UPDATE_SEARCH_ENGINE_STRING);
 
     /**
      * Mod Mongo Query Keys when finding devices
      */
     public static final JsonObject FIND_DEVICE_QUERY_KEY =
             new JsonObject()
-                    .putNumber(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID, 1)
-                    .putNumber(Cpe.DB_FIELD_NAME_CONNREQ_URL, 1)
-                    .putNumber(Cpe.DB_FIELD_NAME_CONNREQ_USERNAME, 1)
-                    .putNumber(Cpe.DB_FIELD_NAME_CONNREQ_PASSWORD, 1)
-                    .putNumber(Cpe.DB_FIELD_NAME_REGISTRATION_ID, 1)
-                    .putNumber(CpeDeviceType.FIELD_NAME_MODEL_NAME, 1)
-                    .putNumber(Cpe.DB_FIELD_NAME_SN, 1);
+                    .put(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID, 1)
+                    .put(Cpe.DB_FIELD_NAME_CONNREQ_URL, 1)
+                    .put(Cpe.DB_FIELD_NAME_CONNREQ_USERNAME, 1)
+                    .put(Cpe.DB_FIELD_NAME_CONNREQ_PASSWORD, 1)
+                    .put(Cpe.DB_FIELD_NAME_REGISTRATION_ID, 1)
+                    .put(CpeDeviceType.FIELD_NAME_MODEL_NAME, 1)
+                    .put(Cpe.DB_FIELD_NAME_SN, 1);
 
     /**
      * Is this service for internal uses only?
@@ -176,13 +176,13 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                     }
                 }
 
-                JsonArray locations = nbiRequest.body.getArray(Subscriber.FIELD_NAME_LOCATIONS);
+                JsonArray locations = nbiRequest.body.getJsonArray(Subscriber.FIELD_NAME_LOCATIONS);
                 if (locations != null) {
 
                     // Validate all locations (and the associated devices per location)
                     int primaryLocationIndex = -1;
                     for (int i = 0; i < locations.size(); i ++) {
-                        JsonObject aLocation = locations.get(i);
+                        JsonObject aLocation = locations.getJsonObject(i);
                         VertxJsonUtils.validateFields(
                                 aLocation,
                                 Subscriber.LOCATIONS_MANDATORY_FIELDS,
@@ -199,19 +199,19 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                         }
 
                         // Add the associated devices to Array
-                        JsonArray deviceIdArray = aLocation.getArray(Subscriber.FIELD_NAME_LOCATIONS_DEVICES);
+                        JsonArray deviceIdArray = aLocation.getJsonArray(Subscriber.FIELD_NAME_LOCATIONS_DEVICES);
                         if (deviceIdArray != null) {
                             for (int j = 0; j < deviceIdArray.size(); j ++) {
-                                reqTracker.allDeviceIdStrings.add(deviceIdArray.get(j));
+                                reqTracker.allDeviceIdStrings.add(deviceIdArray.getValue(j));
                             }
                         }
 
                         // Check for multiple primary contacts in the same location
-                        JsonArray contacts = aLocation.getArray(Subscriber.FIELD_NAME_LOCATIONS_CONTACTS);
+                        JsonArray contacts = aLocation.getJsonArray(Subscriber.FIELD_NAME_LOCATIONS_CONTACTS);
                         if (contacts != null && contacts.size() > 0) {
                             int primaryContactIndex = -1;
                             for (int j = 0; j < contacts.size(); j ++) {
-                                JsonObject aContact = contacts.get(j);
+                                JsonObject aContact = contacts.getJsonObject(j);
                                 VertxJsonUtils.validateFields(
                                         aContact,
                                         Subscriber.CONTACTS_MANDATORY_FIELDS,
@@ -240,7 +240,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                          */
                         reqTracker.matcher = getDeviceMatcherByDeviceIdArray(reqTracker.orgId, reqTracker.allDeviceIdStrings);
 
-                        VertxMongoUtils.FindHandler findDeviceHandler = new VertxMongoUtils.FindHandler(
+                        Handler findDeviceHandler =
                                 new Handler<JsonArray>() {
                                     @Override
                                     public void handle(JsonArray queryResult) {
@@ -257,7 +257,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                                          * make sure all internal IDs are found
                                          */
                                         for (int i = 0; i < reqTracker.allDeviceIdStrings.size(); i ++) {
-                                            String deviceId = reqTracker.allDeviceIdStrings.get(i);
+                                            String deviceId = reqTracker.allDeviceIdStrings.getString(i);
                                             Subscriber.DeviceIdStringType deviceIdStringType =
                                                     Subscriber.getDeviceIdStringType(reqTracker.orgId, deviceId);
                                             if (deviceIdStringType.equals(Subscriber.DeviceIdStringType.INTERNAL_ID)) {
@@ -265,7 +265,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
 
                                                 // Traverse query results
                                                 for (int k = 0; k < queryResult.size(); k++) {
-                                                    JsonObject aDevice = queryResult.get(k);
+                                                    JsonObject aDevice = queryResult.getJsonObject(k);
                                                     if (aDevice.getString(AcsConstants.FIELD_NAME_ID).equals(deviceId)) {
                                                         bMatched = true;
                                                         break;
@@ -289,12 +289,12 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                                         // Continue
                                         postValidation(nbiRequest, crudType);
                                     }
-                                }
-                        );
+                                };
+
 
                         // Kick off the query
                         VertxMongoUtils.find(
-                                vertx.eventBus(),
+                                mongoClient,
                                 Cpe.CPE_COLLECTION_NAME,
                                 reqTracker.matcher,
                                 findDeviceHandler,
@@ -327,7 +327,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
         switch (crudType) {
             case Create:
                 // add create time
-                nbiRequest.body.putObject(AcsConstants.FIELD_NAME_CREATE_TIME, VertxMongoUtils.getDateObject());
+                nbiRequest.body.put(AcsConstants.FIELD_NAME_CREATE_TIME, VertxMongoUtils.getDateObject());
                 break;
         }
     };
@@ -361,25 +361,25 @@ public class SubscriberService extends AbstractAcNbiCrudService {
              */
             JsonArray or = new JsonArray();
             if (customId != null) {
-                or.add(new JsonObject().putString(Subscriber.FIELD_NAME_CUSTOM_ID, customId));
+                or.add(new JsonObject().put(Subscriber.FIELD_NAME_CUSTOM_ID, customId));
             }
             if (servicePrefix != null) {
-                or.add(new JsonObject().putString(Subscriber.SERVICE_PREFIX_FULL_PATH, servicePrefix));
+                or.add(new JsonObject().put(Subscriber.SERVICE_PREFIX_FULL_PATH, servicePrefix));
             }
             if (reqTracker.allDeviceIdStrings != null && reqTracker.allDeviceIdStrings.size() > 0) {
                 JsonObject elemMatch = new JsonObject()
-                        .putArray(VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_IN, reqTracker.allDeviceIdStrings);
+                        .put(VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_IN, reqTracker.allDeviceIdStrings);
                 or.add(new JsonObject()
-                        .putObject(
+                        .put(
                                 Subscriber.FIELD_NAME_LOCATIONS + "." + Subscriber.FIELD_NAME_LOCATIONS_DEVICES,
-                                new JsonObject().putObject("$elemMatch", elemMatch)
+                                new JsonObject().put("$elemMatch", elemMatch)
                         )
                 );
             }
 
             indexMatcher
-                    .putArray(VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_OR, or)
-                    .putString(
+                    .put(VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_OR, or)
+                    .put(
                             AcsConstants.FIELD_NAME_ORG_ID,
                             nbiRequest.body.getString(AcsConstants.FIELD_NAME_ORG_ID)
                     );
@@ -417,7 +417,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
             /**
              * Update Search Engine first
              */
-            nbiRequest.body.removeField(AcsConstants.FIELD_NAME_CREATE_TIME);
+            nbiRequest.body.remove(AcsConstants.FIELD_NAME_CREATE_TIME);
             SxaStagerApiUtils.createOrUpdateSubscriber(
                     nbiRequest.body,
                     new Handler<Boolean>() {
@@ -450,12 +450,12 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                                  */
                                 try {
                                     VertxMongoUtils.delete(
-                                            vertx.eventBus(),
+                                            mongoClient,
                                             Subscriber.DB_COLLECTION_NAME,
                                             id,
-                                            new Handler<Message<JsonObject>>() {
+                                            new Handler<Long>() {
                                                 @Override
-                                                public void handle(Message<JsonObject> deleteResult) {
+                                                public void handle(Long deleteResult) {
                                                     sendCreateResponse(
                                                             nbiRequest,
                                                             HttpResponseStatus.INTERNAL_SERVER_ERROR,
@@ -512,12 +512,12 @@ public class SubscriberService extends AbstractAcNbiCrudService {
              */
             try {
                 VertxMongoUtils.findOne(
-                        vertx.eventBus(),
+                        mongoClient,
                         getDbCollectionName(),
                         new JsonObject()
-                                .putString(AcsConstants.FIELD_NAME_ORG_ID, newRecord.getString(AcsConstants.FIELD_NAME_ORG_ID))
-                                .putString(Subscriber.SERVICE_PREFIX_FULL_PATH, newServicePrefix),
-                        new VertxMongoUtils.FindOneHandler(
+                                .put(AcsConstants.FIELD_NAME_ORG_ID, newRecord.getString(AcsConstants.FIELD_NAME_ORG_ID))
+                                .put(Subscriber.SERVICE_PREFIX_FULL_PATH, newServicePrefix),
+
                                 new Handler<JsonObject>() {
                                     @Override
                                     public void handle(JsonObject anotherSubscriber) {
@@ -527,13 +527,13 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                                                     + anotherSubscriber.getString(AcsConstants.FIELD_NAME_NAME) + "!";
                                             log.error(error);
                                             nbiRequest.sendResponse(HttpResponseStatus.BAD_REQUEST,
-                                                    new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR, error));
+                                                    new JsonObject().put(AcsConstants.FIELD_NAME_ERROR, error));
                                         } else {
                                             saveUpdate(nbiRequest);
                                         }
                                     }
-                                }
-                        ),
+                                },
+
                         null        // null query key means returns everything
                 );
             } catch (VertxException e) {
@@ -570,7 +570,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
             /**
              * Update Search Engine
              */
-            nbiRequest.body.removeField(AcsConstants.FIELD_NAME_CREATE_TIME);
+            nbiRequest.body.remove(AcsConstants.FIELD_NAME_CREATE_TIME);
             SxaStagerApiUtils.createOrUpdateSubscriber(
                     nbiRequest.body,
                     new Handler<Boolean>() {
@@ -594,7 +594,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                                 SubscriberRequestTracker reqTracker = nbiRequest.getServiceData();
                                 try {
                                     VertxMongoUtils.update(
-                                            vertx.eventBus(),
+                                            mongoClient,
                                             Subscriber.DB_COLLECTION_NAME,
                                             nbiRequest.body.getString(AcsConstants.FIELD_NAME_ID),
                                             reqTracker.oldRecord,
@@ -634,22 +634,22 @@ public class SubscriberService extends AbstractAcNbiCrudService {
         final JsonArray toBeDisassociated = new JsonArray();
         JsonArray oldAllDeviceIdStrings = new JsonArray();
 
-        JsonArray oldLocations = reqTracker.oldRecord.getArray(Subscriber.FIELD_NAME_LOCATIONS);
+        JsonArray oldLocations = reqTracker.oldRecord.getJsonArray(Subscriber.FIELD_NAME_LOCATIONS);
         if (oldLocations != null) {
             // Look for device(s) to be dis-associated
             for (int i = 0; i < oldLocations.size(); i++) {
-                JsonObject aLocation = oldLocations.get(i);
+                JsonObject aLocation = oldLocations.getJsonObject(i);
 
                 // Add the associated devices to Array
-                JsonArray deviceIdArray = aLocation.getArray(Subscriber.FIELD_NAME_LOCATIONS_DEVICES);
+                JsonArray deviceIdArray = aLocation.getJsonArray(Subscriber.FIELD_NAME_LOCATIONS_DEVICES);
                 if (deviceIdArray != null) {
                     for (int j = 0; j < deviceIdArray.size(); j++) {
-                        String deviceId = deviceIdArray.get(j);
+                        String deviceId = deviceIdArray.getString(j);
                         oldAllDeviceIdStrings.add(deviceId);
                         JsonObject matchingDevice = null;
                         if (reqTracker.matchingDevices != null) {
                             for (int k = 0; k < reqTracker.matchingDevices.size(); k++) {
-                                JsonObject aDevice = reqTracker.matchingDevices.get(k);
+                                JsonObject aDevice = reqTracker.matchingDevices.getJsonObject(k);
                                 Subscriber.DeviceIdStringType deviceIdStringType =
                                         Subscriber.getDeviceIdStringType(reqTracker.orgId, deviceId);
                                 if (deviceIdStringType.equals(Subscriber.DeviceIdStringType.INTERNAL_ID)) {
@@ -685,7 +685,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
 
         // Look for device(s) to be associated
         for (int i = 0; i < reqTracker.allDeviceIdStrings.size(); i ++) {
-            String deviceId = reqTracker.allDeviceIdStrings.get(i);
+            String deviceId = reqTracker.allDeviceIdStrings.getString(i);
             if (!oldAllDeviceIdStrings.contains(deviceId)) {
                 toBeAssociated.add(deviceId);
             }
@@ -696,8 +696,8 @@ public class SubscriberService extends AbstractAcNbiCrudService {
         log.debug("toBeAssociated: " + toBeAssociated);
         log.debug("toBeDisassociated: " + toBeDisassociated);
 
-        final String newDeviceId = (String)(toBeAssociated.size() == 1? toBeAssociated.get(0) : null);
-        final String oldDeviceId = (String)(toBeDisassociated.size() == 1? toBeDisassociated.get(0) : null);
+        final String newDeviceId = (String)(toBeAssociated.size() == 1? toBeAssociated.getValue(0) : null);
+        final String oldDeviceId = (String)(toBeDisassociated.size() == 1? toBeDisassociated.getValue(0) : null);
 
         /**
          * Is it a replacement operation?
@@ -723,18 +723,18 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                                     if (bIsReplacement) {
                                         try {
                                             VertxMongoUtils.findOne(
-                                                    vertx.eventBus(),
+                                                    mongoClient,
                                                     ServicePlan.DB_COLLECTION_NAME,
                                                     new JsonObject()
-                                                        .putString(
+                                                        .put(
                                                                 ServicePlan.FIELD_NAME_SUBSCRIBER_ID,
                                                                 nbiRequest.body.getString(AcsConstants.FIELD_NAME_ID)
                                                         )
-                                                        .putString(
+                                                        .put(
                                                                 ServicePlan.FIELD_NAME_DEVICE_ID,
                                                                 oldDeviceId
                                                         ),
-                                                    new VertxMongoUtils.FindOneHandler(
+
                                                             new Handler<JsonObject>() {
                                                                 @Override
                                                                 public void handle(JsonObject servicePlan) {
@@ -754,8 +754,8 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                                                                             servicePlan
                                                                     );
                                                                 }
-                                                            }
-                                                    ),
+                                                            },
+
                                                     null
                                             );
                                         } catch (VertxException e) {
@@ -789,18 +789,18 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                             // Delete Service plan if any
                             try {
                                 VertxMongoUtils.deleteWithMatcher(
-                                        vertx.eventBus(),
+                                        mongoClient,
                                         ServicePlan.DB_COLLECTION_NAME,
                                         new JsonObject()
-                                                .putString(
+                                                .put(
                                                         ServicePlan.FIELD_NAME_SUBSCRIBER_ID,
                                                         nbiRequest.body.getString(AcsConstants.FIELD_NAME_ID)
                                                 )
-                                                .putObject(
+                                                .put(
                                                         ServicePlan.FIELD_NAME_DEVICE_ID,
-                                                        new JsonObject().putObject(
+                                                        new JsonObject().put(
                                                                 VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_IN,
-                                                                new JsonObject().putArray(
+                                                                new JsonObject().put(
                                                                         VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_IN,
                                                                         toBeDisassociated
                                                                 )
@@ -847,10 +847,10 @@ public class SubscriberService extends AbstractAcNbiCrudService {
      * Query Keys when querying the old device (to be replaced)
      */
     public static final JsonObject REPLACEMENT_QUERY_OLD_DEVICE_KEYS = new JsonObject()
-            .putNumber(Cpe.DB_FIELD_NAME_REGISTRATION_ID, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_SN, 1)
-            .putNumber(CpeDeviceType.FIELD_NAME_MODEL_NAME, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_CHANGE_COUNTER, 1);
+            .put(Cpe.DB_FIELD_NAME_REGISTRATION_ID, 1)
+            .put(Cpe.DB_FIELD_NAME_SN, 1)
+            .put(CpeDeviceType.FIELD_NAME_MODEL_NAME, 1)
+            .put(Cpe.DB_FIELD_NAME_CHANGE_COUNTER, 1);
 
     /**
      * Process the service plan query result (part of the replacement process)
@@ -893,13 +893,13 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                 log.info(reqTracker.subscriberName + ": Querying the old device " + oldDeviceId + "...");
                 try {
                     VertxMongoUtils.findOne(
-                            vertx.eventBus(),
+                            mongoClient,
                             Cpe.CPE_COLLECTION_NAME,
                             Subscriber.getDeviceMatcherByDeviceId(
                                     reqTracker.orgId,
                                     oldDeviceId
                             ),
-                            new VertxMongoUtils.FindOneHandler(
+
                                     new Handler<JsonObject>() {
                                         @Override
                                         public void handle(JsonObject oldDevice) {
@@ -910,7 +910,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                                             } else if (oldDevice.equals(VertxMongoUtils.FIND_ONE_TIMED_OUT)) {
                                                 log.error(reqTracker.subscriberName + ": DB Timed out when querying "
                                                         + "old Device (" + oldDeviceId + ")!");
-                                            } else if (oldDevice.containsField(Cpe.DB_FIELD_NAME_CHANGE_COUNTER)) {
+                                            } else if (oldDevice.containsKey(Cpe.DB_FIELD_NAME_CHANGE_COUNTER)) {
                                                 log.info(reqTracker.subscriberName + ": Found the old device ("
                                                         + oldDeviceId + ") which supports change counter.");
 
@@ -940,6 +940,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                                                  */
                                                 ReplacementUtils.doReplacement(
                                                         vertx.eventBus(),
+                                                        mongoClient,
                                                         redisClient,
                                                         null,
                                                         newDevice,
@@ -958,7 +959,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                                                             + oldDeviceId + " to " + newDeviceId + "...");
                                                     ServicePlanService.attachServicePlanToDevice(
                                                             log,
-                                                            vertx.eventBus(),
+                                                            mongoClient,
                                                             servicePlan.getString(AcsConstants.FIELD_NAME_ID),
                                                             newDeviceId
                                                         );
@@ -972,6 +973,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                                                 ServicePlanService.applyServicePlan(
                                                         log,
                                                         vertx.eventBus(),
+                                                        mongoClient,
                                                         servicePlan,
                                                         passiveWorkflowCache,
                                                         reqTracker.orgId,
@@ -979,8 +981,8 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                                                 );
                                             }
                                         }
-                                    }
-                            ),
+                                    },
+
                             REPLACEMENT_QUERY_OLD_DEVICE_KEYS
                     );
                 } catch (VertxException e) {
@@ -1000,6 +1002,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                 ServicePlanService.applyServicePlan(
                         log,
                         vertx.eventBus(),
+                        mongoClient,
                         servicePlan,
                         passiveWorkflowCache,
                         reqTracker.orgId,
@@ -1012,7 +1015,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                 log.info(reqTracker.subscriberName + ": Attaching Service plan to new device " + newDeviceId + "...");
                 ServicePlanService.attachServicePlanToDevice(
                         log,
-                        vertx.eventBus(),
+                        mongoClient,
                         servicePlan.getString(AcsConstants.FIELD_NAME_ID),
                         newDeviceId
                 );
@@ -1036,7 +1039,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
     public JsonObject findDeviceFromArrayByDeviceId(JsonArray devices, String deviceId) {
         if (devices != null) {
             for (int i = 0; i < devices.size(); i ++) {
-                JsonObject aMatchingDevice = devices.get(i);
+                JsonObject aMatchingDevice = devices.getJsonObject(i);
                 if (deviceId.equals(aMatchingDevice.getString(AcsConstants.FIELD_NAME_ID)) ||
                         deviceId.equals(aMatchingDevice.getString(Cpe.DB_FIELD_NAME_REGISTRATION_ID)) ||
                         deviceId.equals(aMatchingDevice.getString(Cpe.DB_FIELD_NAME_SN))) {
@@ -1069,7 +1072,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
         }
         try {
             VertxMongoUtils.updateWithMatcher(
-                    vertx.eventBus(),
+                    mongoClient,
                     Cpe.CPE_COLLECTION_NAME,
                     getDeviceMatcherByDeviceIdArray(orgId, deviceIdStrings),
                     VertxMongoUtils.getUpdatesObject(
@@ -1093,14 +1096,14 @@ public class SubscriberService extends AbstractAcNbiCrudService {
         SubscriberRequestTracker reqTracker = nbiRequest.getServiceData();
         if (reqTracker.matchingDevices != null && reqTracker.matchingDevices.size() > 0) {
             for (int i = 0; i < reqTracker.matchingDevices.size(); i++) {
-                JsonObject aDevice = reqTracker.matchingDevices.get(i);
+                JsonObject aDevice = reqTracker.matchingDevices.getJsonObject(i);
                 Event.saveEvent(
-                        vertx.eventBus(),
+                        mongoClient,
                         reqTracker.orgId,
                         aDevice.getString(Cpe.DB_FIELD_NAME_SN),
                         EventTypeEnum.Association,
                         EventSourceEnum.System,
-                        new JsonObject().putString(
+                        new JsonObject().put(
                                 "subscriber",
                                 nbiRequest.body.getString(AcsConstants.FIELD_NAME_NAME)
                         )
@@ -1138,10 +1141,10 @@ public class SubscriberService extends AbstractAcNbiCrudService {
          */
         try {
             VertxMongoUtils.find(
-                    vertx.eventBus(),
+                    mongoClient,
                     Cpe.CPE_COLLECTION_NAME,
                     getDeviceMatcherByDeviceIdArray(orgId, deviceIdStrings),
-                    new VertxMongoUtils.FindHandler(
+
                             new Handler<JsonArray>() {
                                 @Override
                                 public void handle(JsonArray oldDevices) {
@@ -1165,19 +1168,19 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                                      */
                                     JsonArray internalDeviceIdStrings = new JsonArray();
                                     for (int i = 0; i < oldDevices.size(); i++) {
-                                        JsonObject anOldDevice = oldDevices.get(i);
+                                        JsonObject anOldDevice = oldDevices.getJsonObject(i);
 
                                         // Save Internal Device Id
                                         internalDeviceIdStrings.add(anOldDevice.getString(AcsConstants.FIELD_NAME_ID));
 
                                         // Save Event
                                         Event.saveEvent(
-                                                vertx.eventBus(),
+                                                mongoClient,
                                                 reqTracker.orgId,
                                                 anOldDevice.getString(Cpe.DB_FIELD_NAME_SN),
                                                 EventTypeEnum.Disassociation,
                                                 EventSourceEnum.System,
-                                                new JsonObject().putString("subscriber name", reqTracker.subscriberName)
+                                                new JsonObject().put("subscriber name", reqTracker.subscriberName)
                                         );
 
                                         /**
@@ -1185,16 +1188,16 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                                          */
                                         try {
                                             JsonObject sets = new JsonObject()
-                                                    .putString(
+                                                    .put(
                                                             Cpe.DB_FIELD_NAME_PREV_SUBSCRIBER,
                                                             nbiRequest.body.getString(Subscriber.FIELD_NAME_NAME)
                                                     );
                                             if (replacementUnitFsan != null) {
-                                                sets.putString(Cpe.DB_FIELD_NAME_TO_BE_REPLACED_BY, replacementUnitFsan);
+                                                sets.put(Cpe.DB_FIELD_NAME_TO_BE_REPLACED_BY, replacementUnitFsan);
                                             }
 
                                             VertxMongoUtils.updateWithMatcher(
-                                                    vertx.eventBus(),
+                                                    mongoClient,
                                                     Cpe.CPE_COLLECTION_NAME,
                                                     getDeviceMatcherByDeviceIdArray(orgId, deviceIdStrings),
                                                     VertxMongoUtils.getUpdatesObject(
@@ -1212,8 +1215,8 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                                         }
                                     }
                                 }
-                            }
-                    ),
+                            },
+
                     FIND_DEVICE_QUERY_KEY,
                     deviceIdStrings.size()
             );
@@ -1251,10 +1254,10 @@ public class SubscriberService extends AbstractAcNbiCrudService {
     @Override
     public JsonObject buildRetrieveMatcher(AcsNbiRequest nbiRequest) throws VertxException{
         // Use "_id" whenever possible
-        if (nbiRequest.body.containsField(AcsConstants.FIELD_NAME_ID)) {
+        if (nbiRequest.body.containsKey(AcsConstants.FIELD_NAME_ID)) {
             return new JsonObject()
-                    .putString(AcsConstants.FIELD_NAME_ID, nbiRequest.body.getString(AcsConstants.FIELD_NAME_ID))
-                    .putString(AcsConstants.FIELD_NAME_ORG_ID, nbiRequest.body.getString(AcsConstants.FIELD_NAME_ORG_ID)
+                    .put(AcsConstants.FIELD_NAME_ID, nbiRequest.body.getString(AcsConstants.FIELD_NAME_ID))
+                    .put(AcsConstants.FIELD_NAME_ORG_ID, nbiRequest.body.getString(AcsConstants.FIELD_NAME_ORG_ID)
                     );
         }
 
@@ -1262,25 +1265,25 @@ public class SubscriberService extends AbstractAcNbiCrudService {
         JsonObject matcher = new JsonObject();
         String fullName = nbiRequest.body.getString(Subscriber.FIELD_NAME_NAME);
         if (fullName != null) {
-            matcher.putString(Subscriber.FIELD_NAME_NAME, fullName);
+            matcher.put(Subscriber.FIELD_NAME_NAME, fullName);
         }
         String customId = nbiRequest.body.getString(Subscriber.FIELD_NAME_CUSTOM_ID);
         if (customId != null) {
-            matcher.putString(Subscriber.FIELD_NAME_CUSTOM_ID, customId);
+            matcher.put(Subscriber.FIELD_NAME_CUSTOM_ID, customId);
         }
         String email = nbiRequest.body.getString(Subscriber.FIELD_NAME_LOCATIONS_CONTACTS_EMAIL);
         String phoneNumber = nbiRequest.body.getString(Subscriber.FIELD_NAME_LOCATIONS_CONTACTS_PHONE);
         if (phoneNumber != null || email != null) {
             JsonObject elemMatch = new JsonObject();
             if (phoneNumber != null) {
-                elemMatch.putString(Subscriber.FIELD_NAME_LOCATIONS_CONTACTS_PHONE, phoneNumber);
+                elemMatch.put(Subscriber.FIELD_NAME_LOCATIONS_CONTACTS_PHONE, phoneNumber);
             }
             if (email != null) {
-                elemMatch.putString(Subscriber.FIELD_NAME_LOCATIONS_CONTACTS_EMAIL, email);
+                elemMatch.put(Subscriber.FIELD_NAME_LOCATIONS_CONTACTS_EMAIL, email);
             }
-            matcher.putObject(
+            matcher.put(
                     Subscriber.FIELD_NAME_LOCATIONS + "." + Subscriber.FIELD_NAME_LOCATIONS_CONTACTS,
-                    new JsonObject().putObject("$elemMatch", elemMatch)
+                    new JsonObject().put("$elemMatch", elemMatch)
             );
         }
         if (matcher.size() == 0) {
@@ -1289,7 +1292,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
         }
 
         // Add orgId
-        matcher.putString(AcsConstants.FIELD_NAME_ORG_ID, nbiRequest.body.getString(AcsConstants.FIELD_NAME_ORG_ID));
+        matcher.put(AcsConstants.FIELD_NAME_ORG_ID, nbiRequest.body.getString(AcsConstants.FIELD_NAME_ORG_ID));
 
         return matcher;
     }
@@ -1311,8 +1314,8 @@ public class SubscriberService extends AbstractAcNbiCrudService {
      */
     private static final JsonObject INTERNAL_QUERY_KEYS = null;
     private static final JsonObject EXTERNAL_QUERY_KEYS = new JsonObject()
-            .putNumber(AcsConstants.FIELD_NAME_ORG_ID, 0)
-            .putNumber(Subscriber.FIELD_NAME_APP_DATA, 0);
+            .put(AcsConstants.FIELD_NAME_ORG_ID, 0)
+            .put(Subscriber.FIELD_NAME_APP_DATA, 0);
     @Override
     public JsonObject buildRetrieveQueryKeys(AcsNbiRequest nbiRequest) {
         if (nbiRequest.bInternalRequest) {
@@ -1335,7 +1338,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
         JsonArray allInternalIDs = new JsonArray();
 
         for (int j = 0; j < deviceIdArray.size(); j ++) {
-            String deviceId = deviceIdArray.get(j);
+            String deviceId = deviceIdArray.getString(j);
             switch (Subscriber.getDeviceIdStringType(orgId, deviceId)) {
                 case INTERNAL_ID:
                     // Found an internal device id
@@ -1367,11 +1370,11 @@ public class SubscriberService extends AbstractAcNbiCrudService {
         if (allFSANs.size() > 0) {
             subMatcherCount ++;
             if (allFSANs.size() == 1) {
-                fsanMatcher = new JsonObject().putString(Cpe.DB_FIELD_NAME_SN, allFSANs.get(0).toString());
+                fsanMatcher = new JsonObject().put(Cpe.DB_FIELD_NAME_SN, allFSANs.getValue(0).toString());
             } else {
-                fsanMatcher = new JsonObject().putObject(
+                fsanMatcher = new JsonObject().put(
                         Cpe.DB_FIELD_NAME_SN,
-                        new JsonObject().putArray(
+                        new JsonObject().put(
                                 VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_IN,
                                 allFSANs
                         )
@@ -1381,11 +1384,11 @@ public class SubscriberService extends AbstractAcNbiCrudService {
         if (allRegIDs.size() > 0) {
             subMatcherCount ++;
             if (allRegIDs.size() == 1) {
-                regIdMatcher = new JsonObject().putString(Cpe.DB_FIELD_NAME_REGISTRATION_ID, allRegIDs.get(0).toString());
+                regIdMatcher = new JsonObject().put(Cpe.DB_FIELD_NAME_REGISTRATION_ID, allRegIDs.getValue(0).toString());
             } else {
-                regIdMatcher = new JsonObject().putObject(
+                regIdMatcher = new JsonObject().put(
                         Cpe.DB_FIELD_NAME_REGISTRATION_ID,
-                        new JsonObject().putArray(
+                        new JsonObject().put(
                                 VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_IN,
                                 allRegIDs
                         )
@@ -1395,12 +1398,12 @@ public class SubscriberService extends AbstractAcNbiCrudService {
         if (allInternalIDs.size() > 0) {
             subMatcherCount ++;
             if (allInternalIDs.size() == 1) {
-                internalIdMatcher = new JsonObject().putString(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID,
-                        allInternalIDs.get(0).toString());
+                internalIdMatcher = new JsonObject().put(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID,
+                        allInternalIDs.getValue(0).toString());
             } else {
-                internalIdMatcher = new JsonObject().putObject(
+                internalIdMatcher = new JsonObject().put(
                         VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID,
-                        new JsonObject().putArray(
+                        new JsonObject().put(
                                 VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_IN,
                                 allInternalIDs
                         )
@@ -1420,7 +1423,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
             if (internalIdMatcher != null) {
                 matcherArray.add(internalIdMatcher);
             }
-            matcher = new JsonObject().putArray(
+            matcher = new JsonObject().put(
                     VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_OR,
                     matcherArray
             );
@@ -1434,7 +1437,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
             }
         }
 
-        matcher.putString(AcsConstants.FIELD_NAME_ORG_ID, orgId);
+        matcher.put(AcsConstants.FIELD_NAME_ORG_ID, orgId);
 
         return matcher;
     }
@@ -1455,7 +1458,7 @@ public class SubscriberService extends AbstractAcNbiCrudService {
 
         if (details != null &&
                 !details.equals(CONFLICT) &&
-                details.containsField(AcsConstants.FIELD_NAME_ERROR)) {
+                details.containsKey(AcsConstants.FIELD_NAME_ERROR)) {
             String error = details.getString(AcsConstants.FIELD_NAME_ERROR);
 
             if (error.contains(Subscriber.FIELD_NAME_CUSTOM_ID)) {
@@ -1469,12 +1472,12 @@ public class SubscriberService extends AbstractAcNbiCrudService {
                 if (reqTracker.allDeviceIdStrings.size() > 1) {
                     return MULTI_DEVICE_ALREADY_ASSOCIATED;
                 } else {
-                    String deviceId = reqTracker.allDeviceIdStrings.get(0);
+                    String deviceId = reqTracker.allDeviceIdStrings.getString(0);
                     Subscriber.DeviceIdStringType deviceIdStringType =
                             Subscriber.getDeviceIdStringType(reqTracker.orgId, deviceId);
-                    details.putString(
+                    details.put(
                             AcsConstants.FIELD_NAME_ERROR,
-                            deviceIdStringType.typeString + " " + reqTracker.allDeviceIdStrings.get(0)
+                            deviceIdStringType.typeString + " " + reqTracker.allDeviceIdStrings.getValue(0)
                                     + " is already associated with another Subscriber!"
                     );
                 }
@@ -1553,22 +1556,22 @@ public class SubscriberService extends AbstractAcNbiCrudService {
          */
         try {
             VertxMongoUtils.deleteWithMatcher(
-                    vertx.eventBus(),
+                    mongoClient,
                     ServicePlan.DB_COLLECTION_NAME,
-                    new JsonObject().putString(
+                    new JsonObject().put(
                             ServicePlan.FIELD_NAME_SUBSCRIBER_ID,
                             record.getString(AcsConstants.FIELD_NAME_ID)
                     ),
-                    new Handler<Message<JsonObject>>() {
+                    new Handler<Long>() {
                         @Override
-                        public void handle(Message<JsonObject> result) {
+                        public void handle(Long result) {
                             if (result == null) {
                                 nbiRequest.sendResponse(
                                         HttpResponseStatus.INTERNAL_SERVER_ERROR,
                                         MONGODB_TIMED_OUT);
                             } else {
                                 log.debug("Deleted "
-                                        + result.body().getField(VertxMongoUtils.MOD_MONGO_FIELD_NAME_NUMBER)
+                                        + result
                                         + " service plan(s) for Subscriber "
                                         + record.getString(Subscriber.FIELD_NAME_NAME));
 

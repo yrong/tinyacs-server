@@ -678,6 +678,7 @@ public class ActiveWorkflowTaskWorker extends AbstractSxaTaskImpl{
                                         aCpe.getString(AcsConstants.FIELD_NAME_ID),
                                         new WorkflowCpeTracker(
                                                 vertx,
+                                                mongoClient,
                                                 aCpe,
                                                 workflow,
                                                 cpeExecResultHandler
@@ -732,6 +733,7 @@ public class ActiveWorkflowTaskWorker extends AbstractSxaTaskImpl{
                         aCpe.getString(AcsConstants.FIELD_NAME_ID),
                         new WorkflowCpeTracker(
                                 vertx,
+                                mongoClient,
                                 aCpe,
                                 workflow,
                                 cpeExecResultHandler

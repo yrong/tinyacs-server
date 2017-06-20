@@ -1,5 +1,8 @@
 package vertx.acs.nbi.deviceop;
 
+import io.vertx.core.eventbus.DeliveryOptions;
+import io.vertx.ext.mongo.MongoClient;
+import io.vertx.redis.RedisClient;
 import vertx.VertxException;
 import vertx.VertxJsonUtils;
 import vertx.VertxRedisUtils;
@@ -7,7 +10,6 @@ import vertx.acs.nbi.model.AcsNbiRequest;
 import vertx.model.*;
 import vertx.util.AcsConstants;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.java.redis.RedisClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.AsyncResult;
@@ -94,21 +96,21 @@ public class DeviceOp extends CpeDeviceOp{
      * Only the CPE "_id" and device id attributes are interesting to us.
      */
     private static final JsonObject DEFAULT_QUERY_KEYS_CACHED = new JsonObject()
-            .putNumber("_id", 1)
-            .putNumber(Cpe.DB_FIELD_NAME_CONNREQ_URL, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_CONNREQ_USERNAME, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_CONNREQ_PASSWORD, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_SN, 1);
+            .put("_id", 1)
+            .put(Cpe.DB_FIELD_NAME_CONNREQ_URL, 1)
+            .put(Cpe.DB_FIELD_NAME_CONNREQ_USERNAME, 1)
+            .put(Cpe.DB_FIELD_NAME_CONNREQ_PASSWORD, 1)
+            .put(Cpe.DB_FIELD_NAME_SN, 1);
 
     private static final JsonObject DEFAULT_QUERY_KEYS_LIVE = new JsonObject()
-            .putNumber("_id", 1)
-            .putNumber(AcsConstants.FIELD_NAME_ORG_ID, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_CONNREQ_URL, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_CONNREQ_USERNAME, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_CONNREQ_PASSWORD, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_SN, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_LAST_INFORM_TIME, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_PERIODIC_INFORM_INTERVAL, 1);
+            .put("_id", 1)
+            .put(AcsConstants.FIELD_NAME_ORG_ID, 1)
+            .put(Cpe.DB_FIELD_NAME_CONNREQ_URL, 1)
+            .put(Cpe.DB_FIELD_NAME_CONNREQ_USERNAME, 1)
+            .put(Cpe.DB_FIELD_NAME_CONNREQ_PASSWORD, 1)
+            .put(Cpe.DB_FIELD_NAME_SN, 1)
+            .put(Cpe.DB_FIELD_NAME_LAST_INFORM_TIME, 1)
+            .put(Cpe.DB_FIELD_NAME_PERIODIC_INFORM_INTERVAL, 1);
 
     /**
      * Non-Static Variables 
@@ -133,6 +135,8 @@ public class DeviceOp extends CpeDeviceOp{
     public boolean bResponseSent = false;
     public String redisString = null;
 
+    public MongoClient mongoClient;
+
     /**
      * Constructor by a DeviceOp JSON Object.
      *
@@ -144,6 +148,7 @@ public class DeviceOp extends CpeDeviceOp{
      */
     public DeviceOp(
             Vertx vertx,
+            MongoClient mongoClient,
             JsonObject deviceOpJsonObject,
             AcsNbiRequest nbiRequest,
             long internalDeviceOpSn,
@@ -179,7 +184,7 @@ public class DeviceOp extends CpeDeviceOp{
         /**
          * Validate "getOptions"
          */
-        JsonObject getOptions = deviceOpJsonObject.getObject(FIELD_NAME_GET_OPTIONS);
+        JsonObject getOptions = deviceOpJsonObject.getJsonObject(FIELD_NAME_GET_OPTIONS);
         if (getOptions != null) {
             try {
                 //VertxJsonUtils.validateFields(getOptions, getOptionsMandatoryFields, getOptionsOptionalFields);
@@ -204,7 +209,7 @@ public class DeviceOp extends CpeDeviceOp{
         /**
          * Extract exec policy related attributes
          */
-        JsonObject execPolicyJsonObject = deviceOpJsonObject.getObject(FIELD_NAME_EXEC_POLICY);
+        JsonObject execPolicyJsonObject = deviceOpJsonObject.getJsonObject(FIELD_NAME_EXEC_POLICY);
         if (execPolicyJsonObject != null) {
             ExecPolicy execPolicy = new ExecPolicy(execPolicyJsonObject);
             timeout = execPolicy.timeout;
@@ -216,23 +221,23 @@ public class DeviceOp extends CpeDeviceOp{
          * If no callback URL is specified by the client (i.e. "synchronous" op), pass the internal device
          * op SN to CPE server for internal callback purpose.
          */
-        if (!deviceOpJsonObject.containsField(CpeDeviceOp.FIELD_NAME_CALLBACK_URL)) {
+        if (!deviceOpJsonObject.containsKey(CpeDeviceOp.FIELD_NAME_CALLBACK_URL)) {
             // Internal Callback URl contains an internal Device Op SN
-            deviceOpJsonObject.putString(CpeDeviceOp.FIELD_NAME_CALLBACK_URL, internalCallbackUrl);
-            deviceOpJsonObject.putNumber(CpeDeviceOp.FIELD_NAME_INTERNAL_SN, internalSn);
+            deviceOpJsonObject.put(CpeDeviceOp.FIELD_NAME_CALLBACK_URL, internalCallbackUrl);
+            deviceOpJsonObject.put(CpeDeviceOp.FIELD_NAME_INTERNAL_SN, internalSn);
         }
 
         /**
          * Extract CPE DB Object if any
          */
-        cpeDbObject = deviceOpJsonObject.getObject(FIELD_NAME_CPE_DB_OBJECT);
+        cpeDbObject = deviceOpJsonObject.getJsonObject(FIELD_NAME_CPE_DB_OBJECT);
         if (cpeDbObject == null) {
             /**
              * Get Match by CPE Identifier and Org Id
              */
             matcher = CpeIdentifier.getCpeMatcher(
                     deviceOpJsonObject.getString(AcsConstants.FIELD_NAME_ORG_ID),
-                    deviceOpJsonObject.getObject(AcsConstants.FIELD_NAME_CPE_ID)
+                    deviceOpJsonObject.getJsonObject(AcsConstants.FIELD_NAME_CPE_ID)
             );
 
             cpeIdString = matcher.encode();
@@ -249,9 +254,9 @@ public class DeviceOp extends CpeDeviceOp{
             if (getOptionsEnum != GetOptionsEnum.LiveDataOnly) {
                 // Cached data is needed.
                 queryKeys = DEFAULT_QUERY_KEYS_CACHED.copy();
-                JsonArray paramNames = deviceOpJsonObject.getArray(FIELD_NAME_PARAM_NAMES);
+                JsonArray paramNames = deviceOpJsonObject.getJsonArray(FIELD_NAME_PARAM_NAMES);
                 for (int i = 0; i < paramNames.size(); i ++) {
-                    String paramName = paramNames.get(i);
+                    String paramName = paramNames.getString(i);
 
                     // truncate the trailing '.' if any
                     if (paramName.endsWith(".")) {
@@ -260,9 +265,9 @@ public class DeviceOp extends CpeDeviceOp{
 
                     // add the parameter names into the query keys
                     if (operationType == CpeDeviceOpTypeEnum.GetParameterValues) {
-                        queryKeys.putNumber(Cpe.DB_FIELD_NAME_PARAM_VALUES + "." + paramName, 1);
+                        queryKeys.put(Cpe.DB_FIELD_NAME_PARAM_VALUES + "." + paramName, 1);
                     } else {
-                        queryKeys.putNumber(Cpe.DB_FIELD_NAME_PARAM_ATTRIBUTES + "." + paramName, 1);
+                        queryKeys.put(Cpe.DB_FIELD_NAME_PARAM_ATTRIBUTES + "." + paramName, 1);
                     }
                 }
             }
@@ -271,7 +276,7 @@ public class DeviceOp extends CpeDeviceOp{
         /**
          * Create an UUID
          */
-        deviceOpJsonObject.putString("_id", UUID.randomUUID().toString());
+        deviceOpJsonObject.put("_id", UUID.randomUUID().toString());
     }
 
     /**
@@ -354,12 +359,13 @@ public class DeviceOp extends CpeDeviceOp{
     public void sendToCpeServerViaEventBus(
             String cpeServer,
             Handler<AsyncResult<Message<JsonObject>>> handler) {
-        vertx.eventBus().sendWithTimeout(
+        DeliveryOptions options = new DeliveryOptions().setSendTimeout(timeout*1000);
+        vertx.eventBus().send(
                 AcsConstants.VERTX_ADDRESS_ACS_DEVICE_OP_REQUEST_PREFIX + cpeServer,
                 new JsonObject()
-                        .putString(AcsConstants.FIELD_NAME_ID, cpeIdString)
-                        .putObject(DeviceOp.FIELD_NAME_DEVICE_OP, deviceOpJsonObject),
-                timeout * 1000,
+                        .put(AcsConstants.FIELD_NAME_ID, cpeIdString)
+                        .put(DeviceOp.FIELD_NAME_DEVICE_OP, deviceOpJsonObject),
+                options,
                 handler
         );
     }
@@ -380,13 +386,13 @@ public class DeviceOp extends CpeDeviceOp{
         }
         bResponseSent = true;
 
-        deviceOpJsonObject.putString(FIELD_NAME_STATE, state);
+        deviceOpJsonObject.put(FIELD_NAME_STATE, state);
         if (error != null) {
             log.error(cpeIdString + ": internalSN " + internalSn + ": " + error + "!");
-            deviceOpJsonObject.putString(FIELD_NAME_ERROR, error);
+            deviceOpJsonObject.put(FIELD_NAME_ERROR, error);
         }
         if (result != null) {
-            deviceOpJsonObject.putObject(FIELD_NAME_RESULT, result);
+            deviceOpJsonObject.put(FIELD_NAME_RESULT, result);
         }
 
         // Cancel timer if any
@@ -402,13 +408,13 @@ public class DeviceOp extends CpeDeviceOp{
         if (operationType.equals(CpeDeviceOpTypeEnum.Upload) &&
                 AcsFileType.LogFile.equals(fileType) &&
                 HttpResponseStatus.OK.equals(responseStatus)) {
-            result.putString(
+            result.put(
                     AcsFile.FIELD_NAME_DOWNLOAD_URL,
                     AcsFile.getDownloadUrl(result.getString(CpeDeviceOp.FIELD_NAME_INTERNAL_FILE_ID))
-            ).putString(
+            ).put(
                     AcsFile.FIELD_NAME_USERNAME,
                     result.getString(AcsFile.FIELD_NAME_USERNAME)
-            ).putString(
+            ).put(
                     AcsFile.FIELD_NAME_PASSWORD,
                     result.getString(AcsFile.FIELD_NAME_PASSWORD)
             );
@@ -419,7 +425,7 @@ public class DeviceOp extends CpeDeviceOp{
          */
         if (error != null) {
             nbiRequest.sendResponse(responseStatus,
-                    new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR, error));
+                    new JsonObject().put(AcsConstants.FIELD_NAME_ERROR, error));
         } else if (result != null) {
             nbiRequest.sendResponse(responseStatus, result);
         } else {
@@ -468,7 +474,7 @@ public class DeviceOp extends CpeDeviceOp{
                 break;
 
             case Download:
-                if (!deviceOpJsonObject.containsField(CpeDeviceOp.FIELD_NAME_FILE_STRUCT)) {
+                if (!deviceOpJsonObject.containsKey(CpeDeviceOp.FIELD_NAME_FILE_STRUCT)) {
                     eventType = error == null? EventTypeEnum.Restore : EventTypeEnum.RestoreFailure;
                 } else {
                     /**
@@ -479,7 +485,7 @@ public class DeviceOp extends CpeDeviceOp{
         }
         if (eventType != null) {
             Event.saveEvent(
-                    vertx.eventBus(),
+                    mongoClient,
                     cpeDbObject.getString(AcsConstants.FIELD_NAME_ORG_ID),
                     cpeDbObject.getString(Cpe.DB_FIELD_NAME_SN),
                     eventType,

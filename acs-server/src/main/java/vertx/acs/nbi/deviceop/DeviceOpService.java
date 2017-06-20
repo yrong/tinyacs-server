@@ -1,9 +1,10 @@
 package vertx.acs.nbi.deviceop;
 
-import vertx.VertxException;
-import vertx.VertxConstants;
-import vertx.VertxMongoUtils;
-import vertx.VertxUtils;
+import io.vertx.core.eventbus.DeliveryOptions;
+import io.vertx.core.eventbus.MessageConsumer;
+import io.vertx.redis.RedisClient;
+import io.vertx.redis.RedisOptions;
+import vertx.*;
 import vertx.acs.nbi.AbstractAcNbiCrudService;
 import vertx.acs.nbi.model.AcsNbiRequest;
 import vertx.connreq.ConnectionRequestConstants;
@@ -11,12 +12,10 @@ import vertx.connreq.ConnectionRequestFsm;
 import vertx.model.*;
 import vertx.util.AcsConstants;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.java.redis.RedisClient;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.Message;
-import io.vertx.core.eventbus.impl.JsonObjectMessage;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Date;
@@ -54,6 +53,8 @@ public class DeviceOpService extends AbstractAcNbiCrudService {
      */
     public Map<Long, AcsNbiRequest> mapDeviceOpToNbiRequest = new HashMap<>();
 
+    MessageConsumer consumer;
+
     /**
      * Start the service
      */
@@ -65,12 +66,14 @@ public class DeviceOpService extends AbstractAcNbiCrudService {
          * Register API Callback Handler
          */
         log.info("Registering internal callback handler for vertx address " + internalCallbackAddress);
-        vertx.eventBus().registerHandler(internalCallbackAddress, internalCallbackHandler);
+        consumer = vertx.eventBus().consumer(internalCallbackAddress);
+        consumer.handler(internalCallbackHandler);
 
         /**
          * Initialize Redis Client
          */
-        redisClient = new RedisClient(vertx.eventBus(), VertxConstants.VERTX_ADDRESS_REDIS);
+        RedisOptions options = new RedisOptions().setHost(VertxConfigProperties.redisHost).setPort(VertxConfigProperties.redisPort);
+        redisClient = RedisClient.create(vertx,options);
     }
 
     /**
@@ -84,7 +87,7 @@ public class DeviceOpService extends AbstractAcNbiCrudService {
          * Un-Register API Callback Handler
          */
         log.info("Un-Registering internal callback handler for vertx address " + internalCallbackAddress);
-        vertx.eventBus().unregisterHandler(internalCallbackAddress, internalCallbackHandler);
+        consumer.unregister();
     }
 
     /**
@@ -156,6 +159,7 @@ public class DeviceOpService extends AbstractAcNbiCrudService {
             try {
                 deviceOp = new DeviceOp(
                         vertx,
+                        mongoClient,
                         nbiRequest.body,
                         nbiRequest,
                         internalDeviceOpSn++,
@@ -196,12 +200,12 @@ public class DeviceOpService extends AbstractAcNbiCrudService {
              */
             try {
                 VertxMongoUtils.findOne(
-                        vertx.eventBus(),
+                        mongoClient,
                         Cpe.CPE_COLLECTION_NAME,
                         // Matcher which contains the CPE Key as the id
                         deviceOp.matcher,
                         // Async FindOne Result Handler
-                        new VertxMongoUtils.FindOneHandler(new Handler<JsonObject>() {
+                        new Handler<JsonObject>() {
                             @Override
                             public void handle(JsonObject cpeJsonObject) {
                                 // Check for MongoDB timeouts
@@ -215,7 +219,7 @@ public class DeviceOpService extends AbstractAcNbiCrudService {
                                     cpeDeviceQueryHandler(cpeJsonObject, deviceOp, nbiRequest);
                                 }
                             }
-                        }),
+                        },
                         // Keys
                         deviceOp.queryKeys
                 );
@@ -242,7 +246,7 @@ public class DeviceOpService extends AbstractAcNbiCrudService {
             final DeviceOp deviceOp,
             final AcsNbiRequest nbiRequest) {
         if (cpeJsonObject == null) {
-            deviceOp.matcher.removeField(AcsConstants.FIELD_NAME_ORG_ID);
+            deviceOp.matcher.remove(AcsConstants.FIELD_NAME_ORG_ID);
             deviceOp.sendResponse(
                     HttpResponseStatus.BAD_REQUEST,
                     DeviceOp.CPE_DEVICE_OP_STATE_INVALID_REQUEST,
@@ -263,9 +267,9 @@ public class DeviceOpService extends AbstractAcNbiCrudService {
             if (deviceOp.getOptionsEnum != DeviceOp.GetOptionsEnum.LiveDataOnly) {
                 // get the cached data from query result
                 if (deviceOp.operationType == CpeDeviceOpTypeEnum.GetParameterValues) {
-                    deviceOp.cachedData = cpeJsonObject.getObject(Cpe.DB_FIELD_NAME_PARAM_VALUES);
+                    deviceOp.cachedData = cpeJsonObject.getJsonObject(Cpe.DB_FIELD_NAME_PARAM_VALUES);
                 } else {
-                    deviceOp.cachedData = cpeJsonObject.getObject(Cpe.DB_FIELD_NAME_PARAM_ATTRIBUTES);
+                    deviceOp.cachedData = cpeJsonObject.getJsonObject(Cpe.DB_FIELD_NAME_PARAM_ATTRIBUTES);
                 }
 
                 if (deviceOp.getOptionsEnum == DeviceOp.GetOptionsEnum.CachedDataOnly) {
@@ -285,7 +289,7 @@ public class DeviceOpService extends AbstractAcNbiCrudService {
             sendConnReq(cpeJsonObject, deviceOp);
 
             // Start internal callback timer
-            if (deviceOp.deviceOpJsonObject.containsField(CpeDeviceOp.FIELD_NAME_INTERNAL_SN)) {
+            if (deviceOp.deviceOpJsonObject.containsKey(CpeDeviceOp.FIELD_NAME_INTERNAL_SN)) {
                 // Start timer
                 deviceOp.setCallbackTimer(
                         vertx.setTimer(
@@ -312,9 +316,9 @@ public class DeviceOpService extends AbstractAcNbiCrudService {
      *
      * The callbacks are made by the CPE servers to send the device op results up to the ACS server.
      */
-    Handler<JsonObjectMessage> internalCallbackHandler = new Handler<JsonObjectMessage>() {
+    Handler<Message<JsonObject>> internalCallbackHandler = new Handler<Message<JsonObject>>() {
         @Override
-        public void handle(JsonObjectMessage callbackMessage) {
+        public void handle(Message<JsonObject> callbackMessage) {
             JsonObject callback = callbackMessage.body();
             if (callback == null) {
                 log.error("The callback message has no body!!");
@@ -326,7 +330,7 @@ public class DeviceOpService extends AbstractAcNbiCrudService {
             }
 
             // Send empty reply
-            callbackMessage.reply();
+            callbackMessage.reply("");
 
             // extract internal SN
             Long internalSn = callbackMessage.body().getLong(CpeDeviceOp.FIELD_NAME_INTERNAL_SN);
@@ -363,7 +367,7 @@ public class DeviceOpService extends AbstractAcNbiCrudService {
                         responseStatus,
                         state,
                         null,
-                        callback.getObject(CpeDeviceOp.FIELD_NAME_RESULT));
+                        callback.getJsonObject(CpeDeviceOp.FIELD_NAME_RESULT));
 
                 // Update hash map
                 mapDeviceOpToNbiRequest.remove(internalSn);
@@ -389,26 +393,27 @@ public class DeviceOpService extends AbstractAcNbiCrudService {
         String password = cpeJsonObject.getString(Cpe.DB_FIELD_NAME_CONNREQ_PASSWORD);
         String connReqUrl = cpeJsonObject.getString(Cpe.DB_FIELD_NAME_CONNREQ_URL);
         JsonObject connReqRequest = new JsonObject()
-                .putString(ConnectionRequestConstants.CPE_ID, deviceOp.cpeIdString)
-                .putString(CpeDeviceOp.FIELD_NAME_CALLBACK_URL, internalCallbackAddress)
-                .putString(ConnectionRequestConstants.URL, connReqUrl)
-                .putString(ConnectionRequestConstants.USERNAME, username)
-                .putString(ConnectionRequestConstants.PASSWORD, password);
+                .put(ConnectionRequestConstants.CPE_ID, deviceOp.cpeIdString)
+                .put(CpeDeviceOp.FIELD_NAME_CALLBACK_URL, internalCallbackAddress)
+                .put(ConnectionRequestConstants.URL, connReqUrl)
+                .put(ConnectionRequestConstants.USERNAME, username)
+                .put(ConnectionRequestConstants.PASSWORD, password);
 
         String orgId = cpeJsonObject.getString(AcsConstants.FIELD_NAME_ORG_ID);
         if (orgId != null) {
             Organization org = organizationCache.getOrgById(orgId);
             if (org != null && org.internalProxy != null && org.internalProxy.length() > 1) {
-                connReqRequest.putString(ConnectionRequestConstants.PROXY, org.internalProxy);
+                connReqRequest.put(ConnectionRequestConstants.PROXY, org.internalProxy);
             }
         }
 
         // Send the request message to connection-request worker vertice
         log.info(deviceOp.cpeIdString + ": Sending new conn-req request:\n" + connReqRequest.encode());
-        vertx.eventBus().sendWithTimeout(
+        DeliveryOptions options = new DeliveryOptions().setSendTimeout(ConnectionRequestConstants.DEFAULT_CONN_REQ_TIMEOUT);
+        vertx.eventBus().send(
                 AcsConstants.VERTX_ADDRESS_ACS_CONNECTION_REQUEST,
                 connReqRequest,
-                ConnectionRequestConstants.DEFAULT_CONN_REQ_TIMEOUT,
+                options,
                 new Handler<AsyncResult<Message<JsonObject>>>() {
                     @Override
                     public void handle(AsyncResult<Message<JsonObject>> asyncResult) {
@@ -517,7 +522,7 @@ public class DeviceOpService extends AbstractAcNbiCrudService {
                             case ConnectionRequestFsm.STATE_LOCKED:
                                 String currOp = "long";
                                 try {
-                                    currOp = result.getObject("deviceOp").getString("operation");
+                                    currOp = result.getJsonObject("deviceOp").getString("operation");
                                 } catch (Exception ex) {
                                     log.info("Unable to tell the type of the current op.");
                                 }
@@ -553,7 +558,7 @@ public class DeviceOpService extends AbstractAcNbiCrudService {
         // Cleanup incomplete file record if needed
         if (deviceOp.operationType.equals(CpeDeviceOpTypeEnum.Upload)) {
             AcsFile.cleanupIncompleteUploads(
-                    vertx.eventBus(),
+                    mongoClient,
                     Cpe.getSnByCpeKey(deviceOp.cpeIdString)
             );
         }
@@ -564,11 +569,11 @@ public class DeviceOpService extends AbstractAcNbiCrudService {
                     deviceOp.cpeDbObject.getBoolean(Cpe.DB_FIELD_NAME_PERIODIC_INFORM_ENABLE, false)) {
                 int interval = deviceOp.cpeDbObject.getInteger(Cpe.DB_FIELD_NAME_PERIODIC_INFORM_INTERVAL, 0);
                 if (interval > 0) {
-                    JsonObject lastInformTimeJsonObj = deviceOp.cpeDbObject.getObject(Cpe.DB_FIELD_NAME_LAST_INFORM_TIME);
+                    JsonObject lastInformTimeJsonObj = deviceOp.cpeDbObject.getJsonObject(Cpe.DB_FIELD_NAME_LAST_INFORM_TIME);
                     if (lastInformTimeJsonObj != null) {
                         try {
                             Date lastInformTime = VertxMongoUtils.getDateFromMongoDateObject(
-                                    deviceOp.cpeDbObject.getObject(Cpe.DB_FIELD_NAME_LAST_INFORM_TIME)
+                                    deviceOp.cpeDbObject.getJsonObject(Cpe.DB_FIELD_NAME_LAST_INFORM_TIME)
                             );
                             long timeSinceLastInform = (System.currentTimeMillis() - lastInformTime.getTime()) / 1000;
                             if (timeSinceLastInform > interval) {

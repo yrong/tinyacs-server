@@ -101,7 +101,7 @@ public class ConfigurationProfileService extends AbstractProfileService{
                 /**
                  * Editing Profile is not allowed
                  */
-                if (!nbiRequest.body.containsField(AcsConstants.FIELD_NAME_ID)) {
+                if (!nbiRequest.body.containsKey(AcsConstants.FIELD_NAME_ID)) {
                     throw MISSING_ID_EXCEPTION;
                 }
                 break;
@@ -157,12 +157,12 @@ public class ConfigurationProfileService extends AbstractProfileService{
      * Default to null (return everything)
      */
     private static final JsonObject QUERY_KEY = new JsonObject()
-            .putNumber(ConfigurationProfile.FIELD_NAME_SERVICES, 0)
-            .putNumber(ConfigurationProfile.FIELD_NAME_DYNAMIC_OBJECTS, 0)
-            .putNumber(ConfigurationProfile.FIELD_NAME_PARAMETER_VALUES, 0);
+            .put(ConfigurationProfile.FIELD_NAME_SERVICES, 0)
+            .put(ConfigurationProfile.FIELD_NAME_DYNAMIC_OBJECTS, 0)
+            .put(ConfigurationProfile.FIELD_NAME_PARAMETER_VALUES, 0);
     private static final JsonObject QUERY_KEY_BRIEF = QUERY_KEY.copy()
-            .putNumber(ConfigurationProfile.FIELD_NAME_CONFIGURATIONS, 0)
-            .putNumber(AcsConstants.FIELD_NAME_ORG_ID, 0);
+            .put(ConfigurationProfile.FIELD_NAME_CONFIGURATIONS, 0)
+            .put(AcsConstants.FIELD_NAME_ORG_ID, 0);
     public JsonObject buildRetrieveQueryKeys(AcsNbiRequest nbiRequest) {
         if (nbiRequest.getQueryBrief()) {
             return QUERY_KEY_BRIEF;
@@ -201,13 +201,13 @@ public class ConfigurationProfileService extends AbstractProfileService{
      */
     @Override
     public List<CrossReferenceCheck> getAllCrossReferenceChecks(String id) {
-        JsonObject matcher = new JsonObject().putObject(
+        JsonObject matcher = new JsonObject().put(
                 Workflow.FIELD_NAME_ACTIONS,
-                new JsonObject().putObject(
+                new JsonObject().put(
                         VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_ELEM_MATCH,
-                        new JsonObject().putObject(
+                        new JsonObject().put(
                                 WorkflowAction.FIELD_NAME_PROFILE_ID,
-                                new JsonObject().putArray(
+                                new JsonObject().put(
                                         VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_ALL,
                                         new JsonArray().add(id)
                                 )

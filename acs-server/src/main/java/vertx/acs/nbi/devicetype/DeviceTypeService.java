@@ -112,7 +112,7 @@ public class DeviceTypeService extends AbstractAcNbiCrudService {
              * Retrieve the CPE Counts for each device type(s)
              */
             for (int i = 0; i < queryResults.size(); i++) {
-                final JsonObject aDeviceType = queryResults.get(i);
+                final JsonObject aDeviceType = queryResults.getJsonObject(i);
 
                 /**
                  * Check for illegal device types
@@ -124,7 +124,7 @@ public class DeviceTypeService extends AbstractAcNbiCrudService {
 
                     try {
                         VertxMongoUtils.delete(
-                                vertx.eventBus(),
+                                mongoClient,
                                 CpeDeviceType.DB_COLLECTION_NAME,
                                 aDeviceType.getString(AcsConstants.FIELD_NAME_ID),
                                 null
@@ -135,21 +135,21 @@ public class DeviceTypeService extends AbstractAcNbiCrudService {
                 } else {
                     // Build CPE Matcher by Device Type
                     JsonObject cpeMatcher = new JsonObject();
-                    for (String fieldName : aDeviceType.getFieldNames()) {
+                    for (String fieldName : aDeviceType.fieldNames()) {
                         if (fieldName.equals(AcsConstants.FIELD_NAME_ID)) {
                             continue;
                         }
 
                         String value = aDeviceType.getString(fieldName);
                         if (value != null) {
-                            cpeMatcher.putString(fieldName, value);
+                            cpeMatcher.put(fieldName, value);
                         }
                     }
 
                     //log.debug("Built CPE Matcher:\n" + cpeMatcher.encodePrettily());
                     try {
                         VertxMongoUtils.count(
-                                vertx.eventBus(),
+                                mongoClient,
                                 Cpe.CPE_COLLECTION_NAME,
                                 cpeMatcher,
                                 new Handler<Long>() {
@@ -163,14 +163,14 @@ public class DeviceTypeService extends AbstractAcNbiCrudService {
                                             nbiRequest.serviceData = pendingCount;
 
                                             if (count > 0) {
-                                                aDeviceType.putNumber(CpeDeviceType.FIELD_NAME_CPE_COUNT, count);
+                                                aDeviceType.put(CpeDeviceType.FIELD_NAME_CPE_COUNT, count);
                                                 results.add(aDeviceType);
                                             } else {
                                                 log.error("Found a device type with no matching device: " + aDeviceType);
 
                                                 try {
                                                     VertxMongoUtils.delete(
-                                                            vertx.eventBus(),
+                                                            mongoClient,
                                                             CpeDeviceType.DB_COLLECTION_NAME,
                                                             aDeviceType.getString(AcsConstants.FIELD_NAME_ID),
                                                             null

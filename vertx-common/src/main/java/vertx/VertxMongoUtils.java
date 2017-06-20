@@ -558,7 +558,7 @@ public class VertxMongoUtils {
         mongoClient.updateCollectionWithOptions(collectionName,matcher,update,options,res->{
             if (res.succeeded()) {
                 if(customHandler!=null){
-                    customHandler.handle(res.result().toJson());
+                    customHandler.handle(res.result().getDocMatched());
                 }
             } else {
                 res.cause().printStackTrace();
@@ -587,7 +587,7 @@ public class VertxMongoUtils {
             /**
              * Optional Custom Handler
              */
-            Handler<JsonObject> customHandler
+            Handler<Long> customHandler
     ) throws VertxException {
         deleteWithMatcher(
                 mongoClient,
@@ -618,7 +618,7 @@ public class VertxMongoUtils {
             /**
              * Optional Custom Handler
              */
-            Handler<JsonObject> customHandler
+            Handler<Long> customHandler
     ) throws VertxException {
         /**
          * Validate the mandatory arguments
@@ -630,10 +630,10 @@ public class VertxMongoUtils {
         /**
          * Build the delete message
          */
-        mongoClient.findOneAndDelete(collectionName,matcher,res->{
+        mongoClient.removeDocuments(collectionName,matcher,res->{
             if (res.succeeded()) {
                 if(customHandler!=null){
-                    customHandler.handle(res.result());
+                    customHandler.handle(res.result().getRemovedCount());
                 }
             } else {
                 res.cause().printStackTrace();

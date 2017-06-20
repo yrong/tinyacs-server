@@ -110,10 +110,10 @@ public class WorkflowExecLogsService extends AbstractAcNbiCrudService {
                 final String workflowId = nbiRequest.body.getString(FIELD_NAME_WORKFLOW_ID);
                 try {
                     VertxMongoUtils.findOne(
-                            vertx.eventBus(),
+                            mongoClient,
                             Workflow.DB_COLLECTION_NAME,
-                            new JsonObject().putString(AcsConstants.FIELD_NAME_ID, workflowId),
-                            new VertxMongoUtils.FindOneHandler(
+                            new JsonObject().put(AcsConstants.FIELD_NAME_ID, workflowId),
+
                                     new Handler<JsonObject>() {
                                         @Override
                                         public void handle(JsonObject result) {
@@ -146,8 +146,8 @@ public class WorkflowExecLogsService extends AbstractAcNbiCrudService {
                                                 }
                                             }
                                         }
-                                    }
-                            ),
+                                    },
+
                             null
                     );
                 } catch (Exception ex) {
@@ -169,13 +169,13 @@ public class WorkflowExecLogsService extends AbstractAcNbiCrudService {
      * Default to null (return everything)
      */
     private static final JsonObject QUERY_KEY = new JsonObject()
-            .putNumber(Cpe.DB_FIELD_NAME_SN, 1)
-            .putNumber(Cpe.DB_FIELD_NAME_IP_ADDRESS, 1)
-            .putNumber(CpeDeviceType.FIELD_NAME_MODEL_NAME, 1)
-            .putNumber(CpeDeviceType.FIELD_NAME_SW_VER, 1);
+            .put(Cpe.DB_FIELD_NAME_SN, 1)
+            .put(Cpe.DB_FIELD_NAME_IP_ADDRESS, 1)
+            .put(CpeDeviceType.FIELD_NAME_MODEL_NAME, 1)
+            .put(CpeDeviceType.FIELD_NAME_SW_VER, 1);
     public JsonObject buildRetrieveQueryKeys(AcsNbiRequest nbiRequest) {
         return QUERY_KEY.copy()
-                .putNumber(
+                .put(
                         Cpe.DB_FIELD_NAME_WORKFLOW_EXEC + "." + nbiRequest.body.getString(FIELD_NAME_WORKFLOW_ID),
                         1
                 );
@@ -203,7 +203,7 @@ public class WorkflowExecLogsService extends AbstractAcNbiCrudService {
                 if (Workflow.STATE_COMPLETED.equals(workflow.state)) {
                     // Completed Active Workflow
                     matcher = new JsonObject()
-                            .putObject(
+                            .put(
                                     Cpe.DB_FIELD_NAME_WORKFLOW_EXEC + "." + nbiRequest.body.getString(FIELD_NAME_WORKFLOW_ID),
                                     VertxMongoUtils.EXISTS
                             );
@@ -215,14 +215,14 @@ public class WorkflowExecLogsService extends AbstractAcNbiCrudService {
             } else {
                 // Passive workflow
                 JsonObject started = new JsonObject()
-                                .putObject(
+                                .put(
                                         Cpe.DB_FIELD_NAME_WORKFLOW_EXEC + "." + nbiRequest.body.getString(FIELD_NAME_WORKFLOW_ID),
                                         VertxMongoUtils.EXISTS
                                 );
                 JsonObject pending = workflow.getMatcher(null, true);
 
                 // Query with $or to include all pending and started devices.
-                matcher = new JsonObject().putArray(
+                matcher = new JsonObject().put(
                         VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_OR,
                         new JsonArray()
                                 .add(started)
@@ -237,7 +237,7 @@ public class WorkflowExecLogsService extends AbstractAcNbiCrudService {
                 matcher = workflow.getMatcher(null, true);
             } else {
                 matcher = new JsonObject()
-                        .putObject(
+                        .put(
                                 Cpe.DB_FIELD_NAME_WORKFLOW_EXEC + "." + nbiRequest.body.getString(FIELD_NAME_WORKFLOW_ID),
                                 VertxMongoUtils.EXISTS
                         );
@@ -256,7 +256,7 @@ public class WorkflowExecLogsService extends AbstractAcNbiCrudService {
                     }
 
                     if (internalStateString != null) {
-                        matcher.putString(
+                        matcher.put(
                                 Cpe.DB_FIELD_NAME_WORKFLOW_EXEC + "."
                                         + nbiRequest.body.getString(FIELD_NAME_WORKFLOW_ID) + "."
                                         + WorkflowCpeTracker.FIELD_NAME_STATE,
@@ -281,7 +281,7 @@ public class WorkflowExecLogsService extends AbstractAcNbiCrudService {
      * @return  Default to null (let MongoDB to sort it)
      */
     public JsonObject getDefaultQuerySort(AcsNbiRequest nbiRequest) {
-        return new JsonObject().putNumber(
+        return new JsonObject().put(
                 Cpe.DB_FIELD_NAME_WORKFLOW_EXEC + "."
                         + nbiRequest.body.getString(FIELD_NAME_WORKFLOW_ID) + "."
                         + WorkflowCpeTracker.FIELD_NAME_STATE,
@@ -317,50 +317,50 @@ public class WorkflowExecLogsService extends AbstractAcNbiCrudService {
             JsonArray newResults = new JsonArray();
             for (int i=0; i < queryResults.size(); i ++) {
                 // Convert the timestamp JSON Object to string
-                JsonObject aRecord = queryResults.get(i);
+                JsonObject aRecord = queryResults.getJsonObject(i);
 
                 // No need to include ID
-                aRecord.removeField(AcsConstants.FIELD_NAME_ID);
+                aRecord.remove(AcsConstants.FIELD_NAME_ID);
 
                 // Pull the exec logs up to top level
-                JsonObject execLog = aRecord.getObject(Cpe.DB_FIELD_NAME_WORKFLOW_EXEC);
+                JsonObject execLog = aRecord.getJsonObject(Cpe.DB_FIELD_NAME_WORKFLOW_EXEC);
                 if (execLog != null) {
-                    execLog = execLog.getObject(workflowId);
+                    execLog = execLog.getJsonObject(workflowId);
                     if (execLog == null) {
-                        aRecord.putString(WorkflowCpeTracker.FIELD_NAME_STATE, WorkflowCpeTracker.STATE_PENDING);
+                        aRecord.put(WorkflowCpeTracker.FIELD_NAME_STATE, WorkflowCpeTracker.STATE_PENDING);
                     } else {
                         String state = execLog.getString(WorkflowCpeTracker.FIELD_NAME_STATE);
                         if (state != null) {
-                            aRecord.putString(WorkflowCpeTracker.FIELD_NAME_STATE, state.substring(3));
+                            aRecord.put(WorkflowCpeTracker.FIELD_NAME_STATE, state.substring(3));
                         } else {
-                            aRecord.putString(WorkflowCpeTracker.FIELD_NAME_STATE, WorkflowCpeTracker.STATE_PENDING);
+                            aRecord.put(WorkflowCpeTracker.FIELD_NAME_STATE, WorkflowCpeTracker.STATE_PENDING);
                         }
 
                         String failureSummary = execLog.getString(WorkflowCpeTracker.FIELD_NAME_FAILURE_SUMMARY);
                         if (failureSummary != null) {
-                            aRecord.putString(WorkflowCpeTracker.FIELD_NAME_FAILURE_SUMMARY, failureSummary);
+                            aRecord.put(WorkflowCpeTracker.FIELD_NAME_FAILURE_SUMMARY, failureSummary);
                         }
 
-                        if (execLog.getObject(WorkflowCpeTracker.FIELD_NAME_START) != null) {
-                            aRecord.putString(
+                        if (execLog.getJsonObject(WorkflowCpeTracker.FIELD_NAME_START) != null) {
+                            aRecord.put(
                                     WorkflowCpeTracker.FIELD_NAME_START,
-                                    execLog.getObject(WorkflowCpeTracker.FIELD_NAME_START)
+                                    execLog.getJsonObject(WorkflowCpeTracker.FIELD_NAME_START)
                                             .getString(VertxMongoUtils.MOD_MONGO_DATE)
                             );
                         }
 
-                        if (execLog.getObject(WorkflowCpeTracker.FIELD_NAME_END) != null) {
-                            aRecord.putString(
+                        if (execLog.getJsonObject(WorkflowCpeTracker.FIELD_NAME_END) != null) {
+                            aRecord.put(
                                     WorkflowCpeTracker.FIELD_NAME_END,
-                                    execLog.getObject(WorkflowCpeTracker.FIELD_NAME_END)
+                                    execLog.getJsonObject(WorkflowCpeTracker.FIELD_NAME_END)
                                             .getString(VertxMongoUtils.MOD_MONGO_DATE)
                             );
                         }
                     }
                 } else {
-                    aRecord.putString(WorkflowCpeTracker.FIELD_NAME_STATE, WorkflowCpeTracker.STATE_PENDING);
+                    aRecord.put(WorkflowCpeTracker.FIELD_NAME_STATE, WorkflowCpeTracker.STATE_PENDING);
                 }
-                aRecord.removeField(Cpe.DB_FIELD_NAME_WORKFLOW_EXEC);
+                aRecord.remove(Cpe.DB_FIELD_NAME_WORKFLOW_EXEC);
                 newResults.add(aRecord);
             }
 

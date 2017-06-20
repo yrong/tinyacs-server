@@ -25,7 +25,7 @@ public class DialPlanService extends AbstractAcNbiCrudService {
      * Static Errors
      */
     public static final JsonObject CANNOT_DELETE_SYSTEM_DEFAULT = new JsonObject()
-            .putString(AcsConstants.FIELD_NAME_ERROR, "The system-default dial plan cannot be deleted!");
+            .put(AcsConstants.FIELD_NAME_ERROR, "The system-default dial plan cannot be deleted!");
 
     /**
      * Get the name of the service which is to be used to build URL Path Prefix.
@@ -116,8 +116,8 @@ public class DialPlanService extends AbstractAcNbiCrudService {
      */
     @Override
     public boolean bReturnRetrieveResultInChunkMode(AcsNbiRequest nbiRequest) {
-        if (nbiRequest.body.containsField(AcsConstants.FIELD_NAME_ID) ||
-                nbiRequest.body.containsField(AcsConstants.FIELD_NAME_NAME)) {
+        if (nbiRequest.body.containsKey(AcsConstants.FIELD_NAME_ID) ||
+                nbiRequest.body.containsKey(AcsConstants.FIELD_NAME_NAME)) {
             // Return a single record if querying with ID
             return false;
         } else {
@@ -169,7 +169,7 @@ public class DialPlanService extends AbstractAcNbiCrudService {
      */
     @Override
     public List<CrossReferenceCheck> getAllCrossReferenceChecks(String id) {
-        JsonObject matcher = new JsonObject().putString(
+        JsonObject matcher = new JsonObject().put(
                 ServicePlan.FIELD_NAME_VOICE + "." + ServicePlan.FIELD_NAME_DIAL_PLAN,
                 id
         );

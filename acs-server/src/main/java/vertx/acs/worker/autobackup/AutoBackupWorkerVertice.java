@@ -1,5 +1,9 @@
 package vertx.acs.worker.autobackup;
 
+import io.vertx.core.AbstractVerticle;
+import io.vertx.redis.RedisClient;
+import io.vertx.redis.RedisOptions;
+import vertx.VertxConfigProperties;
 import vertx.VertxConstants;
 import vertx.VertxRedisUtils;
 import vertx.model.*;
@@ -7,7 +11,6 @@ import vertx.util.AcsApiUtils;
 import vertx.util.AcsConfigProperties;
 import vertx.util.AcsConstants;
 import vertx.util.AutoBackupUtils;
-import io.vertx.java.redis.RedisClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import io.vertx.core.AsyncResult;
@@ -15,7 +18,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.platform.Verticle;
 
 /**
  * Project:  cwmp
@@ -24,7 +26,7 @@ import io.vertx.platform.Verticle;
  *
  * @author: ronyang
  */
-public class AutoBackupWorkerVertice extends Verticle{
+public class AutoBackupWorkerVertice extends AbstractVerticle{
     private Logger log = LoggerFactory.getLogger(this.getClass());
 
     // Async Redis Client Instance
@@ -40,7 +42,8 @@ public class AutoBackupWorkerVertice extends Verticle{
         /**
          * Initialize Redis Client
          */
-        redisClient = new RedisClient(vertx.eventBus(), VertxConstants.VERTX_ADDRESS_REDIS);
+        RedisOptions options = new RedisOptions().setHost(VertxConfigProperties.redisHost).setPort(VertxConfigProperties.redisPort);
+        redisClient = RedisClient.create(vertx,options);
 
         /**
          * Start a 10-second timer to read the auto-backup task queue (in Redis)
@@ -88,7 +91,7 @@ public class AutoBackupWorkerVertice extends Verticle{
             }
 
             for (int i = 0; i < allTasks.size(); i ++) {
-                final String rawString = allTasks.get(i);
+                final String rawString = allTasks.getString(i);
                 /**
                  * Try to delete this task from the queue
                  */
@@ -131,10 +134,10 @@ public class AutoBackupWorkerVertice extends Verticle{
 
         // Build a device-op API request
         JsonObject requestBody = new JsonObject()
-                .putObject(CpeDeviceOp.FIELD_NAME_CPE_DB_OBJECT, cpe)
-                .putString(CpeDeviceOp.FIELD_NAME_OPERATION, CpeDeviceOpTypeEnum.Upload.name())
-                .putString(CpeDeviceOp.FIELD_NAME_FILE_TYPE, AcsFileType.ConfigFile.tr069DownloadFileTypeString)
-                .putObject(CpeDeviceOp.FIELD_NAME_FILE_STRUCT, AcsFile.buildAutoBackupFileRecordWithUploadURL(cpeKey));
+                .put(CpeDeviceOp.FIELD_NAME_CPE_DB_OBJECT, cpe)
+                .put(CpeDeviceOp.FIELD_NAME_OPERATION, CpeDeviceOpTypeEnum.Upload.name())
+                .put(CpeDeviceOp.FIELD_NAME_FILE_TYPE, AcsFileType.ConfigFile.tr069DownloadFileTypeString)
+                .put(CpeDeviceOp.FIELD_NAME_FILE_STRUCT, AcsFile.buildAutoBackupFileRecordWithUploadURL(cpeKey));
 
         /**
          * Send the device-op request

@@ -1,5 +1,6 @@
 package vertx.acs.worker.workflow;
 
+import io.vertx.ext.mongo.MongoClient;
 import vertx.VertxException;
 import vertx.VertxJsonUtils;
 import vertx.VertxMongoUtils;
@@ -54,7 +55,7 @@ public class WorkflowCpeTracker {
      * Internal Failure JSON Object
      */
     public static final JsonObject INTERNAL_FAILURE =
-            new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR, "Internal Failure");
+            new JsonObject().put(AcsConstants.FIELD_NAME_ERROR, "Internal Failure");
     public static final String EXPECTATION_FAILED =
             "The value(s) read from target device are different from the expected value(s)!";
     /**
@@ -85,6 +86,8 @@ public class WorkflowCpeTracker {
 
     public boolean inProgress = false;
 
+    public MongoClient mongoClient;
+
     /**
      * Constructor.
      *
@@ -95,6 +98,7 @@ public class WorkflowCpeTracker {
      */
     public WorkflowCpeTracker(
             Vertx vertx,
+            MongoClient mongoClient,
             final JsonObject cpe,
             final Workflow workflow,
             final Handler<JsonObject> finalHandler) {
@@ -128,7 +132,7 @@ public class WorkflowCpeTracker {
         cpeDbWorkflowExecPrefix = Cpe.DB_FIELD_NAME_WORKFLOW_EXEC + "." + workflow.id + ".";
         try {
             VertxMongoUtils.updateWithMatcher(
-                    vertx.eventBus(),
+                    mongoClient,
                     Cpe.CPE_COLLECTION_NAME,
                     matcher,
                     VertxMongoUtils.getUpdatesObject(
@@ -155,7 +159,7 @@ public class WorkflowCpeTracker {
                             if (result == null) {
                                 log.error("Failed to add workflow log into CPE record for " + cpeId + "!");
                                 finalHandler.handle(
-                                        cpe.putString(AcsConstants.FIELD_NAME_STATUS_CODE,
+                                        cpe.put(AcsConstants.FIELD_NAME_STATUS_CODE,
                                                 HttpResponseStatus.INTERNAL_SERVER_ERROR.toString()
                                         )
                                 );
@@ -163,7 +167,7 @@ public class WorkflowCpeTracker {
                                 // This is probably due to a race condition that the workflow has already been executed
                                 // against this CPE
                                 log.info("Workflow " + workflow.id + " has already been started for CPE " + cpeId);
-                                finalHandler.handle(cpe.putBoolean(FIELD_NAME_RACE_CONDITION, true));
+                                finalHandler.handle(cpe.put(FIELD_NAME_RACE_CONDITION, true));
                             } else {
                                 // Start execution
                                 log.info("Start executing workflow " + workflow.id + " towards CPE " + cpeId);
@@ -199,7 +203,7 @@ public class WorkflowCpeTracker {
                         JsonObject dbSets = null;
                         JsonObject timestamp = null;
                         JsonObject actionResult = new JsonObject()
-                                .putString(WorkflowAction.FIELD_NAME_ACTION_TYPE, firstAction.actionEnum.typeString);
+                                .put(WorkflowAction.FIELD_NAME_ACTION_TYPE, firstAction.actionEnum.typeString);
 
                         if (WorkflowActionEnum.DELAY.equals(firstAction.actionEnum)) {
                             // Delay timer is up
@@ -217,7 +221,7 @@ public class WorkflowCpeTracker {
                                      * Further Check the result if action is "Get Parameter Values"
                                      */
                                     if (firstAction.actionEnum.equals(WorkflowActionEnum.GET_PARAMETER_VALUES)) {
-                                        result.removeField(AcsConstants.FIELD_NAME_STATUS_CODE);
+                                        result.remove(AcsConstants.FIELD_NAME_STATUS_CODE);
                                         if (!VertxJsonUtils.compare(
                                                 result,
                                                 firstAction.expectedParamValues,
@@ -230,20 +234,20 @@ public class WorkflowCpeTracker {
                                             statusCode = HttpResponseStatus.EXPECTATION_FAILED.toString();
                                         }
                                         failureSummary = EXPECTATION_FAILED;
-                                        result.putString(AcsConstants.FIELD_NAME_STATUS_CODE, statusCode);
+                                        result.put(AcsConstants.FIELD_NAME_STATUS_CODE, statusCode);
                                     }
                                 } else {
                                     failureSummary = result.getString(AcsConstants.FIELD_NAME_ERROR);
                                 }
 
-                                actionResult.putObject(AcsConstants.FIELD_NAME_RESULT, result);
+                                actionResult.put(AcsConstants.FIELD_NAME_RESULT, result);
                             } else {
                                 log.info("AsyncResult for CPE " + cpeId + " Action " + firstAction.actionEnum.name()
                                         + ": Action failed due to " + asyncResult.cause() + "!");
 
                                 statusCode = HttpResponseStatus.BAD_GATEWAY.toString();
                                 failureSummary = INTERNAL_FAILURE.getString(AcsConstants.FIELD_NAME_ERROR);
-                                actionResult.putObject(AcsConstants.FIELD_NAME_RESULT, INTERNAL_FAILURE);
+                                actionResult.put(AcsConstants.FIELD_NAME_RESULT, INTERNAL_FAILURE);
                             }
                         }
                         dbSets = VertxMongoUtils.addSet(
@@ -267,7 +271,7 @@ public class WorkflowCpeTracker {
                                         );
                         if (eventType != null) {
                             eventSummary = new JsonObject()
-                                    .putString(
+                                    .put(
                                             "workflow",
                                             workflow.rawJsonObject.getString(AcsConstants.FIELD_NAME_NAME)
                                     );
@@ -276,14 +280,14 @@ public class WorkflowCpeTracker {
                                 case DOWNLOAD_CONFIG_FILE:
                                 case DOWNLOAD_FW_IMAGE:
                                     // Extract/Add file name
-                                    eventSummary.putString(
+                                    eventSummary.put(
                                             fileType.typeString + " name",
                                             firstAction.file.getString(AcsConstants.FIELD_NAME_NAME)
                                     );
 
                                     // Extract/Add Version if any
-                                    if (firstAction.file.containsField(AcsFile.FIELD_NAME_VERSION)) {
-                                        eventSummary.putString(
+                                    if (firstAction.file.containsKey(AcsFile.FIELD_NAME_VERSION)) {
+                                        eventSummary.put(
                                                 AcsFile.FIELD_NAME_VERSION,
                                                 firstAction.file.getString(AcsFile.FIELD_NAME_VERSION)
                                         );
@@ -296,7 +300,7 @@ public class WorkflowCpeTracker {
 
                                 case APPLY_CONFIG_PROFILE:
                                     // Add profile name
-                                    eventSummary.putString("profile name", firstAction.profileName);
+                                    eventSummary.put("profile name", firstAction.profileName);
                                     break;
                             }
                         }
@@ -316,7 +320,7 @@ public class WorkflowCpeTracker {
 
                             if (failureSummary != null) {
                                 if (eventSummary != null) {
-                                    eventSummary.putString("failure", failureSummary);
+                                    eventSummary.put("failure", failureSummary);
                                 }
                                 dbSets = VertxMongoUtils.addSet(
                                         dbSets,
@@ -339,7 +343,7 @@ public class WorkflowCpeTracker {
                         // Save Event
                         if (eventType != null) {
                             Event.saveEvent(
-                                    vertx.eventBus(),
+                                    mongoClient,
                                     workflow.orgId,
                                     cpe.getString(Cpe.DB_FIELD_NAME_SN),
                                     eventType,
@@ -357,7 +361,7 @@ public class WorkflowCpeTracker {
                         try {
                             final String finalStatusCode = statusCode;
                             VertxMongoUtils.update(
-                                    vertx.eventBus(),
+                                    mongoClient,
                                     Cpe.CPE_COLLECTION_NAME,
                                     cpeId,
                                     VertxMongoUtils.getUpdatesObject(
@@ -377,11 +381,11 @@ public class WorkflowCpeTracker {
                                         public void handle(Long event) {
                                             if (!HttpResponseStatus.OK.toString().equals(finalStatusCode)) {
                                                 // Failed, call the final handler with error status code
-                                                finalHandler.handle(cpe.putString(AcsConstants.FIELD_NAME_STATUS_CODE, finalStatusCode));
+                                                finalHandler.handle(cpe.put(AcsConstants.FIELD_NAME_STATUS_CODE, finalStatusCode));
                                             } else {
                                                 if (actionChain.size() ==0) {
                                                     // We are done
-                                                    finalHandler.handle(cpe.putString(AcsConstants.FIELD_NAME_STATUS_CODE, finalStatusCode));
+                                                    finalHandler.handle(cpe.put(AcsConstants.FIELD_NAME_STATUS_CODE, finalStatusCode));
                                                 } else {
                                                     // kick off the next action if any
                                                     doFirstAction();

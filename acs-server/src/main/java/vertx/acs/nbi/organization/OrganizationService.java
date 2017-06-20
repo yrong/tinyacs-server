@@ -34,7 +34,7 @@ public class OrganizationService extends AbstractAcNbiCrudService {
     public static final VertxException INVALID_EXT_IMAGE_SERVER_URL =
             new VertxException("Invalid External Image File Server URL!");
     public static final JsonObject DELETE_EXISTING_IMAGES_FIRST = new JsonObject()
-            .putString(
+            .put(
                     AcsConstants.FIELD_NAME_ERROR,
                     "Prior to adding/changing External Image Server, all existing images must be deleted first!"
             );
@@ -127,7 +127,7 @@ public class OrganizationService extends AbstractAcNbiCrudService {
                         newUrlString += url.getPath();
                     }
                     log.info("Converted URL string to " + newUrlString + " (from " + urlString + ")");
-                    nbiRequest.body.putString(Organization.FIELD_NAME_URL, newUrlString);
+                    nbiRequest.body.put(Organization.FIELD_NAME_URL, newUrlString);
                 } catch (MalformedURLException e) {
                     if (urlString.startsWith("/")) {
                         // This is the URL suffix
@@ -143,10 +143,10 @@ public class OrganizationService extends AbstractAcNbiCrudService {
          * Validate External Image Server if any
          */
         Organization.ExternalFileServer newExtImageServer = null;
-        if (nbiRequest.body.containsField(Organization.FIELD_NAME_EXTERNAL_IMAGE_SERVER)) {
+        if (nbiRequest.body.containsKey(Organization.FIELD_NAME_EXTERNAL_IMAGE_SERVER)) {
             try {
                 newExtImageServer = new Organization.ExternalFileServer(
-                        nbiRequest.body.getObject(Organization.FIELD_NAME_EXTERNAL_IMAGE_SERVER)
+                        nbiRequest.body.getJsonObject(Organization.FIELD_NAME_EXTERNAL_IMAGE_SERVER)
                 );
             } catch (MalformedURLException e) {
                 throw INVALID_EXT_IMAGE_SERVER_URL;
@@ -178,11 +178,11 @@ public class OrganizationService extends AbstractAcNbiCrudService {
                             null : existingOrg.extImageServer.baseUrl;
                     if (newImageServerUrl != null && !newImageServerUrl.equals(oldImageServerUrl)) {
                         VertxMongoUtils.count(
-                                vertx.eventBus(),
+                                mongoClient,
                                 AcsFile.DB_COLLECTION_NAME,
                                 new JsonObject()
-                                    .putString(AcsConstants.FIELD_NAME_ORG_ID, orgId)
-                                    .putString(AcsFile.FIELD_NAME_TYPE, AcsFileType.Image.typeString),
+                                    .put(AcsConstants.FIELD_NAME_ORG_ID, orgId)
+                                    .put(AcsFile.FIELD_NAME_TYPE, AcsFileType.Image.typeString),
                                 new Handler<Long>() {
                                     @Override
                                     public void handle(Long count) {
@@ -232,12 +232,12 @@ public class OrganizationService extends AbstractAcNbiCrudService {
 
         // Name/URL/API-Client-Username must be unique
         JsonArray or = new JsonArray();
-        or.add(new JsonObject().putString(AcsConstants.FIELD_NAME_NAME, org.getString(AcsConstants.FIELD_NAME_NAME)));
-        or.add(new JsonObject().putString(Organization.FIELD_NAME_URL, org.getString(Organization.FIELD_NAME_URL)));
-        or.add(new JsonObject().putString(Organization.FIELD_NAME_API_CLIENT_USERNAME,
+        or.add(new JsonObject().put(AcsConstants.FIELD_NAME_NAME, org.getString(AcsConstants.FIELD_NAME_NAME)));
+        or.add(new JsonObject().put(Organization.FIELD_NAME_URL, org.getString(Organization.FIELD_NAME_URL)));
+        or.add(new JsonObject().put(Organization.FIELD_NAME_API_CLIENT_USERNAME,
                 org.getString(Organization.FIELD_NAME_API_CLIENT_USERNAME)));
 
-        JsonObject indexMatcher = new JsonObject().putArray(VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_OR, or);
+        JsonObject indexMatcher = new JsonObject().put(VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_OR, or);
 
         return indexMatcher;
     }
@@ -307,7 +307,7 @@ public class OrganizationService extends AbstractAcNbiCrudService {
         // Clean up
         if (bSucceeded == true) {
             final String orgId = nbiRequest.body.getString(AcsConstants.FIELD_NAME_ID);
-            JsonObject matcher = new JsonObject().putString(AcsConstants.FIELD_NAME_ORG_ID, orgId);
+            JsonObject matcher = new JsonObject().put(AcsConstants.FIELD_NAME_ORG_ID, orgId);
 
             /**
              * Clean up other related DB collections
@@ -315,7 +315,7 @@ public class OrganizationService extends AbstractAcNbiCrudService {
             for (String collectionName : COLLECTIONS_TO_BE_CLEANED_UP) {
                 try {
                     VertxMongoUtils.deleteWithMatcher(
-                            vertx.eventBus(),
+                            mongoClient,
                             collectionName,
                             matcher,
                             null
@@ -329,7 +329,7 @@ public class OrganizationService extends AbstractAcNbiCrudService {
              * Delete all files from local file system
              */
             final String fileRoot = AcsFile.getOrgFileRoot(orgId);
-            vertx.fileSystem().delete(fileRoot, true,  new Handler<AsyncResult<Void>>(){
+            vertx.fileSystem().delete(fileRoot,  new Handler<AsyncResult<Void>>(){
                 @Override
                 public void handle(AsyncResult<Void> event) {
                     if (event.succeeded()) {
@@ -347,25 +347,25 @@ public class OrganizationService extends AbstractAcNbiCrudService {
             /**
              * Delete all files from GridFS
              */
-            VertxMongoGridFsFile.deleteFilesWithMetadata(
-                    vertx.eventBus(),
-                    new JsonObject().putString(
-                            VertxMongoGridFsVertice.FIELD_NAME_METADATA + "." + AcsConstants.FIELD_NAME_ORG_ID,
-                            orgId
-                    ),
-                    new Handler<AsyncResult<Message<JsonObject>>>() {
-                        @Override
-                        public void handle(AsyncResult<Message<JsonObject>> result) {
-                            if (result.failed()) {
-                                log.error(orgId + ": Failed to delete all files from GridFS! Cause: " + result.cause());
-                            } else {
-                                log.info(orgId + ": Deleted "
-                                        + result.result().body().getNumber(VertxMongoUtils.MOD_MONGO_FIELD_NAME_NUMBER, 0)
-                                        + " file(s) from GridFS.");
-                            }
-                        }
-                    }
-            );
+//            VertxMongoGridFsFile.deleteFilesWithMetadata(
+//                    vertx.eventBus(),
+//                    new JsonObject().putString(
+//                            VertxMongoGridFsVertice.FIELD_NAME_METADATA + "." + AcsConstants.FIELD_NAME_ORG_ID,
+//                            orgId
+//                    ),
+//                    new Handler<AsyncResult<Message<JsonObject>>>() {
+//                        @Override
+//                        public void handle(AsyncResult<Message<JsonObject>> result) {
+//                            if (result.failed()) {
+//                                log.error(orgId + ": Failed to delete all files from GridFS! Cause: " + result.cause());
+//                            } else {
+//                                log.info(orgId + ": Deleted "
+//                                        + result.result().body().getNumber(VertxMongoUtils.MOD_MONGO_FIELD_NAME_NUMBER, 0)
+//                                        + " file(s) from GridFS.");
+//                            }
+//                        }
+//                    }
+//            );
         }
 
         return super.postDelete(nbiRequest, bSucceeded);

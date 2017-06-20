@@ -1,5 +1,9 @@
 package vertx.acs.nbi.workflow;
 
+import io.vertx.core.eventbus.DeliveryOptions;
+import io.vertx.redis.RedisClient;
+import io.vertx.redis.RedisOptions;
+import vertx.VertxConfigProperties;
 import vertx.VertxException;
 import vertx.VertxConstants;
 import vertx.VertxMongoUtils;
@@ -12,7 +16,6 @@ import vertx.cache.GroupCache;
 import vertx.model.*;
 import vertx.util.AcsConstants;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.java.redis.RedisClient;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -43,27 +46,27 @@ public class WorkflowService extends AbstractAcNbiCrudService {
      * Static Error Object Constants
      */
     public static final JsonObject MISSING_ID_ON_DELETE = new JsonObject()
-            .putString(AcsConstants.FIELD_NAME_ERROR, "Workflow ID String is required on deletions!");
+            .put(AcsConstants.FIELD_NAME_ERROR, "Workflow ID String is required on deletions!");
     public static final JsonObject CANNOT_UPDATE_COMPLETED =
-            new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR,
+            new JsonObject().put(AcsConstants.FIELD_NAME_ERROR,
                     "Workflow has already completed thus cannot be modified/edited!");
     public static final JsonObject CANNOT_UPDATE_IN_PROGRESS =
-            new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR,
+            new JsonObject().put(AcsConstants.FIELD_NAME_ERROR,
                     "Workflow is in-progress thus cannot be modified/edited! (must suspend first)");
     public static final JsonObject CANNOT_RESUME_IN_PROGRESS =
-            new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR,
+            new JsonObject().put(AcsConstants.FIELD_NAME_ERROR,
                     "Workflow is in-progress thus cannot be resumed right now!");
     public static final JsonObject CANNOT_RESUME_SCHEDULED =
-            new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR,
+            new JsonObject().put(AcsConstants.FIELD_NAME_ERROR,
                     "Workflow is scheduled for the next maintenance window thus cannot be resumed right now!");
     public static final JsonObject ALREADY_SUSPENDED =
-            new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR,
+            new JsonObject().put(AcsConstants.FIELD_NAME_ERROR,
                     "Workflow has already been suspended!");
     public static final JsonObject CANNOT_SUSPEND_COMPLETED =
-            new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR,
+            new JsonObject().put(AcsConstants.FIELD_NAME_ERROR,
                     "Workflow has already completed thus cannot be suspended!");
     public static final JsonObject CANNOT_RESUME_COMPLETED =
-            new JsonObject().putString(AcsConstants.FIELD_NAME_ERROR,
+            new JsonObject().put(AcsConstants.FIELD_NAME_ERROR,
                     "Workflow has already completed thus cannot be resumed!");
 
     // Async Redis Client Instance
@@ -79,7 +82,8 @@ public class WorkflowService extends AbstractAcNbiCrudService {
         /**
          * Initialize Redis Client
          */
-        redisClient = new RedisClient(vertx.eventBus(), VertxConstants.VERTX_ADDRESS_REDIS);
+        RedisOptions options = new RedisOptions().setHost(VertxConfigProperties.redisHost).setPort(VertxConfigProperties.redisPort);
+        redisClient = RedisClient.create(vertx,options);
 
         /**
          * Initialize Configuration Profile Cache
@@ -151,7 +155,7 @@ public class WorkflowService extends AbstractAcNbiCrudService {
      */
     public static final VertxException INVALID_SUSPEND_RESUME_SUSPEND_REQUEST =
             new VertxException("Invalid Suspend/Resume/Suspend Request!");
-    public static final JsonObject INVALID_CPE_ID = new JsonObject().putString(
+    public static final JsonObject INVALID_CPE_ID = new JsonObject().put(
             AcsConstants.FIELD_NAME_ERROR, "Invalid Device ID(s)!"
     );
     public static final VertxException INVALID_GROUP_ID = new VertxException("Invalid Device Group ID(s)!");
@@ -175,13 +179,13 @@ public class WorkflowService extends AbstractAcNbiCrudService {
             "When downloading SW/FW Images via Workflows, the device group must explicitly match on one or more 844E Models!"
     );
 
-    public static final JsonObject NO_MATCHING_CPE_FOUND = new JsonObject().putString(
+    public static final JsonObject NO_MATCHING_CPE_FOUND = new JsonObject().put(
             AcsConstants.FIELD_NAME_ERROR, "No Matching Device found for the given device group(s)!"
     );
-    public static final JsonObject INVALID_IMAGE_ID = new JsonObject().putString(
+    public static final JsonObject INVALID_IMAGE_ID = new JsonObject().put(
             AcsConstants.FIELD_NAME_ERROR, "Invalid Image ID!"
     );
-    public static final JsonObject INVALID_PROFILE_ID = new JsonObject().putString(
+    public static final JsonObject INVALID_PROFILE_ID = new JsonObject().put(
             AcsConstants.FIELD_NAME_ERROR, "Invalid Profile ID!"
     );
 
@@ -204,7 +208,7 @@ public class WorkflowService extends AbstractAcNbiCrudService {
     /**
      * Mod Mongo Query Keys that asks for id only
      */
-    public static final JsonObject FIND_KEY_ID_ONLY = new JsonObject().putNumber(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID, 1);
+    public static final JsonObject FIND_KEY_ID_ONLY = new JsonObject().put(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID, 1);
 
     /**
      * Validate an NBI Request.
@@ -272,7 +276,7 @@ public class WorkflowService extends AbstractAcNbiCrudService {
                     // Check for service profile and SW Image Download which require 844E model
                     if (action.services != null && action.services.size() > 0) {
                         for (int i = 0; i < action.services.size(); i ++) {
-                            JsonObject aService = action.services.get(i);
+                            JsonObject aService = action.services.getJsonObject(i);
                             String serviceName = aService.getString(ConfigurationCategory.PARAM_NAME_SERVICE_NAME);
                             if (ConfigurationCategory.VIDEO_SERVICE.equals(serviceName)) {
                                 if (bHasVideoService) {
@@ -307,7 +311,7 @@ public class WorkflowService extends AbstractAcNbiCrudService {
                 // Validate Group ID(s) if any
                 if (workflow.groupIdStrings != null) {
                     for (int i = 0; i < workflow.groupIdStrings.size(); i ++) {
-                        String groupId = workflow.groupIdStrings.get(i);
+                        String groupId = workflow.groupIdStrings.getString(i);
                         CpeGroup group = groupCache.getGroupById(groupId);
                         if (group == null) {
                             log.error("Invalid Group Id " + groupId + "!");
@@ -344,14 +348,14 @@ public class WorkflowService extends AbstractAcNbiCrudService {
 
                 // Build CPE Matcher
                 JsonObject matcher = workflow.getMatcher(groupCache, false);
-                nbiRequest.body.putString(Workflow.FIELD_NAME_CPE_MATCHER, matcher.encode());
+                nbiRequest.body.put(Workflow.FIELD_NAME_CPE_MATCHER, matcher.encode());
 
                 // Create Time
                 JsonObject currDateTime = VertxMongoUtils.getDateObject();
-                nbiRequest.body.putObject(AcsConstants.FIELD_NAME_CREATE_TIME, currDateTime);
+                nbiRequest.body.put(AcsConstants.FIELD_NAME_CREATE_TIME, currDateTime);
                 if (!workflow.isActive()) {
                     // Passive workflows start right away
-                    nbiRequest.body.putObject(Workflow.FIELD_NAME_START, currDateTime);
+                    nbiRequest.body.put(Workflow.FIELD_NAME_START, currDateTime);
                 }
 
                 if (workflow.validationPendingCount == 0) {
@@ -420,13 +424,13 @@ public class WorkflowService extends AbstractAcNbiCrudService {
         // Build matcher
         JsonObject matcher = new JsonObject();
         if (idArray != null) {
-            matcher.putObject(
+            matcher.put(
                     VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID,
-                    new JsonObject().putArray(VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_IN, idArray)
+                    new JsonObject().put(VertxMongoUtils.MOD_MONGO_QUERY_OPERATOR_IN, idArray)
             );
             batchSize = idArray.size();
         } else {
-            matcher.putString(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID, singleId);
+            matcher.put(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID, singleId);
             batchSize = 1;
         }
 
@@ -438,10 +442,10 @@ public class WorkflowService extends AbstractAcNbiCrudService {
 
         // mongo example: db.inventory.find( { qty: { $in: [ 5, 15 ] } } )
         VertxMongoUtils.find(
-                vertx.eventBus(),
+                mongoClient,
                 dbCollectionName,
                 matcher,
-                new VertxMongoUtils.FindHandler(
+
                         new Handler<JsonArray>() {
                             @Override
                             public void handle(JsonArray queryResult) {
@@ -454,23 +458,23 @@ public class WorkflowService extends AbstractAcNbiCrudService {
 
                                     if (dbCollectionName.equals(AcsFile.DB_COLLECTION_NAME)) {
                                         // Save the AcsFile struct into workflow
-                                        JsonArray actions = nbiRequest.body.getArray(Workflow.FIELD_NAME_ACTIONS);
+                                        JsonArray actions = nbiRequest.body.getJsonArray(Workflow.FIELD_NAME_ACTIONS);
                                         for (int i = 0; i < actions.size(); i ++) {
-                                            JsonObject anAction = actions.get(i);
+                                            JsonObject anAction = actions.getJsonObject(i);
                                             if (singleId.equals(anAction.getString(WorkflowAction.FIELD_NAME_FILE_ID))){
-                                                JsonObject fileStruct = queryResult.get(0);
+                                                JsonObject fileStruct = queryResult.getJsonObject(0);
                                                 // Save the actual file struct (except the file content if any) in cache
-                                                fileStruct.removeField(AcsFile.FIELD_NAME_TEXT_CONTENT);
-                                                fileStruct.removeField(AcsFile.FIELD_NAME_BINARY_CONTENT);
-                                                anAction.putObject(WorkflowAction.FIELD_NAME_FILE_STRUCT, fileStruct);
+                                                fileStruct.remove(AcsFile.FIELD_NAME_TEXT_CONTENT);
+                                                fileStruct.remove(AcsFile.FIELD_NAME_BINARY_CONTENT);
+                                                anAction.put(WorkflowAction.FIELD_NAME_FILE_STRUCT, fileStruct);
                                             }
                                         }
                                     }
                                 }
                                 completeSubValidation(nbiRequest, crudType, workflow, bSucceeded, error);
                             }
-                        }
-                ),
+                        },
+
                 keys,
                 batchSize
         );
@@ -504,7 +508,7 @@ public class WorkflowService extends AbstractAcNbiCrudService {
                 // No more pending sub validation
                 if (!workflow.isActive()) {
                     // Passive workflows cannot have a fixed total count up front
-                    nbiRequest.body.putString(Workflow.FIELD_NAME_STATE, Workflow.STATE_IN_PROGRESS);
+                    nbiRequest.body.put(Workflow.FIELD_NAME_STATE, Workflow.STATE_IN_PROGRESS);
                     // Resume the CRUD Operation
                     postValidation(nbiRequest, crudType);
                 } else {
@@ -535,8 +539,8 @@ public class WorkflowService extends AbstractAcNbiCrudService {
 
         // For create, initialize "state" to "pending"
         if (crudType.equals(AcsApiCrudTypeEnum.Create)) {
-            nbiRequest.body.putString(Workflow.FIELD_NAME_STATE, Workflow.STATE_SCHEDULED);
-            nbiRequest.body.putString(AcsConstants.FIELD_NAME_ID, workflow.id);
+            nbiRequest.body.put(Workflow.FIELD_NAME_STATE, Workflow.STATE_SCHEDULED);
+            nbiRequest.body.put(AcsConstants.FIELD_NAME_ID, workflow.id);
         }
 
         int totalCount = 0;
@@ -544,7 +548,7 @@ public class WorkflowService extends AbstractAcNbiCrudService {
         // Query all matching CPEs
         try {
             VertxMongoUtils.count(
-                    vertx.eventBus(),
+                    mongoClient,
                     Cpe.CPE_COLLECTION_NAME,
                     workflow.getMatcher(groupCache, false),
                     new Handler<Long>() {
@@ -558,7 +562,7 @@ public class WorkflowService extends AbstractAcNbiCrudService {
                                     nbiRequest.sendResponse(HttpResponseStatus.BAD_REQUEST, NO_MATCHING_CPE_FOUND);
                                 } else {
                                     // Add total count
-                                    nbiRequest.body.putNumber(Workflow.FIELD_NAME_TOTAL_COUNT, count);
+                                    nbiRequest.body.put(Workflow.FIELD_NAME_TOTAL_COUNT, count);
 
                                     // Resume the CRUD Operation
                                     postValidation(nbiRequest, crudType);
@@ -754,7 +758,7 @@ public class WorkflowService extends AbstractAcNbiCrudService {
             );
         } else {
             // Passive workflow. Just change the state and publish the Update event
-            nbiRequest.body = workflow.rawJsonObject.putString(Workflow.FIELD_NAME_STATE, Workflow.STATE_IN_PROGRESS);
+            nbiRequest.body = workflow.rawJsonObject.put(Workflow.FIELD_NAME_STATE, Workflow.STATE_IN_PROGRESS);
         }
     }
 
@@ -778,7 +782,7 @@ public class WorkflowService extends AbstractAcNbiCrudService {
 
         if (!workflow.isActive()) {
             // For Passive workflows, simply publish the update and worker will get it
-            nbiRequest.body = workflow.rawJsonObject.putString(Workflow.FIELD_NAME_STATE, Workflow.STATE_SUSPENDED);
+            nbiRequest.body = workflow.rawJsonObject.put(Workflow.FIELD_NAME_STATE, Workflow.STATE_SUSPENDED);
             return;
         }
 
@@ -787,10 +791,12 @@ public class WorkflowService extends AbstractAcNbiCrudService {
         if (currentState.equals(Workflow.STATE_IN_PROGRESS)) {
             timeout = 30000;
         }
-        vertx.eventBus().sendWithTimeout(
+        DeliveryOptions options = new DeliveryOptions();
+        options.setSendTimeout(timeout);
+        vertx.eventBus().send(
                 AcsConstants.VERTX_ADDRESS_WORKFLOW_SUSPEND + "." + workflow.id,
                 ActiveWorkflowTaskWorker.REMOTE_REQUEST_SUSPEND,
-                timeout,
+                options,
                 new Handler<AsyncResult<Message<JsonObject>>>() {
                     @Override
                     public void handle(AsyncResult<Message<JsonObject>> asyncResult) {
@@ -828,7 +834,7 @@ public class WorkflowService extends AbstractAcNbiCrudService {
                                             } else {
                                                 // Update task state
                                                 Workflow.changeState(
-                                                        vertx,
+                                                        mongoClient,
                                                         workflow.id,
                                                         Workflow.STATE_SUSPENDED,
                                                         new ChangeStateHandler(nbiRequest, workflow.id)
@@ -846,7 +852,7 @@ public class WorkflowService extends AbstractAcNbiCrudService {
                             } else {
                                 // Update task state
                                 Workflow.changeState(
-                                        vertx,
+                                        mongoClient,
                                         workflow.id,
                                         Workflow.STATE_SUSPENDED,
                                         new ChangeStateHandler(nbiRequest, workflow.id)
@@ -956,20 +962,10 @@ public class WorkflowService extends AbstractAcNbiCrudService {
                     1,
                     workflow.getInitialDelay(),
                     redisClient,
-                    new Handler<Message<JsonObject>>() {
+                    new Handler<Long>() {
                         @Override
-                        public void handle(Message<JsonObject> enqueueResult) {
-                            JsonObject result = enqueueResult.body();
-                            if (result == null ||
-                                    !("ok".equals(result.getString("status")))
-                                    ) {
-                                log.error("Received unexpected result when en-queuing a new workflow task!\n"
-                                        + "Workflow:\n" + workflow.rawJsonObject.encodePrettily()
-                                        + "\nEnqueue Result:\n"
-                                        + (result == null ? "(null)" : result.encodePrettily()));
-                                nbiRequest.sendResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR,
-                                        getServerInternalErrorWithDetails());
-                            } else {
+                        public void handle(Long enqueueResult) {
+                            {
                                 log.info("Successfully en-queued a new workflow task to redis.");
 
                                 if (crudType.equals(AcsApiCrudTypeEnum.Update)) {
@@ -977,7 +973,7 @@ public class WorkflowService extends AbstractAcNbiCrudService {
                                      * Change workflow state due to resume action
                                      */
                                     Workflow.changeState(
-                                            vertx,
+                                            mongoClient,
                                             workflow.id,
                                             workflow.state,
                                             new Handler<Long>() {
@@ -1012,7 +1008,7 @@ public class WorkflowService extends AbstractAcNbiCrudService {
     /**
      * Find Result Handler (used by delete)
      */
-    public class FindBeforeDeleteResultHandler extends VertxMongoUtils.FindOneHandler{
+    public class FindBeforeDeleteResultHandler implements Handler<JsonObject>{
         AcsNbiRequest nbiRequest;
 
         /**
@@ -1024,15 +1020,14 @@ public class WorkflowService extends AbstractAcNbiCrudService {
 
         /**
          * The handler method body.
-         * @param jsonObjectMessage
+         * @param queryResult
          */
         @Override
-        public void handle(Message<JsonObject> jsonObjectMessage) {
+        public void handle(JsonObject queryResult) {
             // Call super
-            super.handle(jsonObjectMessage);
 
             // Any match found?
-            if (queryResult != null && queryResult.containsField(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID)) {
+            if (queryResult != null && queryResult.containsKey(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID)) {
                 // Found existing document
                 // Extract the id
                 String workflowId = queryResult.getString(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID);
@@ -1043,7 +1038,7 @@ public class WorkflowService extends AbstractAcNbiCrudService {
                     nbiRequest.sendResponse(HttpResponseStatus.BAD_REQUEST, MISSING_ID_ON_DELETE);
                     return;
                 }
-                nbiRequest.body.putString(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID, workflowId);
+                nbiRequest.body.put(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID, workflowId);
 
                 Workflow workflow;
                 try {
@@ -1077,7 +1072,7 @@ public class WorkflowService extends AbstractAcNbiCrudService {
                     );
                 }
             } else {
-                log.error("No match found for delete with matcher " + jsonObjectMessage.body().encode());
+                log.error("No match found for delete with matcher ");
                 nbiRequest.sendResponse(HttpResponseStatus.NOT_FOUND, NO_MATCH_FOUND);
             }
         }
@@ -1102,14 +1097,14 @@ public class WorkflowService extends AbstractAcNbiCrudService {
             nbiRequest.sendResponse(HttpResponseStatus.BAD_REQUEST, MISSING_ID_OR_FILTER);
             return;
         }
-        JsonObject matcher = new JsonObject().putString(AcsConstants.FIELD_NAME_ID, id);
+        JsonObject matcher = new JsonObject().put(AcsConstants.FIELD_NAME_ID, id);
 
         /**
          * First Query with the index field, so we only overwrite existing document
          */
         try {
             VertxMongoUtils.findOne(
-                    vertx.eventBus(),
+                    mongoClient,
                     getDbCollectionName(),
                     matcher,
                     new FindBeforeDeleteResultHandler(nbiRequest),
@@ -1133,7 +1128,7 @@ public class WorkflowService extends AbstractAcNbiCrudService {
         log.info("Deleting workflow " + workflowId + " from DB...");
         try {
             VertxMongoUtils.delete(
-                    vertx.eventBus(),
+                    mongoClient,
                     getDbCollectionName(),
                     workflowId,
                     getMongoDeleteHandler(nbiRequest)
@@ -1166,10 +1161,10 @@ public class WorkflowService extends AbstractAcNbiCrudService {
              */
             try {
                 VertxMongoUtils.updateWithMatcher(
-                        vertx.eventBus(),
+                        mongoClient,
                         Cpe.CPE_COLLECTION_NAME,
                         // Matcher
-                        new JsonObject().putObject(unset, VertxMongoUtils.EXISTS),
+                        new JsonObject().put(unset, VertxMongoUtils.EXISTS),
                         // Updates
                         VertxMongoUtils.getUpdatesObject(
                                 // sets
@@ -1200,13 +1195,13 @@ public class WorkflowService extends AbstractAcNbiCrudService {
      * Default to null (return everything)
      */
     private static final JsonObject QUERY_KEY_BRIEF = new JsonObject()
-            .putNumber(Workflow.FIELD_NAME_ACTIONS + "." + WorkflowAction.FIELD_NAME_PARAMETER_VALUES, 0)
-            .putNumber(Workflow.FIELD_NAME_GROUPS, 0)
-            .putNumber(Workflow.FIELD_NAME_CPES, 0)
-            .putNumber(Workflow.FIELD_NAME_EXEC_POLICY, 0)
-            .putNumber(AcsConstants.FIELD_NAME_ORG_ID, 0);
+            .put(Workflow.FIELD_NAME_ACTIONS + "." + WorkflowAction.FIELD_NAME_PARAMETER_VALUES, 0)
+            .put(Workflow.FIELD_NAME_GROUPS, 0)
+            .put(Workflow.FIELD_NAME_CPES, 0)
+            .put(Workflow.FIELD_NAME_EXEC_POLICY, 0)
+            .put(AcsConstants.FIELD_NAME_ORG_ID, 0);
     private static final JsonObject QUERY_KEY_DEFAULT = new JsonObject()
-            .putNumber(Workflow.FIELD_NAME_CPE_MATCHER, 0);
+            .put(Workflow.FIELD_NAME_CPE_MATCHER, 0);
     public JsonObject buildRetrieveQueryKeys(AcsNbiRequest nbiRequest) {
         if (nbiRequest.getQueryBrief()) {
             return QUERY_KEY_BRIEF;
@@ -1228,9 +1223,9 @@ public class WorkflowService extends AbstractAcNbiCrudService {
      */
     @Override
     public JsonArray postRetrieve(final AcsNbiRequest nbiRequest, JsonArray queryResults, boolean moreExists) {
-        if (nbiRequest.body.containsField(AcsConstants.FIELD_NAME_ID) &&
+        if (nbiRequest.body.containsKey(AcsConstants.FIELD_NAME_ID) &&
                 queryResults != null && queryResults.size() == 1) {
-            final JsonObject response = (JsonObject)queryResults.get(0);
+            final JsonObject response = (JsonObject)queryResults.getValue(0);
 
             // Convert to Workflow POJO and get matcher
             final Workflow workflow;
@@ -1247,17 +1242,17 @@ public class WorkflowService extends AbstractAcNbiCrudService {
             /**
              * Remove fields that are not applicable
              */
-            response.removeField(Workflow.FIELD_NAME_TOTAL_COUNT);
-            response.removeField(Workflow.FIELD_NAME_SUCCESS_COUNT);
-            response.removeField(Workflow.FIELD_NAME_FAILURE_COUNT);
-            response.removeField(Workflow.FIELD_NAME_IN_PROGRESS_COUNT);
-            JsonArray actions = response.getArray(Workflow.FIELD_NAME_ACTIONS);
+            response.remove(Workflow.FIELD_NAME_TOTAL_COUNT);
+            response.remove(Workflow.FIELD_NAME_SUCCESS_COUNT);
+            response.remove(Workflow.FIELD_NAME_FAILURE_COUNT);
+            response.remove(Workflow.FIELD_NAME_IN_PROGRESS_COUNT);
+            JsonArray actions = response.getJsonArray(Workflow.FIELD_NAME_ACTIONS);
             if (actions != null) {
                 for (int i = 0; i < actions.size(); i ++) {
-                    JsonObject anAction = actions.get(i);
-                    anAction.removeField(WorkflowAction.FIELD_NAME_FILE_STRUCT);
-                    if (anAction.containsField(WorkflowAction.FIELD_NAME_PROFILE_ID)) {
-                        anAction.removeField(WorkflowAction.FIELD_NAME_PARAMETER_VALUES);
+                    JsonObject anAction = actions.getJsonObject(i);
+                    anAction.remove(WorkflowAction.FIELD_NAME_FILE_STRUCT);
+                    if (anAction.containsKey(WorkflowAction.FIELD_NAME_PROFILE_ID)) {
+                        anAction.remove(WorkflowAction.FIELD_NAME_PARAMETER_VALUES);
                     }
                 }
             }
@@ -1271,40 +1266,40 @@ public class WorkflowService extends AbstractAcNbiCrudService {
                 public void handle(Long count) {
                     JsonObject matcher = null;
                     if (count != null) {
-                        if (!response.containsField(Workflow.FIELD_NAME_SUCCESS_COUNT)) {
+                        if (!response.containsKey(Workflow.FIELD_NAME_SUCCESS_COUNT)) {
                             // Received success count
-                            response.putNumber(Workflow.FIELD_NAME_SUCCESS_COUNT, count);
+                            response.put(Workflow.FIELD_NAME_SUCCESS_COUNT, count);
                             // Query for failure count
                             matcher = workflow.getMatcherByState(WorkflowCpeTracker.STATE_FAILED);
-                        } else if (!response.containsField(Workflow.FIELD_NAME_FAILURE_COUNT)) {
+                        } else if (!response.containsKey(Workflow.FIELD_NAME_FAILURE_COUNT)) {
                             // Received failure count
-                            response.putNumber(Workflow.FIELD_NAME_FAILURE_COUNT, count);
+                            response.put(Workflow.FIELD_NAME_FAILURE_COUNT, count);
                             // Query for in-progress count
                             matcher = workflow.getMatcherByState(WorkflowCpeTracker.STATE_IN_PROGRESS);
-                        } else if (!response.containsField(Workflow.FIELD_NAME_IN_PROGRESS_COUNT)) {
+                        } else if (!response.containsKey(Workflow.FIELD_NAME_IN_PROGRESS_COUNT)) {
                             // Received In-Progress count
-                            response.putNumber(Workflow.FIELD_NAME_IN_PROGRESS_COUNT, count);
+                            response.put(Workflow.FIELD_NAME_IN_PROGRESS_COUNT, count);
 
                             // Try to get pending count if applicable
                             if (workflow.isActive() && workflow.state.equals(Workflow.STATE_COMPLETED)) {
                                 /**
                                  * Pending Count for Completed Active Workflows is 0
                                  */
-                                response.putNumber(Workflow.FIELD_NAME_PENDING_COUNT, 0);
+                                response.put(Workflow.FIELD_NAME_PENDING_COUNT, 0);
                             } else {
                                 // Query for pending count
                                 matcher = workflow.getMatcher(groupCache, true);
                             }
                         } else {
                             // Received pending count
-                            response.putNumber(Workflow.FIELD_NAME_PENDING_COUNT, count);
+                            response.put(Workflow.FIELD_NAME_PENDING_COUNT, count);
                         }
 
                         if (matcher != null) {
                             // Keep querying
                             try {
                                 VertxMongoUtils.count(
-                                        vertx.eventBus(),
+                                        mongoClient,
                                         Cpe.CPE_COLLECTION_NAME,
                                         matcher,
                                         this
@@ -1322,7 +1317,7 @@ public class WorkflowService extends AbstractAcNbiCrudService {
                         } else {
                             // Got all individual counts
                             // Calculate total count
-                            response.putNumber(
+                            response.put(
                                     Workflow.FIELD_NAME_TOTAL_COUNT,
                                     response.getLong(Workflow.FIELD_NAME_SUCCESS_COUNT)
                                             + response.getLong(Workflow.FIELD_NAME_FAILURE_COUNT)
@@ -1338,7 +1333,7 @@ public class WorkflowService extends AbstractAcNbiCrudService {
             // Get the first count (success)
             try {
                 VertxMongoUtils.count(
-                        vertx.eventBus(),
+                        mongoClient,
                         Cpe.CPE_COLLECTION_NAME,
                         workflow.getMatcherByState(WorkflowCpeTracker.STATE_SUCCEEDED),
                         countHandler
@@ -1398,7 +1393,7 @@ public class WorkflowService extends AbstractAcNbiCrudService {
         String address = getPublishCrudEventsAddress();
         if (address != null) {
             // Build a new Event with CRUD Type
-            nbiRequest.body.putString(AcsConstants.FIELD_NAME_ACS_CRUD_TYPE, crudType.name());
+            nbiRequest.body.put(AcsConstants.FIELD_NAME_ACS_CRUD_TYPE, crudType.name());
 
             // Send it
             vertx.eventBus().publish(address, nbiRequest.body);
