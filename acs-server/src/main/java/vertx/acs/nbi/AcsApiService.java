@@ -1,5 +1,6 @@
 package vertx.acs.nbi;
 
+import io.vertx.ext.mongo.MongoClient;
 import io.vertx.redis.RedisClient;
 import vertx.acs.cache.PassiveWorkflowCache;
 import vertx.acs.nbi.model.AcsNbiRequest;
@@ -74,6 +75,8 @@ public interface AcsApiService {
      * Set Redis Client
      */
     public void setRedisClient(RedisClient redisClient);
+
+    public void setMongoClient(MongoClient mongoClient);
 
     /**
      * TODO: Add Method to get WADL for this service

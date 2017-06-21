@@ -1,6 +1,7 @@
 package vertx.acs.nbi.BuildInfo;
 
 import io.vertx.core.Handler;
+import io.vertx.ext.mongo.MongoClient;
 import io.vertx.redis.RedisClient;
 import vertx.VertxUtils;
 import vertx.acs.cache.PassiveWorkflowCache;
@@ -86,6 +87,10 @@ public class BuildInfoService implements AcsApiService{
      */
     @Override
     public void setPassiveWorkflowCache(PassiveWorkflowCache passiveWorkflowCache) {
+
+    }
+
+    public void setMongoClient(MongoClient mongoClient) {
 
     }
 

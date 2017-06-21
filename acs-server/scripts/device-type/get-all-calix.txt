@@ -1,4 +1,4 @@
--X GET
+-X POST
 -v
 --header "Content-Type: application/json"
 --url "http://localhost:8081/cc/device-type"

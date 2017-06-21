@@ -2,10 +2,12 @@ package vertx.acs;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
+import io.vertx.ext.mongo.MongoClient;
 import io.vertx.redis.RedisClient;
 import io.vertx.redis.RedisOptions;
 import vertx.VertxConfigProperties;
 import vertx.VertxConstants;
+import vertx.VertxMongoUtils;
 import vertx.VertxUtils;
 import vertx.acs.cache.PassiveWorkflowCache;
 import vertx.acs.nbi.AbstractAcNbiCrudService;
@@ -48,11 +50,9 @@ import vertx.util.AcsConstants;
 import vertx.taskmgmt.worker.TaskPollerVertice;
 import vertx.taskmgmt.worker.WorkerUtils;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.util.internal.StringUtil;
 import org.apache.http.auth.AUTH;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.Message;
@@ -111,6 +111,8 @@ public class AcsMainVertice extends AbstractVerticle {
      */
     PerOrgNbiAuthenticatorCache perOrgNbiAuthenticatorCache;
 
+    MongoClient mongoClient;
+
     /**
      * Start the Vertice
      */
@@ -120,6 +122,7 @@ public class AcsMainVertice extends AbstractVerticle {
         /**
          * Build the list of sub modules/vertices to be deployed
          */
+        mongoClient = MongoClient.createShared(vertx, VertxMongoUtils.getModMongoPersistorConfig());
         JsonObject workerConfig = WorkerUtils.buildConfig(
                 new String[]{ActiveWorkflowTaskWorker.class.getName()},
                 ActiveWorkflowTaskWorker.MAX_NBR_OF_OUTSTANDING_TASKS
@@ -188,6 +191,7 @@ public class AcsMainVertice extends AbstractVerticle {
                     service.setConfigurationProfileCache(configurationProfileCache);
                     service.setGroupCache(groupCache);
                     service.setRedisClient(redisClient);
+                    service.setMongoClient(mongoClient);
                     // Start this service
                     service.start(vertx);
                 }
