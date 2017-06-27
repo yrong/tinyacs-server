@@ -664,6 +664,10 @@ public class VertxJsonUtils {
         return ISO8601_DATE_FORMAT_WITH_MS.format(new Date());
     }
 
+    public static String getIso8601DateString(long timestamp) {
+        return ISO8601_DATE_FORMAT_WITH_MS.format(new Date(timestamp));
+    }
+
     /**
      * Get a new ISO8601 Date String with the provided date String which may end with "+00:00".
      * @return

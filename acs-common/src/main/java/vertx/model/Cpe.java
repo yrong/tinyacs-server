@@ -973,7 +973,7 @@ public class Cpe extends MultiTenantObject{
             }
         }
 
-        String[] subPaths = path.split(".");
+        String[] subPaths = path.split("\\.");
         JsonObject nextJson = root;
         for (int i = 0; i < subPaths.length; i ++) {
             String subPath = subPaths[i];

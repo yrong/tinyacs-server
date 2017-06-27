@@ -1,10 +1,10 @@
 {
     "_id": "2550",
-    "name": "Venture Labs",
-    "description": "Venture Labs",
-    "url": "http://vmlnx-ronyang.calix.local:8080/venture",
+    "name": "Home",
+    "description": "Home",
+    "url": "http://192.168.0.100:8080/",
     "username": "tr069",
     "password": "tr069",
-    "apiClientUsername": "apiclient@venturelabs.com",
+    "apiClientUsername": "apiclient@ronyang.com",
     "apiClientPassword": "apiclient"
 }

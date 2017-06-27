@@ -52,41 +52,41 @@ public class SxaStagerApiUtils extends SxaJBossApiUtils{
             final JsonObject subscriber,
             final Handler<Boolean> handler) {
         // Send it
-        sendRequest(
-            CWMP_STAGER_MODULE_NAME,
-            HttpMethod.PUT,
-            CWMP_SUBSCRIBER_URL_PATH + subscriber.getString(AcsConstants.FIELD_NAME_ID),
-            USERNAME,
-            PASSWORD,
-            subscriber.encode(),
-            new Handler<HttpClientResponse>() {
-                @Override
-                public void handle(HttpClientResponse response) {
-                    /**
-                     * Check HTTP Status Code
-                     */
-                    if (response.statusCode() == HttpResponseStatus.OK.code() ||
-                            response.statusCode() == HttpResponseStatus.NO_CONTENT.code()) {
-                        log.info(subscriber.getString(AcsConstants.FIELD_NAME_NAME)
-                                + ": Successfully sent Subscriber notification to SXA Stager.");
-                        handler.handle(true);
-                    } else {
-                        log.info(subscriber.getString(AcsConstants.FIELD_NAME_NAME)
-                                + ": Failed to send Subscriber notification to SXA Stager!"
-                                + " HTTP Status " + response.statusCode() + " " + response.statusMessage());
-                        handler.handle(false);
-                    }
-                }
-            },
-            new Handler<Throwable>() {
-                @Override
-                public void handle(Throwable exception) {
-                    log.info(subscriber.getString(AcsConstants.FIELD_NAME_NAME)
-                            + ": Failed to send Subscriber notification to SXA Stager due to"
-                            + " exception " + exception.getMessage() + "!");
-                    handler.handle(false);
-                }
-            });
+//        sendRequest(
+//            CWMP_STAGER_MODULE_NAME,
+//            HttpMethod.PUT,
+//            CWMP_SUBSCRIBER_URL_PATH + subscriber.getString(AcsConstants.FIELD_NAME_ID),
+//            USERNAME,
+//            PASSWORD,
+//            subscriber.encode(),
+//            new Handler<HttpClientResponse>() {
+//                @Override
+//                public void handle(HttpClientResponse response) {
+//                    /**
+//                     * Check HTTP Status Code
+//                     */
+//                    if (response.statusCode() == HttpResponseStatus.OK.code() ||
+//                            response.statusCode() == HttpResponseStatus.NO_CONTENT.code()) {
+//                        log.info(subscriber.getString(AcsConstants.FIELD_NAME_NAME)
+//                                + ": Successfully sent Subscriber notification to SXA Stager.");
+//                        handler.handle(true);
+//                    } else {
+//                        log.info(subscriber.getString(AcsConstants.FIELD_NAME_NAME)
+//                                + ": Failed to send Subscriber notification to SXA Stager!"
+//                                + " HTTP Status " + response.statusCode() + " " + response.statusMessage());
+//                        handler.handle(false);
+//                    }
+//                }
+//            },
+//            new Handler<Throwable>() {
+//                @Override
+//                public void handle(Throwable exception) {
+//                    log.info(subscriber.getString(AcsConstants.FIELD_NAME_NAME)
+//                            + ": Failed to send Subscriber notification to SXA Stager due to"
+//                            + " exception " + exception.getMessage() + "!");
+//                    handler.handle(false);
+//                }
+//            });
     }
 
     /**
@@ -100,36 +100,36 @@ public class SxaStagerApiUtils extends SxaJBossApiUtils{
     public static void deleteSubscriber(
             final String id,
             final Handler<Boolean> handler) {
-        sendRequest(
-                CWMP_STAGER_MODULE_NAME,
-                HttpMethod.DELETE,
-                CWMP_SUBSCRIBER_URL_PATH + id,
-                USERNAME,
-                PASSWORD,
-                null,
-                new Handler<HttpClientResponse>() {
-                    @Override
-                    public void handle(HttpClientResponse response) {
-                        /**
-                         * Simply log the response
-                         */
-                        if (response.statusCode() == HttpResponseStatus.OK.code() ||
-                                response.statusCode() == HttpResponseStatus.NO_CONTENT.code()) {
-                            log.info(id + ": Successfully sent Subscriber Delete notification to SXA Stager.");
-                            handler.handle(true);
-                        } else {
-                            handler.handle(false);
-                        }
-                    }
-                },
-                new Handler<Throwable>() {
-                    @Override
-                    public void handle(Throwable exception) {
-                        log.error(id + ": Failed to send Subscriber Delete notification to SXA Stager due to"
-                                + " exception " + exception.getMessage() + "!");
-                        handler.handle(false);
-                    }
-                });
+//        sendRequest(
+//                CWMP_STAGER_MODULE_NAME,
+//                HttpMethod.DELETE,
+//                CWMP_SUBSCRIBER_URL_PATH + id,
+//                USERNAME,
+//                PASSWORD,
+//                null,
+//                new Handler<HttpClientResponse>() {
+//                    @Override
+//                    public void handle(HttpClientResponse response) {
+//                        /**
+//                         * Simply log the response
+//                         */
+//                        if (response.statusCode() == HttpResponseStatus.OK.code() ||
+//                                response.statusCode() == HttpResponseStatus.NO_CONTENT.code()) {
+//                            log.info(id + ": Successfully sent Subscriber Delete notification to SXA Stager.");
+//                            handler.handle(true);
+//                        } else {
+//                            handler.handle(false);
+//                        }
+//                    }
+//                },
+//                new Handler<Throwable>() {
+//                    @Override
+//                    public void handle(Throwable exception) {
+//                        log.error(id + ": Failed to send Subscriber Delete notification to SXA Stager due to"
+//                                + " exception " + exception.getMessage() + "!");
+//                        handler.handle(false);
+//                    }
+//                });
     }
 
     /**
@@ -140,70 +140,70 @@ public class SxaStagerApiUtils extends SxaJBossApiUtils{
         /**
          * Build request payload
          */
-        JsonObject deviceData = new JsonObject()
-                .put(AcsConstants.FIELD_NAME_ID, cpe.key)
-                .put(AcsConstants.FIELD_NAME_ORG_ID, cpe.deviceId.orgId)
-                .put(Cpe.DB_FIELD_NAME_SN, cpe.deviceId.sn)
-                .put(Cpe.DB_FIELD_NAME_REGISTRATION_ID, cpe.deviceId.registrationId)
-                .put(CpeDeviceType.FIELD_NAME_HW_VER, cpe.deviceId.hwVersion)
-                .put(CpeDeviceType.FIELD_NAME_SW_VER, cpe.deviceId.swVersion)
-                .put(CpeDeviceType.FIELD_NAME_OUI, cpe.deviceId.oui)
-                .put(CpeDeviceType.FIELD_NAME_MODEL_NAME, cpe.deviceId.modelName)
-                .put(Cpe.DB_FIELD_NAME_MAC_ADDRESS, cpe.deviceId.macAddress)
-                .put(Cpe.DB_FIELD_NAME_IP_ADDRESS, cpe.deviceId.ipAddress);
-        final JsonObject payload = new JsonObject().put("device", deviceData);
-
-        // Query Subscriber
-        Subscriber.querySubscriberData(
-                mongoClient,
-                cpe.cpeJsonObj,
-                new Handler<JsonObject>() {
-                    @Override
-                    public void handle(JsonObject subscriberData) {
-                        if (VertxMongoUtils.FIND_ONE_TIMED_OUT.equals(subscriberData)) {
-                            log.error(cpe.getCpeKey() + ": Unable to find subscriber data due to DB timeout!");
-                            subscriberData = null;
-                        }
-
-                        if (subscriberData != null) {
-                            // Add subscriber data if not null
-                            subscriberData.remove(AcsConstants.FIELD_NAME_CREATE_TIME);
-                            payload.put("subscriber", subscriberData);
-                        }
-
-                        // Send API request to JBoss
-                        sendRequest(
-                                CWMP_STAGER_MODULE_NAME,
-                                HttpMethod.POST,
-                                CWMP_DEVICE_URL_PATH,
-                                USERNAME,
-                                PASSWORD,
-                                payload.encode(),
-                                new Handler<HttpClientResponse>() {
-                                    @Override
-                                    public void handle(HttpClientResponse response) {
-                                        /**
-                                         * Simply log the response
-                                         */
-                                        if (response.statusCode() == HttpResponseStatus.OK.code() ||
-                                                response.statusCode() == HttpResponseStatus.NO_CONTENT.code()) {
-                                            log.info(cpe.getCpeKey() + ": Successfully sent CPE discovery notification to SXA Stager.");
-                                        } else {
-                                            log.error(cpe.getCpeKey() + ": Failed to send CPE discovery notification to SXA Stager!"
-                                                    + " HTTP Status " + response.statusCode() + " " + response.statusMessage());
-                                        }
-                                    }
-                                },
-                                new Handler<Throwable>() {
-                                    @Override
-                                    public void handle(Throwable exception) {
-                                        log.error(cpe.getCpeKey() + ": Failed to send CPE discovery notification to SXA Stager due to"
-                                                + " exception " + exception.getMessage() + "!");
-                                    }
-                                });
-                    }
-                }
-        );
+//        JsonObject deviceData = new JsonObject()
+//                .put(AcsConstants.FIELD_NAME_ID, cpe.key)
+//                .put(AcsConstants.FIELD_NAME_ORG_ID, cpe.deviceId.orgId)
+//                .put(Cpe.DB_FIELD_NAME_SN, cpe.deviceId.sn)
+//                .put(Cpe.DB_FIELD_NAME_REGISTRATION_ID, cpe.deviceId.registrationId)
+//                .put(CpeDeviceType.FIELD_NAME_HW_VER, cpe.deviceId.hwVersion)
+//                .put(CpeDeviceType.FIELD_NAME_SW_VER, cpe.deviceId.swVersion)
+//                .put(CpeDeviceType.FIELD_NAME_OUI, cpe.deviceId.oui)
+//                .put(CpeDeviceType.FIELD_NAME_MODEL_NAME, cpe.deviceId.modelName)
+//                .put(Cpe.DB_FIELD_NAME_MAC_ADDRESS, cpe.deviceId.macAddress)
+//                .put(Cpe.DB_FIELD_NAME_IP_ADDRESS, cpe.deviceId.ipAddress);
+//        final JsonObject payload = new JsonObject().put("device", deviceData);
+//
+//        // Query Subscriber
+//        Subscriber.querySubscriberData(
+//                mongoClient,
+//                deviceData,
+//                new Handler<JsonObject>() {
+//                    @Override
+//                    public void handle(JsonObject subscriberData) {
+//                        if (VertxMongoUtils.FIND_ONE_TIMED_OUT.equals(subscriberData)) {
+//                            log.error(cpe.getCpeKey() + ": Unable to find subscriber data due to DB timeout!");
+//                            subscriberData = null;
+//                        }
+//
+//                        if (subscriberData != null) {
+//                            // Add subscriber data if not null
+//                            subscriberData.remove(AcsConstants.FIELD_NAME_CREATE_TIME);
+//                            payload.put("subscriber", subscriberData);
+//                        }
+//
+//                        // Send API request to JBoss
+//                        sendRequest(
+//                                CWMP_STAGER_MODULE_NAME,
+//                                HttpMethod.POST,
+//                                CWMP_DEVICE_URL_PATH,
+//                                USERNAME,
+//                                PASSWORD,
+//                                payload.encode(),
+//                                new Handler<HttpClientResponse>() {
+//                                    @Override
+//                                    public void handle(HttpClientResponse response) {
+//                                        /**
+//                                         * Simply log the response
+//                                         */
+//                                        if (response.statusCode() == HttpResponseStatus.OK.code() ||
+//                                                response.statusCode() == HttpResponseStatus.NO_CONTENT.code()) {
+//                                            log.info(cpe.getCpeKey() + ": Successfully sent CPE discovery notification to SXA Stager.");
+//                                        } else {
+//                                            log.error(cpe.getCpeKey() + ": Failed to send CPE discovery notification to SXA Stager!"
+//                                                    + " HTTP Status " + response.statusCode() + " " + response.statusMessage());
+//                                        }
+//                                    }
+//                                },
+//                                new Handler<Throwable>() {
+//                                    @Override
+//                                    public void handle(Throwable exception) {
+//                                        log.error(cpe.getCpeKey() + ": Failed to send CPE discovery notification to SXA Stager due to"
+//                                                + " exception " + exception.getMessage() + "!");
+//                                    }
+//                                });
+//                    }
+//                }
+//        );
     }
 
     /**
@@ -219,66 +219,66 @@ public class SxaStagerApiUtils extends SxaJBossApiUtils{
             final JsonObject deviceData,
             final JsonObject subscriberData,
             final Handler<JsonObject> handler) {
-        final String cpeKey = deviceData.getString(AcsConstants.FIELD_NAME_ID);
-        // Build payload
-        final JsonObject payload = new JsonObject().put(
-                "orgId",
-                deviceData.getString(AcsConstants.FIELD_NAME_ORG_ID)
-        );
-
-        if (subscriberData != null) {
-            /**
-             * Found the subscriber that this device is associated with
-             */
-            subscriberData.remove(AcsConstants.FIELD_NAME_CREATE_TIME);
-            payload.put("subscriber", subscriberData);
-        }
-
-        // Send API request to JBoss
-        sendRequest(
-                CWMP_STAGER_MODULE_NAME,
-                HttpMethod.DELETE,
-                CWMP_DEVICE_URL_PATH + cpeKey,
-                USERNAME,
-                PASSWORD,
-                payload.encode(),
-                new Handler<HttpClientResponse>() {
-                    @Override
-                    public void handle(HttpClientResponse response) {
-                        /**
-                         * Simply log the response
-                         */
-                        if (response.statusCode() == HttpResponseStatus.OK.code() ||
-                                response.statusCode() == HttpResponseStatus.NO_CONTENT.code()) {
-                            log.info(cpeKey + ": Successfully sent CPE Delete request to SXA Stager.");
-                            handler.handle(payload);
-                        } else {
-                            log.error(cpeKey + ": Failed to send CPE Delete request to "
-                                    + "SXA Stager! HTTP Status " + response.statusCode() + " "
-                                    + response.statusMessage());
-                            handler.handle(
-                                    payload.put(
-                                            AcsConstants.FIELD_NAME_ERROR,
-                                            "Internal Error! (Failed to Update Search Engine)"
-                                    )
-                            );
-                        }
-                    }
-                },
-                new Handler<Throwable>() {
-                    @Override
-                    public void handle(Throwable exception) {
-                        log.error(cpeKey + ": Failed to send CPE Delete request to " +
-                                "SXA Stager due to " + exception
-                                + exception.getMessage() + "!");
-                        handler.handle(
-                                payload.put(
-                                        AcsConstants.FIELD_NAME_ERROR,
-                                        "Internal Error! (Failed to Update Search Engine)"
-                                )
-                        );
-                    }
-                }
-        );
+//        final String cpeKey = deviceData.getString(AcsConstants.FIELD_NAME_ID);
+//        // Build payload
+//        final JsonObject payload = new JsonObject().put(
+//                "orgId",
+//                deviceData.getString(AcsConstants.FIELD_NAME_ORG_ID)
+//        );
+//
+//        if (subscriberData != null) {
+//            /**
+//             * Found the subscriber that this device is associated with
+//             */
+//            subscriberData.remove(AcsConstants.FIELD_NAME_CREATE_TIME);
+//            payload.put("subscriber", subscriberData);
+//        }
+//
+//        // Send API request to JBoss
+//        sendRequest(
+//                CWMP_STAGER_MODULE_NAME,
+//                HttpMethod.DELETE,
+//                CWMP_DEVICE_URL_PATH + cpeKey,
+//                USERNAME,
+//                PASSWORD,
+//                payload.encode(),
+//                new Handler<HttpClientResponse>() {
+//                    @Override
+//                    public void handle(HttpClientResponse response) {
+//                        /**
+//                         * Simply log the response
+//                         */
+//                        if (response.statusCode() == HttpResponseStatus.OK.code() ||
+//                                response.statusCode() == HttpResponseStatus.NO_CONTENT.code()) {
+//                            log.info(cpeKey + ": Successfully sent CPE Delete request to SXA Stager.");
+//                            handler.handle(payload);
+//                        } else {
+//                            log.error(cpeKey + ": Failed to send CPE Delete request to "
+//                                    + "SXA Stager! HTTP Status " + response.statusCode() + " "
+//                                    + response.statusMessage());
+//                            handler.handle(
+//                                    payload.put(
+//                                            AcsConstants.FIELD_NAME_ERROR,
+//                                            "Internal Error! (Failed to Update Search Engine)"
+//                                    )
+//                            );
+//                        }
+//                    }
+//                },
+//                new Handler<Throwable>() {
+//                    @Override
+//                    public void handle(Throwable exception) {
+//                        log.error(cpeKey + ": Failed to send CPE Delete request to " +
+//                                "SXA Stager due to " + exception
+//                                + exception.getMessage() + "!");
+//                        handler.handle(
+//                                payload.put(
+//                                        AcsConstants.FIELD_NAME_ERROR,
+//                                        "Internal Error! (Failed to Update Search Engine)"
+//                                )
+//                        );
+//                    }
+//                }
+//        );
     }
 }

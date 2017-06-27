@@ -11,7 +11,11 @@ import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
+import java.security.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.UUID;
 
 /**
@@ -399,7 +403,10 @@ public class VertxMongoUtils {
         mongoClient.save(collectionName,document,res->{
             if (res.succeeded()) {
                 if(customHandler!=null){
-                    customHandler.handle(res.result());
+                    if(document.containsKey(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID))
+                        customHandler.handle(document.getString(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID));
+                    else
+                        customHandler.handle(res.result());
                 }
             } else {
                 res.cause().printStackTrace();
@@ -838,11 +845,11 @@ public class VertxMongoUtils {
      */
     // Get a Date Object for the current date/time
     public static JsonObject getDateObject() {
-        return new JsonObject().put(MOD_MONGO_DATE, System.currentTimeMillis());
+        return new JsonObject().put(MOD_MONGO_DATE, VertxJsonUtils.getIso8601DateString());
     }
     // Get a Date Object for a custom date/time
     public static JsonObject getDateObject(long customDateTime) {
-        return new JsonObject().put(MOD_MONGO_DATE, customDateTime);
+        return new JsonObject().put(MOD_MONGO_DATE, VertxJsonUtils.getIso8601DateString(customDateTime));
     }
 
     /**

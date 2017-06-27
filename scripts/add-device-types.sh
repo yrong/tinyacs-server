@@ -19,8 +19,8 @@ add_a_new_type() {
   ###########################################################
   ###### Call mongo shell to execute the insert command
   ###########################################################
-  INSERT_CMD="db[\"CWMP-device-types\"].insert({\"_id\":\"$ORG_ID-$1\",\"orgId\":\"$1\",\"manufacturer\":\"Calix\",\"modelName\":\"$1\"})"
-  mongo --quiet --eval $INSERT_CMD sxa
+  INSERT_CMD="db[\"CWMP-device-types\"].insert({\"_id\":\"$ORG_ID-$1\",\"orgId\":\"$ORG_ID\",\"manufacturer\":\"Calix\",\"modelName\":\"$1\"})"
+  mongo --quiet --eval $INSERT_CMD cwmp
 }
 
 #############################################
@@ -30,7 +30,7 @@ if [ "$1" == "" ]; then
   show-usage-and-exit
 elif [ "$1" == "show-orgs" ]; then
   LIST_CMD="printjson(db[\"CWMP-organizations\"].find().toArray())"
-  mongo --quiet --eval $LIST_CMD sxa
+  mongo --quiet --eval $LIST_CMD cwmp
   exit 1
 fi
 

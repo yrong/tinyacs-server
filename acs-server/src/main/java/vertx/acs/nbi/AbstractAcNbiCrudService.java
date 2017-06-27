@@ -1250,7 +1250,7 @@ public abstract class AbstractAcNbiCrudService implements AcsApiService{
             // Call super
 
 
-            String id = null;
+            String id = saveResult;
 
 
             nbiRequest.body.put(VertxMongoUtils.MOD_MONGO_FIELD_NAME_ID, saveResult);
