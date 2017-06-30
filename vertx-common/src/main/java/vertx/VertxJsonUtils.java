@@ -372,7 +372,7 @@ public class VertxJsonUtils {
 
         // Create the object hierarchy
         JsonObject nextJson = dest;
-        String[] subPaths = path.split(".");
+        String[] subPaths = path.split("\\.");
         for (int i = 0; i < (subPaths.length - 1); i ++) {
             String subPath = subPaths[i];
             if (nextJson.getJsonObject(subPath) == null) {
@@ -399,7 +399,7 @@ public class VertxJsonUtils {
      */
     public static <T> T deepGet(JsonObject jsonObject, String path) {
         JsonObject nextJson = jsonObject;
-        String[] subPaths = path.split(".");
+        String[] subPaths = path.split("\\.");
         for (int i = 0; i < (subPaths.length - 1); i ++) {
             String subPath = subPaths[i];
             nextJson = nextJson.getJsonObject(subPath);
@@ -421,7 +421,7 @@ public class VertxJsonUtils {
      */
     public static void deepRemove(JsonObject jsonObject, String path) {
         JsonObject nextJson = jsonObject;
-        String[] subPaths = path.split(".");
+        String[] subPaths = path.split("\\.");
         for (int i = 0; i < (subPaths.length - 1); i ++) {
             String subPath = subPaths[i];
             nextJson = nextJson.getJsonObject(subPath);

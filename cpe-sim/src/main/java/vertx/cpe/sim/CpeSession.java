@@ -986,7 +986,7 @@ public class CpeSession {
      * @return
      */
     public int getNextAvailableObjectInstance(String objectPath) {
-        String[] subPaths = objectPath.split(objectPath, '.');
+        String[] subPaths = objectPath.split("\\.");
 
         // Max Instance Index
         int maxIndex = CpeSimUtils.getMaxInstanceIndex(
