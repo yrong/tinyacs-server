@@ -1,14 +1,14 @@
 {
     "operation":"GetParameterValues",
     "cpeIdentifier": {
-        "serialNumber" : "CXNK001D8E93"
+        "serialNumber" : "CXNK27C08000"
     },
     "getOptions": {
         "cachedData": false,
         "liveData": true
     },
     "parameterNames": [
-        "InternetGatewayDevice.WANDevice.3.WANConnectionDevice.1.WANIPConnection.",
+        "InternetGatewayDevice.WANDevice.5.WANConnectionDevice.",
         "InternetGatewayDevice.Layer2Bridging."
     ]
 }

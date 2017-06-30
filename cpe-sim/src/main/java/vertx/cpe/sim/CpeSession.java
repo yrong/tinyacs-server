@@ -201,14 +201,7 @@ public class CpeSession {
         public void handle(final HttpClientResponse resp) {
             final Buffer body = Buffer.buffer();
 
-            // Incremental Data Buffer handler
-//            resp.bodyHandler(new Handler<Buffer>() {
-//                public void handle(Buffer data) {
-//                    body.appendBuffer(data);
-//                }
-//            });
-
-            resp.bodyHandler((data)-> {
+            resp.handler((data)-> {
                 body.appendBuffer(data);
             });
 

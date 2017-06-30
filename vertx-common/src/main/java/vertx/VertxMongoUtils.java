@@ -559,7 +559,7 @@ public class VertxMongoUtils {
          * Build the update message
          */
         UpdateOptions options = new UpdateOptions();
-        options.setUpsert(true);
+//        options.setUpsert(true);
         if (!matcher.containsKey(MOD_MONGO_FIELD_NAME_ID)) {
             options.setMulti(true);
         }
