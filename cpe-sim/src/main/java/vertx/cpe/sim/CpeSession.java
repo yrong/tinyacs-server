@@ -371,32 +371,35 @@ public class CpeSession {
         } else if (acsMessage.rpcMessageName.equals("TransferCompleteResponse")) {
             // Send Empty POST
             sendMessageToAcs(null);
-        } else if (acsMessage.rpcMessageName.equals("GetParameterValues")) {
-            sendMessageToAcs(handleGetParameterValues(acsMessage));
-        } else if (acsMessage.rpcMessageName.equals("SetParameterValues")) {
-            sendMessageToAcs(handleSetParameterValues(acsMessage));
-        } else if (acsMessage.rpcMessageName.equals("AddObject")) {
-            sendMessageToAcs(handleAddObject(acsMessage));
-        } else if (acsMessage.rpcMessageName.equals("DeleteObject")) {
-            sendMessageToAcs(handleDeleteObject(acsMessage));
-        } else if (acsMessage.rpcMessageName.equals("SetParameterAttributes")) {
-            sendMessageToAcs(handleSetParameterAttributes(acsMessage));
-        } else if (acsMessage.rpcMessageName.equals("GetParameterAttributes")) {
-            sendMessageToAcs(handleGetParameterAttributes(acsMessage));
-        } else if (acsMessage.rpcMessageName.equals("Reboot")) {
-            sendMessageToAcs(handleReboot(acsMessage));
-        } else if (acsMessage.rpcMessageName.equals("Download")) {
-            sendMessageToAcs(handleDownload(acsMessage));
-        }else if (acsMessage.rpcMessageName.equals("FactoryReset")) {
-            sendMessageToAcs(handleFactoryReset(acsMessage));
         } else {
-            sendMessageToAcs(
-                    CwmpUtils.getFaultMessage(
-                            CwmpMessage.DEFAULT_CWMP_VERSION,
-                            CwmpFaultCodes.INVALID_PARAMETER_NAME,
-                            "Invalid RPC Method! (" + acsMessage.rpcMessageName + ")"
-                    )
-            );
+            acsMessage.id = acsMessage.id==null||acsMessage.id==""?"1234":acsMessage.id;
+            if (acsMessage.rpcMessageName.equals("GetParameterValues")) {
+                sendMessageToAcs(handleGetParameterValues(acsMessage));
+            } else if (acsMessage.rpcMessageName.equals("SetParameterValues")) {
+                sendMessageToAcs(handleSetParameterValues(acsMessage));
+            } else if (acsMessage.rpcMessageName.equals("AddObject")) {
+                sendMessageToAcs(handleAddObject(acsMessage));
+            } else if (acsMessage.rpcMessageName.equals("DeleteObject")) {
+                sendMessageToAcs(handleDeleteObject(acsMessage));
+            } else if (acsMessage.rpcMessageName.equals("SetParameterAttributes")) {
+                sendMessageToAcs(handleSetParameterAttributes(acsMessage));
+            } else if (acsMessage.rpcMessageName.equals("GetParameterAttributes")) {
+                sendMessageToAcs(handleGetParameterAttributes(acsMessage));
+            } else if (acsMessage.rpcMessageName.equals("Reboot")) {
+                sendMessageToAcs(handleReboot(acsMessage));
+            } else if (acsMessage.rpcMessageName.equals("Download")) {
+                sendMessageToAcs(handleDownload(acsMessage));
+            } else if (acsMessage.rpcMessageName.equals("FactoryReset")) {
+                sendMessageToAcs(handleFactoryReset(acsMessage));
+            } else {
+                sendMessageToAcs(
+                        CwmpUtils.getFaultMessage(
+                                CwmpMessage.DEFAULT_CWMP_VERSION,
+                                CwmpFaultCodes.INVALID_PARAMETER_NAME,
+                                "Invalid RPC Method! (" + acsMessage.rpcMessageName + ")"
+                        )
+                );
+            }
         }
     }
 
