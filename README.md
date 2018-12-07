@@ -1,37 +1,36 @@
-ACS CWMP协议基于异步开源框架vertx的实现
-===============================
-A blazing fast [TR-069](https://www.broadband-forum.org/cwmp.php) auto configuration server (ACS) built with [Vertx](http://vertx.io/vertx2/), Redis, and MongoDB. 
+ACS CWMP Implementation
+=======================
+A blazing fast [TR-069](https://www.broadband-forum.org/cwmp.php) auto configuration server (ACS) built with [Vertx](http://vertx.io/), Redis, and MongoDB.
 
-The project is migrating from vertx 2 to 3 and may be broken temporarily,will fix soon
 
 ## Infrastructure and message flow for nbi request 
 
 ![](/image/cwmp.png)
 
-1. meteor stack send nbi request to acs nbi server by standard restful api and nbi server forward it to one cpe server by vertx eventbus api(eventbus send will choose one cpe server with round-robin algrithom)
+1. meteor stack send nbi request to acs nbi server using standard restful api and nbi server forward it to one cpe server by vertx eventbus api(eventbus send will choose one cpe server with round-robin algorithm)
 2. cpe server will send connection request to the target cpe
 3. cpe server will also store the nbi request into redis server
 4. the cpe will send inform to the cpe server load balance to start the cwmp session
-5. the cpe server load balance will send the inform to one cpe server by eventbus send api  
-	5.1 the cpe server here may not be the cpe server in step 2   
-	5.2 the cpe server will store it's identifier and the cpe's identifier into http cookie so that next time　load balance will sticky forward cwmp message from cpe to the same cpe server and cpe server will find cwmp session with that cpe
+5. the cpe server load balance will send the inform to one cpe server using eventbus send api
+	5.1 the cpe server here may not be the cpe server in step 2
+	5.2 the cpe server will store it's identifier and the cpe's identifier into http cookie so that next time　load balance will sticky forward cwmp message from cpe to the same cpe server and cpe server will find related cwmp session of that cpe
 6. the cpe server will retrieve the nbi request from redis and translate it into cwmp request(s)
 7. cpe server will send cwmp request to load balance
 8. load balance send cwmp request to cpe
 9. cpe send cwmp response back to load balance
-10. load balance send cwmp response to cpe server
+10. load balance send cwmp response back to cpe server
 11. cpe server translate cwmp response to nbi response and send it back to nbi server
 
 ## Installation Requirements
 
-- [vertx](http://vertx.io/vertx2/install.html)
+- [vertx](http://vertx.io)
 nodejs on jvm
 
 - [mongodb](https://docs.mongodb.com/manual/installation/)
 document based nosql db
 
 - [redis](http://redis.io/topics/quickstart)
-small and fast db which support different data structures
+small and fast cache db which support different data structures like list,set,sorted set
 
 - [meteor](https://www.meteor.com/install)
 most efficient way to build javascript apps
