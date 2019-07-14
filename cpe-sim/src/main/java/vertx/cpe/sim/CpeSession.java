@@ -485,8 +485,8 @@ public class CpeSession {
         parameterValueStruct = parameterValueList.addNewParameterValueStruct();
         parameterValueStruct.setName("InternetGatewayDevice.DeviceInfo.SoftwareVersion");
         parameterValueStruct.addNewValue().setStringValue(getStringValueByPath("InternetGatewayDevice.DeviceInfo.SoftwareVersion"));
-        parameterValueStruct = parameterValueList.addNewParameterValueStruct();
-        parameterValueStruct.setName("InternetGatewayDevice.DeviceInfo.X_000631_RegistrationId");
+        //parameterValueStruct = parameterValueList.addNewParameterValueStruct();
+        //parameterValueStruct.setName("InternetGatewayDevice.DeviceInfo.X_000631_RegistrationId");
         //parameterValueStruct.addNewValue().setStringValue(getStringValueByPath("InternetGatewayDevice.DeviceInfo.X_000631_RegistrationId"));
         parameterValueStruct = parameterValueList.addNewParameterValueStruct();
         parameterValueStruct.setName("InternetGatewayDevice.ManagementServer.ConnectionRequestURL");
@@ -494,7 +494,7 @@ public class CpeSession {
         parameterValueStruct = parameterValueList.addNewParameterValueStruct();
         parameterValueStruct.setName("InternetGatewayDevice.WANDevice.5.WANConnectionDevice.1.WANIPConnection.3.ExternalIPAddress");
         parameterValueStruct.addNewValue().setStringValue(CpeSimUtils.snToIpAddress(Long.decode("0x" + sn)));
-        parameterValueStruct = parameterValueList.addNewParameterValueStruct();
+//        parameterValueStruct = parameterValueList.addNewParameterValueStruct();
 
         if (CwmpInformEventCodes.VALUE_CHANGE.equals(eventCode) && newValues != null) {
             log.info(newValues.encodePrettily());

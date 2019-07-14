@@ -36,7 +36,7 @@
     <mods.directory>target/mods</mods.directory>
 
     <!--Dependency versions-->
-    <vertx.version>3.4.1</vertx.version>
+    <vertx.version>3.7.1</vertx.version>
     <junit.version>4.11</junit.version>
 
     <!--Plugin versions-->
@@ -59,13 +59,11 @@
   </repositories>
 
   <dependencies>
-    <!--Calix provided dependencies-->
     <dependency>
       <groupId>vertx</groupId>
       <artifactId>acs-common</artifactId>
       <version>1.0.0</version>
     </dependency>
-    <!--Vertx provided dependencies-->
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-redis-client</artifactId>
@@ -75,13 +73,11 @@
       <groupId>io.vertx</groupId>
       <artifactId>vertx-core</artifactId>
       <version>${vertx.version}</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-hazelcast</artifactId>
       <version>${vertx.version}</version>
-      <scope>provided</scope>
     </dependency>
     <!--Test dependencies-->
     <dependency>
